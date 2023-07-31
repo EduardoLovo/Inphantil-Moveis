@@ -1,0 +1,9 @@
+.bodyApp {
+    margin-left: 200px;    
+}
+
+@media (max-width: 768px) {
+	.bodyApp {
+        margin-left: 0;
+    }
+  }

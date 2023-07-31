@@ -1,0 +1,124 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css");
+
+
+/* Btn Padrap */
+.btnPadrao {
+    border-color: rgba(255, 255, 135, 1);
+    padding: 5px;
+    border-radius: 5px;
+    background-color: transparent;
+    color: rgba(255, 255, 135, 1);
+    transition: all .3s;
+}
+.btnPadrao:hover {
+    background-color: rgba(255, 255, 135, 1);
+    color: rgba(71, 71, 71, 1);
+}
+
+/* Login */
+.formLogin {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.formLogin label {
+	color: rgba(255, 255, 135, 1);
+}
+
+/* Home */
+.contentHome {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.contentHome img {
+    width: 20rem;
+    height: 20rem;
+}
+
+.card {
+    width: 15rem;
+    margin: 10px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+.display {
+    display: none;
+}
+
+/* Card */
+.card-background {
+    background-color: rgba(71, 71, 71, 1);
+    color: rgba(255, 255, 135, 1);
+    width: 100%;
+    height: 100;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-body button {
+    margin-left: 2rem ;
+}
+
+/* HR */
+.hr {
+    border-top: 2px solid rgba(255, 255, 135, 1);
+    width: 80vw;
+    margin: 0 auto;
+}
+
+.text-amarelo {
+    color: rgba(255, 255, 135, 1);
+}
+
+/* Info */
+.contentInfo {
+    background-color: rgba(255, 255, 255, 0.562);
+}
+
+.contentInfo img {
+    width: 15rem;
+}
+
+.contentInfo:first-child {
+    color: rgb(0, 0, 0);
+    font-size: 1.5rem;
+    margin: 1rem;
+}
+
+.infochild {
+    margin: 2rem;
+}
+
+@media screen and (max-width: 568px) {
+    .infochild {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .youtubeVideo {
+        width: 100%;
+        height: 250px;
+        margin: 0 auto;
+    } 
+}
+
+/* Edit aplique */
+.containerEdit {
+    display:flex ;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
