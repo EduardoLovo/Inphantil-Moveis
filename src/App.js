@@ -33,8 +33,8 @@ function App() {
       <Sidebar/>
       <div className='bodyApp'>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Home />} />
           <Route path="/catalogo-cliente" element={<ApliquesParaCliente />} />
           <Route path="/apliques-estoque" element={<ApliquesEstoque />} />
           <Route path="/catalogo" element={<CatalogoDeTecidos />} />

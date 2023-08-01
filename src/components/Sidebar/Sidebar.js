@@ -34,11 +34,14 @@ const Sidebar = () => {
       <div className="sidebar-items">
         {/* <Link to='/catalogo-cliente'>apliques</Link>   */}
         <Link to='/info'>Informações</Link>  
+        <Link to='https://www.inphantil.com.br/' target='_blank'>Inphantil Site</Link>  
+        <Link to='https://www.instagram.com/inphantil/' target='_blank'>Instagram</Link>  
+        <Link to='https://api.whatsapp.com/send?phone=5561982388828' target='_blank'>WhatsApp</Link>  
         {/* <Link to='/catalogo'>Catalogo</Link> */}
       </div>
       : 
       <div className="sidebar-items">
-        <Link to='/home'>Home</Link>
+        <Link to='/'>Home</Link>
         <Link to='/info'>Informações</Link>  
         <Link to='/catalogo-cliente'>Apliques</Link>
         <Link to='/catalogo'>Catalogo</Link>

@@ -12,7 +12,7 @@ export const Login = () => {
 
   useEffect(() => {
     if(isLogged === true){
-      navigate("/home")
+      navigate("/")
       console.log(setIsLogged);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -36,7 +36,7 @@ export const Login = () => {
     if (response.status === 200) {
         const accessToken = body.accessToken;
         JwtHandler.setJwt(accessToken);
-        navigate("/home");
+        navigate("/");
         window.location.reload();
     } else {
         alert("Usuario ou senha incorreto");
