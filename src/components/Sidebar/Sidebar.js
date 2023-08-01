@@ -32,15 +32,15 @@ const Sidebar = () => {
       </div>
       {isLogged === false ? 
       <div className="sidebar-items">
-        <Link to='/catalogo-cliente'>Catalogo</Link>  
+        {/* <Link to='/catalogo-cliente'>apliques</Link>   */}
         <Link to='/info'>Informações</Link>  
-        <Link to='/catalogo'>Catalogo</Link>
+        {/* <Link to='/catalogo'>Catalogo</Link> */}
       </div>
       : 
       <div className="sidebar-items">
         <Link to='/home'>Home</Link>
         <Link to='/info'>Informações</Link>  
-        <Link to='/catalogo-cliente'>Apliques Catalogo</Link>
+        <Link to='/catalogo-cliente'>Apliques</Link>
         <Link to='/catalogo'>Catalogo</Link>
         {type === 'adm' ?  
           <div>
