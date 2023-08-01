@@ -20,6 +20,7 @@ import { TecidosSolteiro } from "./pages/CatalogoTecidos/Solteiro";
 import { TecidosViuva } from "./pages/CatalogoTecidos/Viuva";
 import { TecidosCasal } from "./pages/CatalogoTecidos/Casal";
 import { TecidosBQK } from "./pages/CatalogoTecidos/BQK";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const PrivateRoute = ({ children, redirectTo }) => {
@@ -31,6 +32,18 @@ function App() {
   return (
     <div className='App'>
       <Sidebar/>
+      <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
       <div className='bodyApp'>
         <Routes>
           <Route path="/login" element={<Login />} />
