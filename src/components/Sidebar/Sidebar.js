@@ -37,10 +37,10 @@ const Sidebar = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            <a href="#"><Link to='/info'>Informações</Link></a>
-            <a href="#"><Link to='https://www.inphantil.com.br/' target='_blank'>Inphantil Site</Link></a>
-            <a href="#"><Link to='https://www.instagram.com/inphantil/' target='_blank'>Instagram</Link></a>
-            <a href="#"><Link to='https://api.whatsapp.com/send?phone=5561982388828' target='_blank'>WhatsApp</Link>  </a>
+            <span ><Link to='/info'>Informações</Link></span>
+            <span ><Link to='https://www.inphantil.com.br/' target='_blank'>Inphantil Site</Link></span>
+            <span ><Link to='https://www.instagram.com/inphantil/' target='_blank'>Instagram</Link></span>
+            <span ><Link to='https://api.whatsapp.com/send?phone=5561982388828' target='_blank'>WhatsApp</Link>  </span>
           </div>
         )}
         </div>
@@ -68,6 +68,7 @@ const Sidebar = () => {
               <Link to='/apliques-para-comprar'>Apliques para Comprar</Link>
               <Link to='/apliques-para-cortar'>Apliques para Cortar</Link>
               <Link to='/apliques-estoque'>Apliques Estoque</Link>
+              <Link to='/apliques-create'>Adicionar Aplique</Link>
             </div>: ''
           }
           <Link to='/calculadora-para-lencois'>Calculadora para Lençois</Link>

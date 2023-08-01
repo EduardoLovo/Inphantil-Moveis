@@ -21,6 +21,7 @@ import { TecidosViuva } from "./pages/CatalogoTecidos/Viuva";
 import { TecidosCasal } from "./pages/CatalogoTecidos/Casal";
 import { TecidosBQK } from "./pages/CatalogoTecidos/BQK";
 import { ToastContainer } from "react-toastify";
+import { ApliquesCreate } from "./pages/ApliquesCreate";
 
 function App() {
   const PrivateRoute = ({ children, redirectTo }) => {
@@ -75,10 +76,10 @@ function App() {
           }
           />
           <Route
-          path="/apliques-para-comprar"
+          path="/apliques-create"
           element={
             <PrivateRoute redirectTo="/">
-              <ApliquesParaComprar />
+              <ApliquesCreate />
             </PrivateRoute>
           }
           />
