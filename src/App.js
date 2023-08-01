@@ -5,7 +5,6 @@ import './App.css';
 //Rotas
 import { Home } from './pages/Home';
 import { Login } from "./pages/Login";
-import { ListaApliques } from "./components/ComponentsCatalogo/ListaApliques";
 import { ApliquesParaCliente } from "./pages/ApliquesParaCliente";
 import { ApliquesParaCortar } from "./pages/ApliquesParaCortar";
 import { ApliquesParaComprar } from "./pages/ApliquesParaComprar";
@@ -15,6 +14,12 @@ import { Info } from "./pages/Info";
 import { ApliquesEstoque } from "./pages/ApliquesEstoque";
 import { ApliquesEdit } from "./pages/ApliquesEdit";
 import { JwtHandler } from "./jwt.handler/jwt_handler";
+import { CatalogoDeTecidos } from "./pages/CatalogoTecidos/CatalogoDeTecidos";
+import { TecidosJunior } from "./pages/CatalogoTecidos/Junior";
+import { TecidosSolteiro } from "./pages/CatalogoTecidos/Solteiro";
+import { TecidosViuva } from "./pages/CatalogoTecidos/Viuva";
+import { TecidosCasal } from "./pages/CatalogoTecidos/Casal";
+import { TecidosBQK } from "./pages/CatalogoTecidos/BQK";
 
 function App() {
   const PrivateRoute = ({ children, redirectTo }) => {
@@ -30,11 +35,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/apliques-adm" element={<ListaApliques />} />
           <Route path="/catalogo-cliente" element={<ApliquesParaCliente />} />
-         
           <Route path="/apliques-estoque" element={<ApliquesEstoque />} />
-          
+          <Route path="/catalogo" element={<CatalogoDeTecidos />} />
+          <Route path="/catalogo-junior" element={<TecidosJunior />} />
+          <Route path="/catalogo-solteiro-solteirao" element={<TecidosSolteiro />} />
+          <Route path="/catalogo-viuva" element={<TecidosViuva />} />
+          <Route path="/catalogo-casal" element={<TecidosCasal />} />
+          <Route path="/catalogo-bqk" element={<TecidosBQK />} />
           <Route path="/info" element={<Info />} />
 
           <Route
@@ -63,7 +71,7 @@ function App() {
           />
 
           <Route
-          path="/CalculadoraParaLencois"
+          path="/calculadora-para-lencois"
           element={
             <PrivateRoute redirectTo="/">
               <CalculadoraParaLencois />

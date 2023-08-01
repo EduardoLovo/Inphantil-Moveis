@@ -1,0 +1,68 @@
+.imagem1 {
+    height: 30vh; 
+}
+
+.backgroundTransparente{
+    background-color: rgba(41, 41, 41, 0.822);
+    /* width: 82%; */
+}
+
+
+
+.imagemFinal {   
+    padding: 2rem ;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.buttonCaatalogo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgba(41, 41, 41, 0.822);
+    padding: 1rem;
+    color: #fff;
+    width: 100%;
+}
+
+.buttonCaatalogo p {
+    font-weight: 600;
+    font-size: large;
+    
+}
+
+.buttonCaatalogo button {
+    padding: 2rem;
+    border-radius: 5px;
+    border-color: rgba(255, 255, 135, 1);
+    background-color: rgba(255, 255, 135, 0.733);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    transition: all .3s;
+
+}
+
+.buttonCaatalogo button:hover {
+    background-color:  rgba(255, 255, 135, 1);
+}
+
+
+@media (max-width: 750px) {
+    
+    .imagem1 {
+        height: 15rem; 
+    }
+    .backgroundTransparente{
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(41, 41, 41, 0.822);
+        display: flex;
+    }
+    .imagemFinal {   
+        transform: rotate(90deg);
+    }
+}
+

@@ -16,6 +16,7 @@ body {
   background-attachment: fixed;
   /* background-color: rgb(13, 77, 77); */
   background-image: url('./img/phant.jpg');
+  /* width: 100vw; */
 
 }
 

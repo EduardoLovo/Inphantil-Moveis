@@ -34,12 +34,14 @@ const Sidebar = () => {
       <div className="sidebar-items">
         <Link to='/catalogo-cliente'>Catalogo</Link>  
         <Link to='/info'>Informações</Link>  
+        <Link to='/catalogo'>Catalogo</Link>
       </div>
       : 
       <div className="sidebar-items">
         <Link to='/home'>Home</Link>
         <Link to='/info'>Informações</Link>  
         <Link to='/catalogo-cliente'>Apliques Catalogo</Link>
+        <Link to='/catalogo'>Catalogo</Link>
         {type === 'adm' ?  
           <div>
             <Link to='/apliques-para-comprar'>Apliques para Comprar</Link>

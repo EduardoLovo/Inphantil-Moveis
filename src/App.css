@@ -1,5 +1,6 @@
 .bodyApp {
-    margin-left: 200px;    
+    margin-left: 15vw;
+    /* width: 72vw;     */
 }
 
 @media (max-width: 768px) {
