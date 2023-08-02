@@ -94,7 +94,6 @@ export const CalculadoraParaLencois = () => {
 
         //Altura 
         const dif = alt - 10
-        console.log(dif);
         const exalt = dif + 23
         const inalt = dif + 21
 

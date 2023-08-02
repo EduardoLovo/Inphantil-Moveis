@@ -13,7 +13,6 @@ const Sidebar = () => {
   const navigate = useNavigate()
 
   const type = localStorage.getItem("user");
-  console.log(type);
 
   const logout = () => {
     setIsLogged(JwtHandler.clearJwt());
@@ -63,6 +62,7 @@ const Sidebar = () => {
           <Link to='/info'>Informações</Link>  
           <Link to='/catalogo-cliente'>Apliques</Link>
           <Link to='/catalogo'>Catalogo</Link>
+          <Link to='/catalogo-lencol-pronta-entrega'>Catalogo Lencol Pronto Entrega</Link>
           {type === 'adm' ?  
             <div>
               <Link to='/apliques-para-comprar'>Apliques para Comprar</Link>

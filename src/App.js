@@ -22,6 +22,7 @@ import { TecidosCasal } from "./pages/CatalogoTecidos/Casal";
 import { TecidosBQK } from "./pages/CatalogoTecidos/BQK";
 import { ToastContainer } from "react-toastify";
 import { ApliquesCreate } from "./pages/ApliquesCreate";
+import { CatalogoLencolPE } from "./pages/CatalogoLencolPE/CatalogoLencolPE";
 
 function App() {
   const PrivateRoute = ({ children, redirectTo }) => {
@@ -57,6 +58,7 @@ function App() {
           <Route path="/catalogo-viuva" element={<TecidosViuva />} />
           <Route path="/catalogo-casal" element={<TecidosCasal />} />
           <Route path="/catalogo-bqk" element={<TecidosBQK />} />
+          <Route path="/catalogo-lencol-pronta-entrega" element={<CatalogoLencolPE />} />
           <Route path="/info" element={<Info />} />
 
           <Route
