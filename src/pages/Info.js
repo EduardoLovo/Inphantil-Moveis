@@ -5,9 +5,9 @@ import vento from '../img/vento.png'
 
 export const Info = () => {
   return (
-    <div className="contentInfo">
+    <div className="contentInfo fs-6">
       <h2 className="text-center p-5">Informações Importantes!</h2>
-      <div className="d-flex justify-content-center align-items-center infochild">
+      <div className="d-flex justify-content-center align-items-center infochild ">
         <div>
           <img src={garantia} alt='garantia' />
         </div>
