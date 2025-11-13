@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* --- Padrão NestJS (Módulo) --- */
+    "module": "commonjs",
+    "target": "ES2022",
+
+    /* --- Essencial para NestJS --- */
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    /* --- A Melhor Prática: "Modo Estrito" --- */
+    "strict": true,
+
+    /* --- Qualidade de Código e Build --- */
+    "skipLibCheck": true, // Essencial para builds rápidas
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "sourceMap": true,
+
+    /* --- Configuração do Projeto --- */
+    "outDir": "./dist",
+    "baseUrl": "./", // Permite imports absolutos
+    "incremental": true,
+
+    /* --- Interoperabilidade de Módulos --- */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+
+  /* --- O que compilar e o que ignorar (Importante!) --- */
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
