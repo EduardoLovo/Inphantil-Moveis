@@ -17,16 +17,49 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
+    // 1. Crie a função para salvar o log no banco
+    private async createLog(
+        email: string,
+        success: boolean,
+        message: string,
+        req?: any, // O request é opcional
+    ) {
+        // Tenta obter o IP real (pode variar dependendo do seu proxy/load balancer)
+        // 1. Use req.header() para acessar os cabeçalhos de forma robusta
+        const forwardedFor = req?.header('x-forwarded-for') || '';
+        const userAgent = req?.header('user-agent') || 'N/A';
+
+        // 2. Simplifique a obtenção do IP
+        // Tenta obter o IP real (primeiro IP da lista x-forwarded-for), ou o IP direto, ou N/A
+        const ipAddress = forwardedFor.split(',')[0].trim() || req?.ip || 'N/A';
+
+        await this.prisma.authLog.create({
+            data: {
+                email,
+                success,
+                message,
+                ipAddress,
+                userAgent,
+            },
+        });
+    }
     /**
      * Registra um novo usuário no sistema
      */
-    async register(dto: RegisterDto) {
+    async register(dto: RegisterDto, req?: any) {
         // 1. Verificar se o usuário já existe
         const existingUser = await this.prisma.user.findUnique({
             where: { email: dto.email },
         });
 
         if (existingUser) {
+            // ❌ LOG DE FALHA: Email já existe
+            await this.createLog(
+                dto.email,
+                false,
+                'Tentativa de registro falhou: Email já existe',
+                req,
+            );
             throw new ConflictException('Um usuário com este email já existe');
         }
 
@@ -45,6 +78,14 @@ export class AuthService {
             },
         });
 
+        // ✅ LOG DE SUCESSO
+        await this.createLog(
+            user.email,
+            true,
+            'Registro de usuário bem-sucedido',
+            req,
+        );
+
         // 4. Retornar o usuário (sem a senha)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...result } = user;
@@ -54,7 +95,7 @@ export class AuthService {
     /**
      * Valida as credenciais do usuário e retorna um JWT se for bem-sucedido
      */
-    async login(dto: LoginDto): Promise<{ accessToken: string }> {
+    async login(dto: LoginDto, req?: any): Promise<{ accessToken: string }> {
         // 1. Encontrar o usuário pelo email
         const user = await this.prisma.user.findUnique({
             where: { email: dto.email },
@@ -63,6 +104,13 @@ export class AuthService {
         // 2. Se o usuário não existir, lançar erro
         // (Usamos a mesma msg de senha inválida para não vazar se o email existe)
         if (!user) {
+            // ❌ LOG DE FALHA: Email não encontrado
+            await this.createLog(
+                dto.email,
+                false,
+                'Login falhou: Email não encontrado',
+                req,
+            );
             throw new UnauthorizedException('Email ou senha inválidos');
         }
 
@@ -70,6 +118,13 @@ export class AuthService {
         const isMatch = await bcrypt.compare(dto.password, user.password);
 
         if (!isMatch) {
+            // ❌ LOG DE FALHA: Senha inválida
+            await this.createLog(
+                dto.email,
+                false,
+                'Login falhou: Senha inválida',
+                req,
+            );
             throw new UnauthorizedException('Email ou senha inválidos');
         }
 
@@ -83,6 +138,14 @@ export class AuthService {
 
         // 5. Assinar e retornar o token
         const accessToken = await this.jwtService.signAsync(payload);
+
+        // ✅ LOG DE SUCESSO
+        await this.createLog(
+            user.email,
+            true,
+            'Login bem-sucedido',
+            req, // <--- Passando o Request
+        );
 
         return {
             accessToken: accessToken,

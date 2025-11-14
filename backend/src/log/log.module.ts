@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { LogService } from './log.service';
+import { LogController } from './log.controller';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module'; // Para usar o RolesGuard
+
+@Module({
+    imports: [PrismaModule, AuthModule],
+    providers: [LogService],
+    controllers: [LogController],
+})
+export class LogModule {}

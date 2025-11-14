@@ -24,3 +24,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AuthLog {
+  id        Int      @id @default(autoincrement())
+  email     String   // O email que foi tentado (sucesso ou falha)
+  success   Boolean  // Se a tentativa foi bem-sucedida ou não
+  message   String   // Descrição da falha (ex: 'Email não encontrado', 'Senha inválida')
+  ipAddress String?  // Opcional: IP do cliente que fez a requisição
+  userAgent String?  // Opcional: User-Agent do cliente (navegador, etc.)
+  createdAt DateTime @default(now())
+}

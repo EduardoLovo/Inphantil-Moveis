@@ -5,7 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     UseGuards,
-    Request,
+    Request, // Importado de @nestjs/common
     Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
+import { GetUser } from './decorators/get-user.decorator';
 
 @ApiTags('auth') // 2. Agrupa os endpoints sob a tag 'auth' (que definimos no main.ts)
 @Controller('auth')
@@ -33,8 +34,9 @@ export class AuthController {
         description: 'Usuário registrado com sucesso',
     })
     @ApiResponse({ status: 409, description: 'Email já existe' })
-    register(@Body() registerDto: RegisterDto) {
-        return this.authService.register(registerDto);
+    // CORRIGIDO: Injeta o Request e passa para o service
+    register(@Body() registerDto: RegisterDto, @Request() req: any) {
+        return this.authService.register(registerDto, req);
     }
 
     @Post('login')
@@ -45,8 +47,9 @@ export class AuthController {
         description: 'Login bem-sucedido, retorna token de acesso',
     })
     @ApiResponse({ status: 401, description: 'Email ou senha inválidos' })
-    login(@Body() loginDto: LoginDto) {
-        return this.authService.login(loginDto);
+    // CORRIGIDO: Injeta o Request e passa para o service
+    login(@Body() loginDto: LoginDto, @Request() req: any) {
+        return this.authService.login(loginDto, req);
     }
 
     // Vamos documentar também a rota de perfil que usamos como exemplo
@@ -59,7 +62,7 @@ export class AuthController {
         status: 401,
         description: 'Não autorizado (token inválido)',
     })
-    getProfile(@Request() user: User) {
+    getProfile(@GetUser() user: User) {
         return user;
     }
 }

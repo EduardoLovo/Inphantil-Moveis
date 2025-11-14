@@ -3,8 +3,8 @@ import { PrismaService } from './prisma/prisma.service';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
-  getHello(): string {
-    return 'Ola Mundo!';
-  }
+    constructor(private prisma: PrismaService) {}
+    getHello(): string {
+        return 'Inphantil Api!';
+    }
 }
