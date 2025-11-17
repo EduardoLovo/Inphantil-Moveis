@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'; // Importe
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { LogModule } from './log/log.module';
+import { RecaptchaModule } from './recaptcha/recaptcha.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { LogModule } from './log/log.module';
     PrismaModule,
     AuthModule,
     LogModule,
+    RecaptchaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

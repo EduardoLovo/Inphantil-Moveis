@@ -33,4 +33,12 @@ export class RegisterDto {
     @IsString()
     @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
     password!: string;
+
+    @ApiProperty({
+        example: '03AFcWeA4C62Sgqf6y_s6l7K...',
+        description: 'Token de resposta do Google reCAPTCHA',
+    })
+    @IsString()
+    @IsNotEmpty({ message: 'O token reCAPTCHA é obrigatório' })
+    gRecaptchaResponse!: string;
 }

@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport'; // 2. Importe o PassportModul
 import { JwtModule } from '@nestjs/jwt'; // 3. Importe o JwtModule
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 4. Importe Configs
 import { JwtStrategy } from './jwt.strategy';
+import { RecaptchaModule } from 'src/recaptcha/recaptcha.module';
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { JwtStrategy } from './jwt.strategy';
                 },
             }),
         }),
-        ConfigModule, // Garante que o ConfigService está disponível
+        ConfigModule,
+        RecaptchaModule, // Garante que o ConfigService está disponível
     ],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy],
