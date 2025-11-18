@@ -27,7 +27,7 @@ import { RecaptchaGuard } from '../recaptcha/recaptcha.guard'; // 1. Importe o R
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
-    // @UseGuards(RecaptchaGuard)
+    @UseGuards(RecaptchaGuard)
     @Post('register')
     @ApiOperation({ summary: 'Registrar um novo usuário' }) // 3. Descreve o endpoint
     @ApiResponse({
@@ -40,7 +40,7 @@ export class AuthController {
         return this.authService.register(registerDto, req);
     }
 
-    @UseGuards(RecaptchaGuard)
+    // @UseGuards(RecaptchaGuard)
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Realizar login e obter token JWT' }) // 4. Descreve

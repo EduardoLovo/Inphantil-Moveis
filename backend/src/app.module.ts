@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { LogModule } from './log/log.module';
 import { RecaptchaModule } from './recaptcha/recaptcha.module';
+import { ProductModule } from './product/product.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { RecaptchaModule } from './recaptcha/recaptcha.module';
     AuthModule,
     LogModule,
     RecaptchaModule,
+    ProductModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
