@@ -9,6 +9,7 @@ import { RecaptchaModule } from './recaptcha/recaptcha.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { AddressModule } from './address/address.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AddressModule } from './address/address.module';
     ProductModule,
     CategoryModule,
     AddressModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

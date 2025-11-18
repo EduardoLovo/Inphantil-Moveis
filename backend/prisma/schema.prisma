@@ -25,6 +25,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   addresses Address[]
+  orders    Order[]
+  
 }
 
 model Address {
@@ -45,6 +47,7 @@ model Address {
 
   userId        Int
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders       Order[]
 }
 model AuthLog {
   id        Int      @id @default(autoincrement())
@@ -88,4 +91,49 @@ model Product {
 
   categoryId  Int?
   category    Category? @relation(fields: [categoryId], references: [id])
+  orderItems       OrderItem[]
+}
+
+// 1. Enum para gerenciar o status do pedido
+enum OrderStatus {
+  PENDING         // Aguardando Pagamento
+  PAID            // Pago
+  IN_PRODUCTION   // Em Produção (Útil para móveis/personalizados)
+  SHIPPED         // Enviado
+  DELIVERED       // Entregue
+  CANCELED        // Cancelado
+}
+
+// 2. Modelo do Pedido Principal
+model Order {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  total       Decimal     @db.Decimal(10, 2) // Valor total do pedido
+  status      OrderStatus @default(PENDING)
+  
+  // Relações
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+
+  addressId   Int
+  address     Address     @relation(fields: [addressId], references: [id])
+
+  items       OrderItem[]
+}
+
+// 3. Modelo dos Itens do Pedido
+model OrderItem {
+  id          Int      @id @default(autoincrement())
+  
+  quantity    Int      // Quantidade comprada
+  price       Decimal  @db.Decimal(10, 2) // Preço unitário NO MOMENTO DA COMPRA (congelado)
+  
+  // Relações
+  orderId     Int
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
 }
