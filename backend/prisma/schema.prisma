@@ -23,8 +23,29 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  addresses Address[]
 }
 
+model Address {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  recipientName String   @db.VarChar(150)
+  zipCode       String   @db.VarChar(20)
+  street        String   @db.VarChar(200)
+  number        String   @db.VarChar(20)
+  complement    String?  @db.VarChar(100)
+  neighborhood  String   @db.VarChar(100)
+  city          String   @db.VarChar(100)
+  state         String   @db.VarChar(2)
+  
+  isDefault     Boolean  @default(false)
+
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 model AuthLog {
   id        Int      @id @default(autoincrement())
   email     String   // O email que foi tentado (sucesso ou falha)

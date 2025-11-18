@@ -8,6 +8,7 @@ import { LogModule } from './log/log.module';
 import { RecaptchaModule } from './recaptcha/recaptcha.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CategoryModule } from './category/category.module';
     RecaptchaModule,
     ProductModule,
     CategoryModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

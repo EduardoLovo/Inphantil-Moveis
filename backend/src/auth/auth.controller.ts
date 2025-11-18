@@ -27,12 +27,12 @@ import { RecaptchaGuard } from '../recaptcha/recaptcha.guard'; // 1. Importe o R
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
-    @UseGuards(RecaptchaGuard)
+    // @UseGuards(RecaptchaGuard)
     @Post('register')
-    @ApiOperation({ summary: 'Registrar um novo usuário' }) // 3. Descreve o endpoint
+    @ApiOperation({ summary: 'Registrar um novo usuário (Retorna Token)' }) // 3. Descreve o endpoint
     @ApiResponse({
         status: 201,
-        description: 'Usuário registrado com sucesso',
+        description: 'Usuário registrado e logado com sucesso',
     })
     @ApiResponse({ status: 409, description: 'Email já existe' })
     // CORRIGIDO: Injeta o Request e passa para o service

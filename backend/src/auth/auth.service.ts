@@ -86,10 +86,23 @@ export class AuthService {
             req,
         );
 
-        // 4. Retornar o usuário (sem a senha)
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+        };
+
+        // 6. Assinar o Token
+        const accessToken = await this.jwtService.signAsync(payload);
+
+        // 7. Preparar o objeto do usuário (sem senha)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...result } = user;
-        return result;
+        const { password, ...userWithoutPassword } = user;
+
+        return {
+            accessToken,
+            user: userWithoutPassword,
+        };
     }
 
     /**
