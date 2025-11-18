@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Prisma } from '@prisma/client';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 // import { UpdateOrderDto } from './dto/update-order.dto'; // Usaremos depois para status
 
 @Injectable()
@@ -140,5 +141,41 @@ export class OrderService {
         return order;
     }
 
-    // Implementaremos updateStatus e remove futuramente se precisar
+    async findAllAdmin() {
+        return this.prisma.order.findMany({
+            include: {
+                user: true, // Inclui dados do usuário que fez o pedido
+                items: {
+                    include: { product: true },
+                },
+                address: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    /**
+     * Atualiza o status de um pedido específico
+     */
+    async updateStatus(id: number, updateDto: UpdateOrderStatusDto) {
+        const order = await this.prisma.order.findUnique({
+            where: { id },
+            select: { status: true }, // Seleciona apenas o status para a verificação inicial
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
+        }
+
+        return this.prisma.order.update({
+            where: { id },
+            data: {
+                status: updateDto.status, // Novo status (válido pelo DTO)
+            },
+            include: {
+                user: true,
+                items: true,
+            },
+        });
+    }
 }
