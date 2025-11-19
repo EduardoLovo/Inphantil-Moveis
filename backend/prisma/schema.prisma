@@ -137,3 +137,64 @@ model OrderItem {
   productId   Int
   product     Product  @relation(fields: [productId], references: [id])
 }
+
+// =-=--=-=-=-=-==-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-==-=-=
+
+enum VisualItemType {
+  APLIQUE
+  TECIDO
+  PANTONE
+  LENÇOL
+  SINTETICO
+  SHOWROOM
+}
+
+enum ItemColor {
+  AMARELO
+  AZUL
+  BEGE
+  BRANCO
+  CINZA
+  LARANJA
+  LILAS
+  MOSTARDA
+  ROSA
+  TIFFANY
+  VERDE
+  VERMELHO
+}
+
+enum ItemSize {
+  BERÇO
+  JUNIOR
+  SOLTEIRO
+  SOLTEIRÃO
+  VIUVA
+  CASAL
+  QUEEN
+  KING
+}
+
+model VisualItem {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Informações Básicas
+  name        String         @db.VarChar(150)
+  code        String         @unique @db.VarChar(50)
+  imageUrl    String?
+
+  // Campo Discriminador
+  type        VisualItemType
+
+  // Características
+  color       ItemColor?
+  size        ItemSize?
+
+  // Dados de Demonstração e Organização
+  inStock     Boolean        @default(true) // Indica se está disponível para demonstração
+  sequence    Int?           // Ordem de exibição no catálogo
+  quantity    Int?           // Quantidade no set/pack (se aplicável)
+  isExternal  Boolean        @default(false) // Indica se o item é de um fornecedor externo
+}
