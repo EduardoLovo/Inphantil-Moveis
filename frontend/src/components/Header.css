@@ -1,0 +1,132 @@
+/* Altura do Header (Usada no espaçador) */
+:root {
+    --header-height: 70px;
+    --mobile-nav-height: 60px; /* Altura do menu fixo no celular */
+
+    /* Fundo/Neutro Claro (Parede, Fundo Principal) */
+    --color-background-light: #b0b6ba;
+
+    /* Texto Principal / Contraste Escuro */
+    --color-text-primary: #313b2f;
+
+    /* Acento Neutro / Madeira Clara (Tons de bege, almofadas) */
+    --color-neutral-accent: #6a736f;
+
+    /* Acento Suave / Destaque (Detalhes do cobertor, Salmão Muted) */
+    --color-accent-soft: #cbcfd1;
+
+    /* Cor de Ação/Links (Substitui o azul antigo por uma cor de ação padrão e acessível) */
+    --color-action-link: #fefe85;
+}
+
+/* ========================================================== */
+/* HEADER FIXO (DESKTOP E MOBILE) */
+/* ========================================================== */
+.main-header {
+    position: fixed;
+    top: 0; /* Fixo no topo por padrão */
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    height: var(--header-height);
+
+    /* Estilo Transparente/Ofuscado */
+    background-color: rgba(0, 0, 0, 0.281);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* Seção de Logo */
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.header-logo {
+    height: 40px; /* Tamanho da sua logo */
+    margin-right: 10px;
+}
+
+.logo-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--color-action-link);
+}
+
+/* Navegação */
+.main-nav a,
+.main-nav button,
+.welcome-message {
+    margin-left: 15px;
+    font-size: 1rem;
+    text-decoration: none;
+    color: var(--color-action-link);
+    transition: color 0.2s;
+}
+
+.main-nav a:hover {
+    color: var(--color-neutral-accent);
+}
+
+.logout-button {
+    background: none;
+    border: 1px solid rgb(156, 156, 156);
+    color: rgb(158, 158, 158);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.logout-button:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* ========================================================== */
+/* RESPONSIVIDADE (MOBILE - BOTTOM BAR) */
+/* ========================================================== */
+@media screen and (max-width: 768px) {
+    .main-header {
+        top: auto; /* Remove o topo */
+        bottom: 0; /* FIXO NA PARTE INFERIOR */
+        height: var(--mobile-nav-height);
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra para cima */
+    }
+
+    .header-content {
+        /* Garante que o conteúdo ocupe a largura total */
+        padding: 0 10px;
+    }
+
+    /* Ocultar elementos maiores (Logo e Título) na barra inferior */
+    .logo-section {
+        display: none;
+    }
+
+    /* Navegação se torna flexível e ocupa todo o espaço */
+    .main-nav {
+        width: 100%;
+        display: flex;
+        justify-content: space-around; /* Distribui links uniformemente */
+        align-items: center;
+    }
+
+    .main-nav a,
+    .main-nav button,
+    .welcome-message {
+        margin: 0;
+        font-size: 0.8rem; /* Links menores */
+        padding: 5px;
+    }
+}

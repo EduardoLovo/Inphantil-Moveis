@@ -9,11 +9,12 @@ interface AuthState {
     user: User | null;
     accessToken: string | null;
     isLoggedIn: boolean;
+    isInitialized: boolean;
 
     // Ações
     login: (credentials: LoginDto) => Promise<void>;
     logout: () => void;
-    initialize: () => void; // Para carregar o token ao iniciar o app
+    initialize: () => Promise<void>; // Para carregar o token ao iniciar o app
     register: (data: RegisterDto) => Promise<void>;
 }
 
@@ -22,14 +23,26 @@ export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     accessToken: null,
     isLoggedIn: false,
+    isInitialized: false,
 
     // Inicializa o estado lendo o token do LocalStorage
-    initialize: () => {
+    initialize: async () => {
         const token = localStorage.getItem('accessToken');
         if (token) {
+            // 1. Define o token e o status de logado rapidamente
             set({ accessToken: token, isLoggedIn: true });
-            // Futuramente, você faria uma chamada para /auth/profile aqui
+
+            try {
+                // 2. Tenta buscar o perfil para preencher o objeto 'user'
+                const userResponse = await api.get('/auth/profile');
+                set({ user: userResponse.data });
+            } catch (error) {
+                // Se o token for inválido/expirado (401), limpa a sessão
+                localStorage.removeItem('accessToken');
+                set({ user: null, accessToken: null, isLoggedIn: false });
+            }
         }
+        set({ isInitialized: true });
     },
 
     register: async (data: RegisterDto) => {
@@ -86,9 +99,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Lógica de Logout
     logout: () => {
         localStorage.removeItem('accessToken');
-        set({ user: null, accessToken: null, isLoggedIn: false });
+        // Garante que o estado seja limpo completamente
+        set({
+            user: null,
+            accessToken: null,
+            isLoggedIn: false,
+            isInitialized: true,
+        });
     },
 }));
-
-// Chamada inicial para carregar o token ao carregar o script
-useAuthStore.getState().initialize();
