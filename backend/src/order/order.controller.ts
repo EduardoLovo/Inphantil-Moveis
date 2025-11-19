@@ -54,7 +54,7 @@ export class OrderController {
 
     @Get('admin/all') // Rota separada para listar TUDO
     @UseGuards(RolesGuard) // Aplica o RolesGuard
-    @Roles(Role.ADMIN, Role.SELLER, Role.DEV)
+    @Roles(Role.ADMIN, Role.DEV)
     @ApiOperation({
         summary: 'Listar TODOS os pedidos do sistema (Admin/Seller)',
     })
@@ -65,7 +65,7 @@ export class OrderController {
 
     @Patch(':id/status')
     @UseGuards(RolesGuard) // Aplica o RolesGuard
-    @Roles(Role.ADMIN, Role.SELLER, Role.DEV)
+    @Roles(Role.ADMIN, Role.DEV)
     @ApiOperation({ summary: 'Atualizar o status de um pedido (Admin/Seller)' })
     @ApiResponse({ status: 200, description: 'Status atualizado com sucesso.' })
     @ApiResponse({ status: 404, description: 'Pedido não encontrado.' })

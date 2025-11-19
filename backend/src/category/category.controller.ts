@@ -56,7 +56,7 @@ export class CategoryController {
     }
 
     @Patch(':id')
-    @Roles(Role.ADMIN, Role.SELLER)
+    @Roles(Role.ADMIN, Role.DEV)
     @ApiOperation({ summary: 'Atualizar categoria (Admin/Seller)' })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -66,7 +66,7 @@ export class CategoryController {
     }
 
     @Delete(':id')
-    @Roles(Role.ADMIN) // Apenas ADMIN pode deletar estrutura
+    @Roles(Role.ADMIN, Role.DEV) // Apenas ADMIN pode deletar estrutura
     @ApiOperation({ summary: 'Remover categoria (Apenas Admin)' })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.categoryService.remove(id);

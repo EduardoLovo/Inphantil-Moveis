@@ -32,10 +32,9 @@ export class VisualItemController {
 
     // 1. POST /visual-items (Criação)
     @Post()
-    @Roles(Role.ADMIN, Role.DEV) // Restringe a criação
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) //
     @ApiOperation({ summary: 'Cria um novo item visual (Apenas Admin/Dev)' })
-    @ApiResponse({ status: 201, description: 'Item criado com sucesso.' })
-    @ApiResponse({ status: 409, description: 'Conflito (Código já existe).' })
     create(@Body() createVisualItemDto: CreateVisualItemDto) {
         return this.visualItemService.create(createVisualItemDto);
     }
@@ -60,7 +59,8 @@ export class VisualItemController {
 
     // 4. PATCH /visual-items/:id (Atualizar)
     @Patch(':id')
-    @Roles(Role.ADMIN, Role.DEV) // Restringe a atualização
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) //
     @ApiOperation({ summary: 'Atualiza um item visual (Apenas Admin/Dev)' })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -71,7 +71,8 @@ export class VisualItemController {
 
     // 5. DELETE /visual-items/:id (Remover)
     @Delete(':id')
-    @Roles(Role.ADMIN, Role.DEV) // Restringe a exclusão
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) // ⬅
     @ApiOperation({ summary: 'Remove um item visual (Apenas Admin/Dev)' })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.visualItemService.remove(id);

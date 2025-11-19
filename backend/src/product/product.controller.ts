@@ -32,13 +32,9 @@ export class ProductController {
 
     // 1. POST /products (Criação de Produto)
     @Post()
-    @Roles(Role.ADMIN, Role.DEV)
-    @ApiOperation({ summary: 'Cria um novo produto (Apenas Admin/Seller)' })
-    @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
-    @ApiResponse({
-        status: 403,
-        description: 'Proibido (Sem permissão de Role)',
-    })
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) //
+    @ApiOperation({ summary: 'Cria um novo produto (Apenas Admin/Dev)' })
     create(@Body() createProductDto: CreateProductDto) {
         return this.productService.create(createProductDto);
     }
@@ -69,18 +65,10 @@ export class ProductController {
 
     // 4. PATCH /products/:id (Atualizar Produto)
     @Patch(':id')
-    @Roles(Role.ADMIN, Role.SELLER)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) // ⬅️ CORRIGIDO: Removido SELLER
     @ApiOperation({
-        summary: 'Atualiza um produto existente (Apenas Admin/Seller)',
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'Produto atualizado com sucesso.',
-    })
-    @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
-    @ApiResponse({
-        status: 403,
-        description: 'Proibido (Sem permissão de Role)',
+        summary: 'Atualiza um produto existente (Apenas Admin/Dev)',
     })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -91,14 +79,9 @@ export class ProductController {
 
     // 5. DELETE /products/:id (Remover Produto)
     @Delete(':id')
-    @Roles(Role.ADMIN)
-    @ApiOperation({ summary: 'Remove um produto (Apenas Admin)' })
-    @ApiResponse({ status: 200, description: 'Produto removido com sucesso.' })
-    @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
-    @ApiResponse({
-        status: 403,
-        description: 'Proibido (Sem permissão de Role)',
-    })
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.ADMIN, Role.DEV) // ⬅️ CORRIGIDO: Adicionado DEV (Mantendo Admin)
+    @ApiOperation({ summary: 'Remove um produto (Apenas Admin/Dev)' })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.productService.remove(id);
     }
