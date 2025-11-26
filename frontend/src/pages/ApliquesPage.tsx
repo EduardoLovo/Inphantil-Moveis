@@ -1,17 +1,62 @@
 import React, { useEffect, useState, type FormEvent } from 'react';
 import { useApliqueStore } from '../store/ApliqueStore';
-import './ApliquesPage.css'; // Vamos criar um CSS simples
+import './ApliquesPage.css'; // CSS atual
 import { useAuthStore } from '../store/AuthStore';
 import type { VisualItem } from '../types/visual-item';
-import { FaCube, FaEdit, FaSortNumericUp } from 'react-icons/fa';
+import { FaCube, FaEdit, FaSortNumericUp, FaTimes } from 'react-icons/fa';
 
-// Componente para o Modal (Pode ser um componente separado, mas aqui incluímos para simplicidade)
+// =========================================================
+// 1. MODAL DE VISUALIZAÇÃO (Novo)
+// =========================================================
+const ViewModal: React.FC<{ item: VisualItem; onClose: () => void }> = ({
+    item,
+    onClose,
+}) => {
+    // Fecha ao clicar no fundo escuro
+    const handleOverlayClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+    };
+
+    return (
+        <div className="modal-overlay" onClick={handleOverlayClick}>
+            <div className="modal-view-card">
+                {' '}
+                {/* Usa o estilo que criamos para Sintéticos */}
+                <button className="close-button" onClick={onClose}>
+                    <FaTimes />
+                </button>
+                <img
+                    src={item.imageUrl}
+                    alt={item.code}
+                    className="modal-view-image"
+                />
+                <div className="modal-view-info">
+                    <h2>{item.code}</h2>
+                    {item.name && <p className="item-name">{item.name}</p>}
+                    {item.description && (
+                        <p className="item-description">{item.description}</p>
+                    )}
+
+                    {/* Status visível apenas aqui se desejar */}
+                    {!item.inStock && (
+                        <span className="info-badge out-badge">
+                            Indisponível
+                        </span>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// =========================================================
+// 2. MODAL DE EDIÇÃO (Existente - Mantido igual)
+// =========================================================
 const EditModal: React.FC<{
     item: VisualItem;
     onClose: () => void;
     onSave: (data: any) => void;
 }> = ({ item, onClose, onSave }) => {
-    // 1. INICIALIZAÇÃO CORRETA: Usa o valor do item, caindo para null se não houver.
     const [code, setCode] = useState(item.code || '');
     const [quantity, setQuantity] = useState<number | null>(
         item.quantity || null
@@ -27,7 +72,6 @@ const EditModal: React.FC<{
         e.preventDefault();
         setLoading(true);
         try {
-            // 2. Cria o payload, que será filtrado na store
             await onSave({
                 id: item.id,
                 imageUrl: imagem,
@@ -39,7 +83,6 @@ const EditModal: React.FC<{
             onClose();
         } catch (error) {
             console.error('Erro ao salvar:', error);
-            // Mostrar mensagem de erro na UI
         } finally {
             setLoading(false);
         }
@@ -53,7 +96,6 @@ const EditModal: React.FC<{
                     {item.code}
                 </h2>
                 <form onSubmit={handleSubmit} className="edit-form">
-                    {/* Campo Código */}
                     <div className="form-group">
                         <label>Código:</label>
                         <input
@@ -64,8 +106,6 @@ const EditModal: React.FC<{
                             required
                         />
                     </div>
-
-                    {/* Campo Imagem URL */}
                     <div className="form-group">
                         <label>Imagem (URL):</label>
                         <input
@@ -76,38 +116,31 @@ const EditModal: React.FC<{
                             required
                         />
                     </div>
-
-                    {/* Campo Quantidade */}
                     <div className="form-group">
                         <label>
                             <FaCube className="input-icon" /> Quantidade:
                         </label>
                         <input
                             type="number"
-                            // CORREÇÃO: Exibir string vazia para null
                             value={quantity === null ? '' : quantity}
-                            onChange={(e) => {
-                                const value = e.target.value;
+                            onChange={(e) =>
                                 setQuantity(
-                                    value === '' ? null : Number(value)
-                                );
-                            }}
+                                    e.target.value === ''
+                                        ? null
+                                        : Number(e.target.value)
+                                )
+                            }
                             className="form-input"
                         />
                     </div>
-
-                    {/* Checkbox Em Estoque */}
                     <div className="form-group checkbox-group">
                         <label>Em Estoque:</label>
                         <input
                             type="checkbox"
-                            className="checkbox"
                             checked={inStock}
                             onChange={(e) => setInStock(e.target.checked)}
                         />
                     </div>
-
-                    {/* Campo Sequência */}
                     <div className="form-group">
                         <label>
                             <FaSortNumericUp className="input-icon" />{' '}
@@ -116,16 +149,16 @@ const EditModal: React.FC<{
                         <input
                             type="number"
                             value={sequence === null ? '' : sequence}
-                            onChange={(e) => {
-                                const value = e.target.value;
+                            onChange={(e) =>
                                 setSequence(
-                                    value === '' ? null : Number(value)
-                                );
-                            }}
+                                    e.target.value === ''
+                                        ? null
+                                        : Number(e.target.value)
+                                )
+                            }
                             className="form-input"
                         />
                     </div>
-
                     <div className="form-actions">
                         <button
                             type="button"
@@ -135,7 +168,7 @@ const EditModal: React.FC<{
                             Cancelar
                         </button>
                         <button type="submit" disabled={loading}>
-                            {loading ? 'Salvando...' : 'Salvar Alterações'}
+                            Salvar
                         </button>
                     </div>
                 </form>
@@ -144,13 +177,23 @@ const EditModal: React.FC<{
     );
 };
 
+// =========================================================
+// 3. COMPONENTE PRINCIPAL
+// =========================================================
 const ApliquesPage: React.FC = () => {
     const { apllyIcons, isLoading, error, fetchApliques, updateAplique } =
         useApliqueStore();
     const user = useAuthStore((state) => state.user);
 
+    // Estados para os dois modais
     const [editingItem, setEditingItem] = useState<VisualItem | null>(null);
+    const [viewingItem, setViewingItem] = useState<VisualItem | null>(null);
 
+    // Permissões Específicas
+    // Quem pode editar? Apenas ADMIN e DEV
+    const canEdit = user && (user.role === 'ADMIN' || user.role === 'DEV');
+
+    // Quem vê informações de estoque coloridas? ADMIN, DEV e SELLER
     const isStaff =
         user &&
         (user.role === 'ADMIN' ||
@@ -163,69 +206,69 @@ const ApliquesPage: React.FC = () => {
         }
     }, [fetchApliques, apllyIcons.length]);
 
-    if (isLoading) {
-        return (
-            <div className="aplly-page-container">
-                <h1>Carregando Apliques...</h1>
-            </div>
-        );
-    }
-
-    // 3. Função para determinar as classes CSS
-    const getCardClassName = (inStock: boolean): string => {
-        let className = 'aplly-card';
-        if (!isStaff) return className; // Se não for da equipe, usa apenas 'aplly-card'
-
-        // Adiciona classe de cor para membros da equipe
-        className += inStock ? ' in-stock-staff' : ' out-of-stock-staff';
-        return className;
-    };
-
-    if (error) {
-        return (
-            <div className="aplly-page-container">
-                <h1>Erro ao carregar apliques: {error}</h1>
-            </div>
-        );
-    }
-
-    const handleEditClick = (item: VisualItem) => {
-        if (isStaff) {
+    // Lógica de Clique Centralizada
+    const handleCardClick = (item: VisualItem) => {
+        if (canEdit) {
+            // Se for ADMIN/DEV -> Abre Edição
             setEditingItem(item);
+        } else {
+            // Se for SELLER, USER ou Público -> Abre Visualização (Imagem Grande)
+            setViewingItem(item);
         }
     };
 
     const handleSave = async (data: any) => {
         await updateAplique(data);
-        // O estado da store será atualizado, não precisa fazer mais nada aqui
     };
+
+    const getCardClassName = (inStock: boolean): string => {
+        let className = 'aplly-card';
+        if (!isStaff) return className;
+        return (
+            className + (inStock ? ' in-stock-staff' : ' out-of-stock-staff')
+        );
+    };
+
+    if (isLoading)
+        return (
+            <div className="aplly-page-container">
+                <h1>Carregando Apliques...</h1>
+            </div>
+        );
+    if (error)
+        return (
+            <div className="aplly-page-container">
+                <h1>Erro: {error}</h1>
+            </div>
+        );
 
     return (
         <div className="aplly-page-container">
             <h1>Catálogo de Apliques</h1>
             <p className="page-description">
                 {isStaff
-                    ? 'Visualização de Gestão: Todos os itens com status de estoque destacado.'
-                    : 'Visualização Pública: Apenas itens em estoque.'}
+                    ? 'Visualização de Gestão: Clique para editar (Admin) ou visualizar (Seller).'
+                    : 'Clique na imagem para ampliar.'}
             </p>
 
             <div className="aplly-grid">
                 {apllyIcons.map((item) => (
-                    // 4. Aplicar classe condicional
                     <div
                         key={item.id}
                         className={getCardClassName(item.inStock)}
-                        onClick={() => handleEditClick(item)}
-                        style={{ cursor: isStaff ? 'pointer' : 'default' }}
+                        onClick={() => handleCardClick(item)} // Todos podem clicar agora
+                        style={{ cursor: 'pointer' }} // Cursor pointer para todos
                     >
+                        {/* Mostra ícone de edição apenas para quem pode editar */}
+                        {canEdit && <FaEdit className="edit-icon" />}
+
                         <img
                             src={item.imageUrl}
-                            alt={item.name}
+                            alt={item.code}
                             className="aplly-image"
                         />
                         <h3 className="aplly-title">{item.code}</h3>
 
-                        {/* 5. Tag de Status (Visível apenas para Staff) */}
                         {isStaff && (
                             <span
                                 className={`stock-tag ${
@@ -233,18 +276,28 @@ const ApliquesPage: React.FC = () => {
                                         ? 'tag-in-stock'
                                         : 'tag-out-of-stock'
                                 }`}
-                            ></span>
+                            >
+                                {item.inStock ? '' : ''}
+                            </span>
                         )}
                     </div>
                 ))}
             </div>
 
-            {/* 2. Renderiza o Modal se houver um item em edição */}
+            {/* Modal de Edição (Apenas Admin/Dev) */}
             {editingItem && (
                 <EditModal
                     item={editingItem}
                     onClose={() => setEditingItem(null)}
                     onSave={handleSave}
+                />
+            )}
+
+            {/* Modal de Visualização (Todos os outros) */}
+            {viewingItem && (
+                <ViewModal
+                    item={viewingItem}
+                    onClose={() => setViewingItem(null)}
                 />
             )}
 

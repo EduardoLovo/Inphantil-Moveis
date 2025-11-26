@@ -17,6 +17,8 @@ import TecidosPage from './pages/TecidosPage';
 import CreateApliquePage from './pages/CreateApliquePage';
 import AdminCategoryPage from './pages/AdminCategoryPage';
 import CreateTecidoPage from './pages/CreateTecidoPage';
+import CreateSinteticoPage from './pages/CreateSinteticoPage';
+import SinteticosPage from './pages/SinteticosPage';
 
 function App() {
     return (
@@ -30,6 +32,7 @@ function App() {
                 <Route path="/catalogo/apliques" element={<ApliquesPage />} />
                 <Route path="/apliques" element={<ApliquesPage />} />
                 <Route path="/tecidos-lencol" element={<TecidosPage />} />
+                <Route path="/sinteticos" element={<SinteticosPage />} />{' '}
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
@@ -74,6 +77,11 @@ function App() {
                         path="/admin/tecidos/new"
                         element={<CreateTecidoPage />}
                     />
+                    <Route
+                        path="/admin/sinteticos/new"
+                        element={<CreateSinteticoPage />}
+                    />
+                    {/* NOVO */}
                 </Route>
             </Routes>
             <Footer />

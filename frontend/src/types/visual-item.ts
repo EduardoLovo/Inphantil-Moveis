@@ -18,4 +18,6 @@ export interface VisualItem {
         | 'SINTETICO'
         | 'SHOWROOM';
     imageUrl: string;
+    isExternal: boolean;
+    isTapete: boolean;
 }

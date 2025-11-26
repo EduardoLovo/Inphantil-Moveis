@@ -105,7 +105,7 @@ const Header = () => {
                                 Apliques para Cabana
                             </Link>
                             <Link
-                                to="/products?category=acessorios"
+                                to="/sinteticos"
                                 onClick={() => setIsCatalogOpen(false)}
                             >
                                 Cores para camas

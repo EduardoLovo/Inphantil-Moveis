@@ -15,10 +15,11 @@ export class CreateVisualItemDto {
     @ApiProperty({
         example: 'Capa Protetora de Parede',
         description: 'Nome do item.',
+        required: false,
     })
     @IsString()
-    @IsNotEmpty()
-    name!: string;
+    @IsOptional() // 3. Use IsOptional no lugar de IsNotEmpty (se houver)
+    name?: string; // 4. Adicione o '?' aqui também e remova o '!'
 
     @ApiProperty({
         example: 'PRT-CAPA-AZL',
@@ -102,11 +103,21 @@ export class CreateVisualItemDto {
 
     @ApiProperty({
         example: false,
-        description: 'Item de fornecedor externo.',
+        description: 'Faz tapete.',
         default: false,
         required: false,
     })
     @IsBoolean()
     @IsOptional()
     isExternal?: boolean = false;
+
+    @ApiProperty({
+        example: false,
+        description: 'Faz externo.',
+        default: false,
+        required: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    isTapete?: boolean = false;
 }

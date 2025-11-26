@@ -1,0 +1,244 @@
+/* ========================================================== */
+/* LAYOUT DA PÁGINA */
+/* ========================================================== */
+.sintetico-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    padding-top: calc(var(--header-height, 70px) + 30px);
+    padding-bottom: 80px;
+    text-align: center;
+}
+
+.instruction-text {
+    margin: 20px 0 40px 0;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+}
+
+.instruction-text p {
+    margin: 5px 0;
+}
+
+.instruction-text p:first-child {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* ========================================================== */
+/* BARRA DE FILTROS (BOTÕES) */
+/* ========================================================== */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
+}
+
+.filter-button {
+    background-color: #333; /* Fundo escuro como na imagem */
+    color: #ddd;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    text-transform: capitalize; /* Primeira letra maiúscula */
+}
+
+.filter-button:hover {
+    background-color: #555;
+}
+
+/* Botão Ativo (Destaque) */
+.filter-button.active {
+    background-color: #6b6b18; /* Tom de oliva/amarelo escuro da imagem */
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Botão Externo (Diferente se quiser) */
+.filter-button:last-child {
+    /* background-color: #444; */
+}
+
+/* ========================================================== */
+/* GRID E CARDS */
+/* ========================================================== */
+.sintetico-grid {
+    display: grid;
+    /* Cards menores para parecer amostras de cor */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.sintetico-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Sem borda para ficar clean como na imagem */
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.sintetico-card:hover {
+    transform: scale(1.02);
+}
+
+.image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Quadrado perfeito */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+}
+
+.sintetico-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sintetico-code {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+}
+
+.sintetico-name {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 5px 0;
+}
+
+/* ========================================================== */
+/* ESTADOS DE ESTOQUE (STAFF) */
+/* ========================================================== */
+.sintetico-card.out-of-stock-staff .image-wrapper {
+    opacity: 0.6;
+    border: 3px solid var(--color-danger);
+}
+
+.stock-tag {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 5px;
+    color: white;
+}
+.tag-in {
+    background-color: var(--color-success);
+}
+.tag-out {
+    background-color: var(--color-danger);
+}
+/* ... estilos anteriores ... */
+
+/* Estilos do View Modal (Visualização Ampla) */
+.modal-view-card {
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    max-width: 600px; /* Mais largo para ver bem a textura */
+    width: 90%;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-view-image {
+    width: 100%;
+    height: auto;
+    max-height: 70vh; /* Garante que caiba na tela */
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.modal-view-info {
+    text-align: center;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.modal-view-info h2 {
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.item-name {
+    color: #666;
+    margin: 5px 0 15px 0;
+}
+
+.close-button {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: var(--color-text-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+/* Badges no Modal */
+.modal-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.info-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.color-badge {
+    background-color: #eee;
+    color: #333;
+}
+.external-badge {
+    background-color: #333;
+    color: #fff;
+}
+.out-badge {
+    background-color: var(--color-stock-out);
+    color: white;
+}
+/* Responsividade */
+@media (max-width: 600px) {
+    .filter-button {
+        flex-grow: 1;
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+
+    .sintetico-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 por linha no celular */
+    }
+}
