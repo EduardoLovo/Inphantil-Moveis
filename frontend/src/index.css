@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap');
+
 :root {
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -5,18 +7,42 @@
 
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #757575;
+    /* background-color: #b0b6ba; */
 
+    background: #ffffff;
+    /* background: #e3e3e3;
+    background: linear-gradient(
+        148deg,
+        rgba(227, 227, 227, 1) 36%,
+        rgba(252, 251, 194, 1) 100%
+    ); */
+    background-repeat: no-repeat;
+
+    /* 3. Garante que a imagem cubra toda a área visível, sem esticar */
+    background-size: cover;
+
+    /* 4. O MAIS IMPORTANTE: Fixa a imagem no viewport */
+    background-attachment: fixed;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
 html,
 body {
     margin: 0;
     padding: 0;
     height: 100%; /* Garante que o body ocupe a altura total */
+    scroll-behavior: smooth;
+    font-family: 'Inter', Arial, sans-serif;
+}
+h1,
+h2,
+h3,
+.logo-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
 }
 
 @media (prefers-color-scheme: light) {

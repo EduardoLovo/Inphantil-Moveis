@@ -1,0 +1,126 @@
+/* ========================================================== */
+/* VARIÁVEIS DE COR (Apenas Referência) */
+/* ========================================================== */
+:root {
+    /* Fundo Escuro para contraste */
+    --color-footer-bg: var(--color-text-primary, #313b2f);
+    /* Texto Claro no Fundo Escuro */
+    --color-footer-text: var(--color-accent-soft, #cbcfd1);
+    /* Cor de Destaque */
+    --color-footer-accent: var(--color-action-link, #fefe85);
+}
+
+/* ========================================================== */
+/* FOOTER PRINCIPAL */
+/* ========================================================== */
+.main-footer {
+    max-width: 100%;
+    background-color: #3a3a3a;
+    color: var(--color-footer-text);
+    padding: 40px 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    margin-top: auto; /* Empurra o footer para baixo em layouts flexbox */
+}
+
+.footer-content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap; /* Permite quebrar em mobile */
+}
+
+.footer-section {
+    width: 100%;
+    flex: 1 1 250px;
+    margin-bottom: 20px;
+}
+
+.footer-title {
+    font-family: 'Poppins', sans-serif;
+    color: var(--color-footer-accent);
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(203, 207, 209, 0.2);
+    padding-bottom: 5px;
+}
+
+.footer-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    width: 100%;
+    margin: 0;
+}
+
+/* LISTA DE LINKS */
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links-list li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-links-list a,
+.footer-links-list .social-icon {
+    color: var(--color-footer-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.footer-links-list a:hover {
+    color: var(--color-footer-accent);
+}
+
+/* Ícones Sociais */
+.social-icons-wrapper {
+    margin-top: 20px;
+}
+
+.social-icon {
+    margin-right: 8px;
+}
+
+.social-icon-large {
+    color: var(--color-footer-text);
+    transition: color 0.2s;
+}
+
+.social-icon-large:hover {
+    color: var(--color-footer-accent);
+}
+
+/* ========================================================== */
+/* RESPONSIVIDADE (MOBILE) */
+/* ========================================================== */
+@media screen and (max-width: 768px) {
+    .main-footer {
+        padding: 30px 20px 80px 20px; /* Adiciona padding extra para não cobrir o menu fixo inferior */
+    }
+
+    .footer-content-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .footer-section {
+        flex: 1 1 100%;
+        border-bottom: 1px dashed rgba(203, 207, 209, 0.2);
+        padding-bottom: 15px;
+    }
+
+    .footer-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .footer-title {
+        font-size: 1.1rem;
+    }
+}

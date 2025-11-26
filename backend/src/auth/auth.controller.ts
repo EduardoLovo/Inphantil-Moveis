@@ -21,13 +21,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { GetUser } from './decorators/get-user.decorator';
-import { RecaptchaGuard } from '../recaptcha/recaptcha.guard'; // 1. Importe o RecaptchaGuard
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('auth') // 2. Agrupa os endpoints sob a tag 'auth' (que definimos no main.ts)
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
-    // @UseGuards(RecaptchaGuard)
+   
+    @Public()
     @Post('register')
     @ApiOperation({ summary: 'Registrar um novo usuário (Retorna Token)' }) // 3. Descreve o endpoint
     @ApiResponse({
@@ -40,7 +41,8 @@ export class AuthController {
         return this.authService.register(registerDto, req);
     }
 
-    // @UseGuards(RecaptchaGuard)
+    
+    @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Realizar login e obter token JWT' }) // 4. Descreve

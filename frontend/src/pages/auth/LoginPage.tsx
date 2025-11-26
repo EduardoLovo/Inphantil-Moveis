@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/AuthStore';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import './LoginPage.css';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -38,44 +39,52 @@ const LoginPage = () => {
     };
 
     return (
-        <div
-            style={{
-                maxWidth: '400px',
-                margin: '50px auto',
-                padding: '20px',
-                border: '1px solid #ccc',
-            }}
-        >
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Senha:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+        <div className="login-container">
+            {' '}
+            {/* Container Principal */}
+            <div className="login-card">
+                {' '}
+                {/* Card com Sombra */}
+                <h2>Acesso do Cliente</h2>
+                <form onSubmit={handleSubmit} className="login-form">
+                    {/* Campo Email */}
+                    <div className="form-group-login">
+                        <label htmlFor="email">Email:</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* Futuramente, o widget do reCAPTCHA seria renderizado aqui */}
+                    {/* Campo Senha */}
+                    <div className="form-group-login">
+                        <label htmlFor="password">Senha:</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                <button type="submit" style={{ marginTop: '10px' }}>
-                    Entrar
-                </button>
-            </form>
-            {error && (
-                <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>
-            )}
+                    <button type="submit" className="login-button">
+                        Entrar
+                    </button>
+                </form>
+                {error && <p className="error-message">{error}</p>}
+                <p className="login-link-text">
+                    Não tem conta?{' '}
+                    <Link to="/register" className="login-link">
+                        Cadastre-se aqui
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 };

@@ -1,0 +1,149 @@
+/* ========================================================== */
+/* VARIÁVEIS (Referência da sua paleta) */
+/* ========================================================== */
+:root {
+    --header-height: 70px;
+    --color-background-light: #b0b6ba; /* Fundo Suave */
+    --color-text-primary: #313b2f; /* Verde Musgo Escuro */
+    --color-neutral-accent: #6a736f; /* Cinza/Oliva (Bordas) */
+    --color-accent-soft: #cbcfd1; /* Cinza Claro (Sombra/Detalhes) */
+    --color-action-link: #ffd639; /* Amarelo/Ouro */
+    --color-danger: #dc3545;
+    --color-success: #28a745;
+}
+
+/* ========================================================== */
+/* LAYOUT E CARD PRINCIPAL */
+/* ========================================================== */
+
+.dashboard-container {
+    /* Centraliza o conteúdo horizontalmente, empurrando a página para baixo do header */
+    padding-top: calc(var(--header-height) + 50px);
+    padding-bottom: 50px;
+    min-height: 100vh;
+    background-color: var(--color-background-light);
+
+    display: flex;
+    justify-content: center;
+    /* Alinha ao topo (para evitar flutuar no meio da tela) */
+    align-items: flex-start;
+}
+
+.profile-card {
+    width: 90%;
+    max-width: 650px;
+    padding: 40px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px var(--color-accent-soft); /* Sombra suave */
+    border: 1px solid var(--color-neutral-accent);
+    color: var(--color-text-primary);
+}
+
+/* Títulos */
+.profile-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon,
+.info-icon {
+    color: var(--color-action-link);
+    margin-right: 10px;
+}
+
+.profile-divider {
+    border-top: 1px solid var(--color-neutral-accent);
+    margin: 25px 0;
+}
+
+/* ========================================================== */
+/* MENSAGENS E INFORMAÇÕES DE CONTA */
+/* ========================================================== */
+.welcome-message {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.role-message {
+    font-size: 0.95rem;
+    color: var(--color-neutral-accent);
+}
+
+.user-name-highlight {
+    font-weight: bold;
+    color: var(--color-action-link);
+}
+
+.role-highlight {
+    color: var(--color-text-primary);
+}
+
+.info-section-title {
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--color-accent-soft);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.info-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--color-accent-soft);
+}
+
+.info-detail label {
+    font-weight: 600;
+}
+
+/* ========================================================== */
+/* BOTÃO E NAVEGAÇÃO RÁPIDA */
+/* ========================================================== */
+.quick-nav-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-accent-soft);
+}
+
+.quick-nav-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.nav-link {
+    font-weight: bold;
+    color: var(--color-action-link);
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.admin-link {
+    color: var(--color-danger) !important;
+}
+
+.logout-btn {
+    width: auto;
+    padding: 10px 20px;
+    background-color: var(--color-danger);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+    background-color: #a72535;
+}

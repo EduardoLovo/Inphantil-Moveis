@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVisualItemDto } from './dto/create-visual-item.dto';
 import { UpdateVisualItemDto } from './dto/update-visual-item.dto';
+import { Prisma, Role, VisualItemType } from '@prisma/client';
 
 @Injectable()
 export class VisualItemService {
@@ -30,12 +31,35 @@ export class VisualItemService {
     }
 
     // 2. Listar Todos (Opcionalmente com filtros por tipo, cor, etc.)
-    async findAll() {
+    async findAll(type?: string, userRole?: Role) {
+        let whereCondition: Prisma.VisualItemWhereInput = {};
+
+        // 1. Filtragem por Tipo ("APLIQUE")
+        if (type) {
+            const typeEnum = type.toUpperCase() as VisualItemType;
+            whereCondition.type = typeEnum;
+        }
+
+        // 2. LÓGICA DE VISIBILIDADE DE ESTOQUE CORRIGIDA
+
+        // Apenas ADMIN e DEV têm a permissão irrestrita (podem ver inStock: false)
+        const isUnrestrictedStaff =
+            userRole === Role.ADMIN || userRole === Role.DEV;
+
+        // Se o usuário NÃO for ADMIN ou DEV (ou seja, é USER, SELLER ou Deslogado),
+        // APLICAMOS o filtro inStock: true.
+        if (!isUnrestrictedStaff) {
+            whereCondition = {
+                ...whereCondition,
+                inStock: true, // Filtra para mostrar apenas o que está em estoque
+            };
+        }
+        // Se for ADMIN ou DEV, o whereCondition não recebe a cláusula inStock: true,
+        // e o Prisma retorna todos os itens.
+
         return this.prisma.visualItem.findMany({
-            orderBy: [
-                { sequence: 'asc' }, // Primeira regra
-                { name: 'asc' }, // Segunda regra
-            ],
+            where: whereCondition,
+            orderBy: { code: 'asc' },
         });
     }
 

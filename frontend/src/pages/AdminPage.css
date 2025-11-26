@@ -1,3 +1,103 @@
+:root {
+    /* ========================================================== */
+    /* PALETA MONTESSORIANA (Inspirada na Imagem) */
+    /* ========================================================== */
+
+    /* Fundo/Neutro Claro (Parede, Fundo Principal) */
+    --color-background-light: #b0b6ba;
+
+    /* Texto Principal / Contraste Escuro */
+    --color-text-primary: #313b2f;
+
+    /* Acento Neutro / Madeira Clara (Tons de bege, almofadas) */
+    --color-neutral-accent: #6a736f;
+
+    /* Acento Suave / Destaque (Detalhes do cobertor, Salmão Muted) */
+    --color-accent-soft: #cbcfd1;
+
+    /* Cor de Ação/Links (Substitui o azul antigo por uma cor de ação padrão e acessível) */
+    --color-action-link: #ffd639;
+}
+
+/* ========================================================== */
+/* LAYOUT DA PÁGINA */
+/* ========================================================== */
+.admin-page-container {
+    padding: 50px;
+    /* max-width: 1200px; */
+    margin: 40px auto;
+    font-family: Arial, sans-serif;
+    color: #313b2f;
+}
+
+.admin-divider {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid var(--color-text-primary);
+}
+
+/* ========================================================== */
+/* GRID DE CARDS */
+/* ========================================================== */
+
+.admin-cards-grid {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
 .admin-card-link {
-    margin-bottom: 30px;
+    text-decoration: none; /* Remove sublinhado dos links */
+    color: inherit;
+    margin-bottom: 40px;
+}
+
+.admin-card {
+    /* Estilo BASE do CARD_STYLE original */
+    padding: 20px;
+    margin: 10px;
+    width: 150px;
+    height: 250px;
+    border: 1px solid var(--color-text-primary);
+    background-color: var(--color-neutral-accent);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--color-box-shadow);
+
+    /* Estilos de Display */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* Transições e Hover */
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px); /* Efeito 3D ao passar o mouse */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra mais forte */
+}
+
+/* ========================================================== */
+/* ESTILOS DOS ELEMENTOS INTERNOS */
+/* ========================================================== */
+
+.card-icon {
+    /* Estilo do ícone */
+    color: var(--color-background-light); /* Cor do ícone */
+    margin: 10px;
+    font-size: 40px;
+}
+
+.card-title {
+    margin: 5px 0;
+    color: var(--color-text-primary);
+}
+
+.card-description {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    margin: 5px 0 10px 0;
+    flex-grow: 1; /* Garante que todos os cards tenham a mesma altura */
 }

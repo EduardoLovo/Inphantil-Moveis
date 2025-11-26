@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../../store/AuthStore';
 import { useNavigate, Link } from 'react-router-dom';
 import type { RegisterDto } from '../../types/auth'; // Usando import type
+import './RegisterPage.css';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState<RegisterDto>({
@@ -46,77 +47,82 @@ const RegisterPage = () => {
     };
 
     return (
-        <div
-            style={{
-                maxWidth: '400px',
-                margin: '50px auto',
-                padding: '20px',
-                border: '1px solid #ccc',
-            }}
-        >
-            <h2>Crie sua Conta</h2>
-            <form onSubmit={handleSubmit}>
-                {/* Campo Nome */}
-                <div>
-                    <label>Nome Completo:</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+        <div className="register-container">
+            {' '}
+            {/* Container Principal */}
+            <div className="register-card">
+                {' '}
+                {/* Card com Sombra */}
+                <h2>Crie sua Conta</h2>
+                <form onSubmit={handleSubmit} className="register-form">
+                    {/* Campo Nome */}
+                    <div className="form-group-login">
+                        <label htmlFor="name">Nome Completo:</label>
+                        <input
+                            id="name"
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* Campo Email */}
-                <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    {/* Campo Email */}
+                    <div className="form-group-login">
+                        <label htmlFor="email">Email:</label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* Campo Telefone */}
-                <div>
-                    <label>Telefone:</label>
-                    <input
-                        type="text"
-                        name="fone"
-                        value={formData.fone}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    {/* Campo Telefone */}
+                    <div className="form-group-login">
+                        <label htmlFor="fone">Telefone:</label>
+                        <input
+                            id="fone"
+                            type="text"
+                            name="fone"
+                            value={formData.fone}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* Campo Senha */}
-                <div>
-                    <label>Senha:</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    {/* Campo Senha */}
+                    <div className="form-group-login">
+                        <label htmlFor="password">Senha:</label>
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className="form-input"
+                        />
+                    </div>
 
-                {/* O gRecaptchaResponse está mockado no estado */}
-
-                <button type="submit" style={{ marginTop: '15px' }}>
-                    Cadastrar
-                </button>
-            </form>
-            {error && (
-                <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>
-            )}
-
-            <p style={{ marginTop: '15px' }}>
-                Já tem conta? <Link to="/login">Faça Login</Link>
-            </p>
+                    <button type="submit" className="register-button">
+                        Cadastrar
+                    </button>
+                </form>
+                {error && <p className="error-message">{error}</p>}
+                <p className="login-link-text">
+                    Já tem conta?{' '}
+                    <Link to="/login" className="login-link">
+                        Faça Login
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 };

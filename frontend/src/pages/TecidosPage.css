@@ -1,0 +1,72 @@
+.tecido-page-container {
+    max-width: 100%;
+    margin: 0px auto;
+    padding: 20px 20px;
+    /* Garante espaçamento abaixo do Header fixo */
+    padding-top: calc(var(--header-height, 70px) + 30px);
+    /* Garante espaçamento acima do Footer fixo em mobile */
+    padding-bottom: var(--mobile-nav-height, 60px);
+    color: var(--color-text-primary);
+}
+
+.tecido-page-container h1,
+p {
+    font-family: 'Poppins', sans-serif;
+    margin: 0 130px;
+}
+.page-description {
+    color: var(--color-neutral-accent, #666);
+}
+
+.tecido-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.tecido-card {
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 0 5px var(--color-neutral-shadow);
+    transition: box-shadow 0.3s;
+}
+
+.tecido-image {
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.541);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tecido-title {
+    font-family: 'Poppins', sans-serif;
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+.tecido-description {
+    font-size: 0.9em;
+    color: var(--color-neutral-accent);
+}
+
+/* -------------------------------------- */
+/* ESTILOS CONDICIONAIS (ESTOQUE) */
+/* Reutiliza as variáveis de cor (verde/vermelho) do ApliquesPage.css */
+/* -------------------------------------- */
+
+.stock-tag {
+    /* ... use os estilos definidos em ApliquesPage.css ... */
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-top: 10px;
+    text-transform: uppercase;
+}

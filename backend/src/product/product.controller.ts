@@ -22,11 +22,10 @@ import {
     ApiResponse,
     ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('products')
 @Controller('products')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@ApiBearerAuth()
 export class ProductController {
     constructor(private readonly productService: ProductService) {}
 
@@ -34,17 +33,18 @@ export class ProductController {
     @Post()
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.ADMIN, Role.DEV) //
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Cria um novo produto (Apenas Admin/Dev)' })
     create(@Body() createProductDto: CreateProductDto) {
         return this.productService.create(createProductDto);
     }
 
     // 2. GET /products (Listar Todos)
+    @Public()
     @Get()
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV)
-    @ApiOperation({
-        summary: 'Lista todos os produtos (Apenas usuários logados)',
-    })
+    // @ApiOperation({
+    //     summary: 'Lista todos os produtos (Apenas usuários logados)',
+    // })
     @ApiResponse({
         status: 200,
         description: 'Lista de produtos retornada com sucesso.',
@@ -54,8 +54,8 @@ export class ProductController {
     }
 
     // 3. GET /products/:id (Buscar por ID)
+    @Public()
     @Get(':id')
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV)
     @ApiOperation({ summary: 'Busca um produto específico pelo ID' })
     @ApiResponse({ status: 200, description: 'Produto encontrado.' })
     @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
@@ -67,6 +67,7 @@ export class ProductController {
     @Patch(':id')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.ADMIN, Role.DEV) // ⬅️ CORRIGIDO: Removido SELLER
+    @ApiBearerAuth()
     @ApiOperation({
         summary: 'Atualiza um produto existente (Apenas Admin/Dev)',
     })
@@ -81,6 +82,7 @@ export class ProductController {
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.ADMIN, Role.DEV) // ⬅️ CORRIGIDO: Adicionado DEV (Mantendo Admin)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Remove um produto (Apenas Admin/Dev)' })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.productService.remove(id);

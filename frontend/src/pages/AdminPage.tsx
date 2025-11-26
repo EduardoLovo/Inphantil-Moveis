@@ -4,10 +4,11 @@ import './AdminPage.css';
 import {
     FaBox,
     FaListAlt,
-    FaShoppingCart,
     FaChartBar,
     FaPalette,
+    FaCalculator,
 } from 'react-icons/fa';
+import { SlLogin } from 'react-icons/sl';
 // Define as rotas administrativas e as permissões necessárias
 interface AdminCard {
     title: string;
@@ -19,6 +20,13 @@ interface AdminCard {
 
 // 1. DADOS DOS CARDS (O MAPA DE FERRAMENTAS)
 const ADMIN_CARDS: AdminCard[] = [
+    {
+        title: 'Gerenciar Catálogos',
+        description: 'Criar, editar e visualizar todos os catálogos.',
+        IconComponent: FaBox, // Substitua por seu link Cloudinary
+        link: '/admin/catalogs',
+        requiredRoles: ['DEV', 'ADMIN'],
+    },
     {
         title: 'Gerenciar Produtos',
         description: 'Criar, editar e visualizar todos os produtos de venda.',
@@ -44,7 +52,7 @@ const ADMIN_CARDS: AdminCard[] = [
     {
         title: 'Logs de Login',
         description: 'Visualizar logs de acesso (sucesso e falha) do sistema.',
-        IconComponent: FaShoppingCart,
+        IconComponent: SlLogin,
         link: '/admin/logs',
         requiredRoles: ['DEV'], // Apenas Dev (como no backend)
     },
@@ -54,6 +62,40 @@ const ADMIN_CARDS: AdminCard[] = [
             'Gerenciar apliques, tecidos e itens visuais para o catálogo.',
         IconComponent: FaPalette,
         link: '/admin/visuals',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+];
+
+const CALCULADORAS_CARDS: AdminCard[] = [
+    {
+        title: 'Calculadora Cama Sob Medida',
+        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
+        IconComponent: FaCalculator,
+        link: '/calculadora-cama-sob-medida',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Calculadora Colchão do Cliente',
+        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
+        IconComponent: FaCalculator,
+        link: '/calculadora-medida-do-colchao',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Calculadora 6040',
+        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
+        IconComponent: FaCalculator,
+        link: '/calculadora-6040',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+];
+
+const CRIARNOVOSPRODUTOS_CARDS: AdminCard[] = [
+    {
+        title: 'Calculadora Cama Sob Medida',
+        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
+        IconComponent: FaCalculator,
+        link: '/calculadora-cama-sob-medida',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
 ];
@@ -79,60 +121,57 @@ const AdminPage = () => {
         card.requiredRoles.includes(currentUserRole)
     );
 
+    const accessibleCalculadorasCards = CALCULADORAS_CARDS.filter((card) =>
+        card.requiredRoles.includes(currentUserRole)
+    );
+
     return (
-        <div
-            className="admin-page"
-            style={{ padding: '50px', maxWidth: '1200px', margin: '0 auto' }}
-        >
+        <div className="admin-page-container">
+            {' '}
+            {/* Container principal */}
             <h1>Painel Administrativo</h1>
-            <p>
-                Bem-vindo(a), **{user.name}**. Seu perfil: **{user.role}**.
-            </p>
-            <hr style={{ margin: '20px 0' }} />
-
+            <p>Bem-vindo(a), **{user.name}**.</p>
+            <hr className="admin-divider" />
             <h2>Ferramentas de Gestão</h2>
-
             {/* GRID DE CARDS */}
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '20px',
-                    marginTop: '30px',
-                }}
-            >
+            <div className="admin-cards-grid">
                 {accessibleCards.map((card) => (
                     <Link
                         to={card.link}
                         key={card.title}
                         className="admin-card-link"
                     >
-                        <div className="admin-card" style={CARD_STYLE}>
-                            <card.IconComponent
-                                size={40}
-                                style={{
-                                    color: '#4A90E2',
-                                    marginBottom: '0px',
-                                }}
-                            />
-                            <h3 style={{ margin: '5px 0' }}>{card.title}</h3>
-                            <p style={{ fontSize: '0.9em', color: '#666' }}>
+                        <div className="admin-card">
+                            <card.IconComponent className="card-icon" />
+
+                            <h3 className="card-title">{card.title}</h3>
+                            <p className="card-description">
                                 {card.description}
                             </p>
-                            <span
-                                style={{
-                                    fontSize: '0.8em',
-                                    color: '#007bff',
-                                    marginTop: '10px',
-                                }}
-                            >
-                                Acesso: {card.requiredRoles.join(', ')}
-                            </span>
                         </div>
                     </Link>
                 ))}
             </div>
+            <hr className="admin-divider" />
+            <h2>Calculadoras</h2>
+            <div className="admin-cards-grid">
+                {accessibleCalculadorasCards.map((card) => (
+                    <Link
+                        to={card.link}
+                        key={card.title}
+                        className="admin-card-link"
+                    >
+                        <div className="admin-card">
+                            <card.IconComponent className="card-icon" />
 
+                            <h3 className="card-title">{card.title}</h3>
+                            <p className="card-description">
+                                {card.description}
+                            </p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
             {accessibleCards.length === 0 && (
                 <p>Nenhuma ferramenta disponível para o seu perfil.</p>
             )}
@@ -141,17 +180,3 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
-// Estilos básicos para o Card (pode ser movido para um arquivo CSS)
-const CARD_STYLE: React.CSSProperties = {
-    padding: '20px',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-    transition: 'transform 0.2s',
-    cursor: 'pointer',
-    textAlign: 'center',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-};

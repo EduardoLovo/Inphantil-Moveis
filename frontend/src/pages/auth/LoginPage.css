@@ -1,0 +1,129 @@
+/* ========================================================== */
+/* VARIÁVEIS (Usando a paleta do HomePage.css) */
+/* ========================================================== */
+:root {
+    /* Fundo/Neutro Claro (Parede, Fundo Principal) */
+    --color-background-light: #b0b6ba;
+
+    /* Texto Principal / Contraste Escuro */
+    --color-text-primary: #313b2f;
+
+    /* Acento Neutro / Madeira Clara (Tons de bege, almofadas) */
+    --color-neutral-accent: #6a736f;
+
+    /* Acento Suave / Destaque (Detalhes do cobertor, Salmão Muted) */
+    --color-accent-soft: #cbcfd1;
+
+    /* Cor de Ação/Links (Substitui o azul antigo por uma cor de ação padrão e acessível) */
+    --color-action-link: #ffd639;
+}
+
+/* ========================================================== */
+/* CONTAINER PRINCIPAL E CARD */
+/* ========================================================== */
+.login-container {
+    /* Centraliza o card vertical e horizontalmente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Adiciona margem no topo para evitar o header fixo */
+    min-height: 100vh; /* Ocupa a altura mínima da tela */
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 12px;
+    background-color: white;
+    /* Sombra elegante e suave */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-neutral-accent);
+}
+
+.login-card h2 {
+    text-align: center;
+    color: var(--color-text-primary);
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+/* ========================================================== */
+/* FORMULÁRIO E INPUTS */
+/* ========================================================== */
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-login {
+    margin-bottom: 20px;
+}
+
+.form-group-login label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    background-color: #b5bdcb;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Garante que padding não estoure a largura */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+    border-color: var(--color-neutral-accent);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-neutral-accent);
+}
+
+/* ========================================================== */
+/* BOTÃO E MENSAGENS */
+/* ========================================================== */
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-neutral-accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.login-button:hover {
+    background-color: var(
+        --color-text-primary
+    ); /* Tom um pouco mais escuro no hover */
+}
+
+.error-message {
+    color: var(--color-danger);
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.register-link-text {
+    text-align: center;
+    width: 100%;
+    margin-top: 25px;
+    font-size: 0.95rem;
+    color: var(--color-neutral-accent);
+}
+
+.register-link {
+    color: var(--color-neutral-accent);
+    font-weight: 600;
+    text-align: center;
+}

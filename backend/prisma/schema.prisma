@@ -26,116 +26,119 @@ model User {
 
   addresses Address[]
   orders    Order[]
-  
+  authLogs  AuthLog[]
 }
 
 model Address {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  recipientName String   @db.VarChar(150)
-  zipCode       String   @db.VarChar(20)
-  street        String   @db.VarChar(200)
-  number        String   @db.VarChar(20)
-  complement    String?  @db.VarChar(100)
-  neighborhood  String   @db.VarChar(100)
-  city          String   @db.VarChar(100)
-  state         String   @db.VarChar(2)
-  
-  isDefault     Boolean  @default(false)
+  recipientName String  @db.VarChar(150)
+  zipCode       String  @db.VarChar(20)
+  street        String  @db.VarChar(200)
+  number        String  @db.VarChar(20)
+  complement    String? @db.VarChar(100)
+  neighborhood  String  @db.VarChar(100)
+  city          String  @db.VarChar(100)
+  state         String  @db.VarChar(2)
 
-  userId        Int
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders       Order[]
+  isDefault Boolean @default(false)
+
+  userId Int
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
 }
+
 model AuthLog {
   id        Int      @id @default(autoincrement())
-  email     String   // O email que foi tentado (sucesso ou falha)
-  success   Boolean  // Se a tentativa foi bem-sucedida ou não
-  message   String   // Descrição da falha (ex: 'Email não encontrado', 'Senha inválida')
-  ipAddress String?  // Opcional: IP do cliente que fez a requisição
-  userAgent String?  // Opcional: User-Agent do cliente (navegador, etc.)
+  email     String // O email que foi tentado (sucesso ou falha)
+  success   Boolean // Se a tentativa foi bem-sucedida ou não
+  message   String // Descrição da falha (ex: 'Email não encontrado', 'Senha inválida')
+  ipAddress String? // Opcional: IP do cliente que fez a requisição
+  userAgent String? // Opcional: User-Agent do cliente (navegador, etc.)
   createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Category {
-  id       Int      @id @default(autoincrement())
-  name     String   @unique @db.VarChar(100)
-  slug     String   @unique @db.VarChar(100)
-  
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+
   products Product[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  name        String   @db.VarChar(150)
-  sku         String?  @unique @db.VarChar(50)
-  slug        String?  @unique @db.VarChar(150)
+  name String  @db.VarChar(150)
+  sku  String? @unique @db.VarChar(50)
+  slug String? @unique @db.VarChar(150)
 
-  description String?  @db.Text
-  
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
+  description String? @db.Text
 
-  size        String?  @db.VarChar(50)
-  color       String?  @db.VarChar(50)
+  price Decimal @db.Decimal(10, 2)
+  stock Int     @default(0)
 
-  isAvailable Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
+  size  String? @db.VarChar(50)
+  color String? @db.VarChar(50)
 
-  mainImage   String?
+  isAvailable Boolean @default(true)
+  isFeatured  Boolean @default(false)
 
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  orderItems       OrderItem[]
+  mainImage String?
+
+  categoryId Int?
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
 }
 
 // 1. Enum para gerenciar o status do pedido
 enum OrderStatus {
-  PENDING         // Aguardando Pagamento
-  PAID            // Pago
-  IN_PRODUCTION   // Em Produção (Útil para móveis/personalizados)
-  SHIPPED         // Enviado
-  DELIVERED       // Entregue
-  CANCELED        // Cancelado
+  PENDING // Aguardando Pagamento
+  PAID // Pago
+  IN_PRODUCTION // Em Produção (Útil para móveis/personalizados)
+  SHIPPED // Enviado
+  DELIVERED // Entregue
+  CANCELED // Cancelado
 }
 
 // 2. Modelo do Pedido Principal
 model Order {
-  id          Int         @id @default(autoincrement())
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  total       Decimal     @db.Decimal(10, 2) // Valor total do pedido
-  status      OrderStatus @default(PENDING)
-  
+  total  Decimal     @db.Decimal(10, 2) // Valor total do pedido
+  status OrderStatus @default(PENDING)
+
   // Relações
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 
-  addressId   Int
-  address     Address     @relation(fields: [addressId], references: [id])
+  addressId Int
+  address   Address @relation(fields: [addressId], references: [id])
 
-  items       OrderItem[]
+  items OrderItem[]
 }
 
 // 3. Modelo dos Itens do Pedido
 model OrderItem {
-  id          Int      @id @default(autoincrement())
-  
-  quantity    Int      // Quantidade comprada
-  price       Decimal  @db.Decimal(10, 2) // Preço unitário NO MOMENTO DA COMPRA (congelado)
-  
-  // Relações
-  orderId     Int
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id Int @id @default(autoincrement())
 
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
+  quantity Int // Quantidade comprada
+  price    Decimal @db.Decimal(10, 2) // Preço unitário NO MOMENTO DA COMPRA (congelado)
+
+  // Relações
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 // =-=--=-=-=-=-==-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-==-=-=
@@ -152,13 +155,17 @@ enum VisualItemType {
 enum ItemColor {
   AMARELO
   AZUL
+  AZULAZ3
+  AZULBEBE
   BEGE
   BRANCO
   CINZA
   LARANJA
   LILAS
   MOSTARDA
+  PRATA
   ROSA
+  ROSABEBE
   TIFFANY
   VERDE
   VERMELHO
@@ -176,25 +183,22 @@ enum ItemSize {
 }
 
 model VisualItem {
-  id          Int            @id @default(autoincrement())
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   // Informações Básicas
-  name        String         @db.VarChar(150)
-  code        String         @unique @db.VarChar(50)
-  imageUrl    String?
-
+  name     String  @db.VarChar(150)
+  code     String  @unique @db.VarChar(50)
+  imageUrl String?
   // Campo Discriminador
-  type        VisualItemType
-
+  type VisualItemType
   // Características
-  color       ItemColor?
-  size        ItemSize?
-
+  color ItemColor?
+  size  ItemSize?
   // Dados de Demonstração e Organização
-  inStock     Boolean        @default(true) // Indica se está disponível para demonstração
-  sequence    Int?           // Ordem de exibição no catálogo
-  quantity    Int?           // Quantidade no set/pack (se aplicável)
-  isExternal  Boolean        @default(false) // Indica se o item é de um fornecedor externo
+  inStock    Boolean @default(true) 
+  sequence   Int? 
+  quantity   Int? 
+  isExternal Boolean @default(false) 
+  isTapeteria Boolean @default(false)
 }

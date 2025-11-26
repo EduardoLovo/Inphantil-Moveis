@@ -8,6 +8,8 @@ import {
     Delete,
     UseGuards,
     ParseIntPipe,
+    Query,
+    Req,
 } from '@nestjs/common';
 import { VisualItemService } from './visual-item.service';
 import { CreateVisualItemDto } from './dto/create-visual-item.dto';
@@ -23,16 +25,18 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
+import { Public } from '../auth/decorators/public.decorator'; // Importe o @Public()
+import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
+
 @ApiTags('visual-items')
 @Controller('visual-items')
-@UseGuards(AuthGuard('jwt'), RolesGuard) // Protege todas as rotas
-@ApiBearerAuth()
 export class VisualItemController {
     constructor(private readonly visualItemService: VisualItemService) {}
 
     // 1. POST /visual-items (Criação)
     @Post()
-    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @UseGuards(AuthGuard('jwt'), RolesGuard) // Protege todas as rotas
+    @ApiBearerAuth()
     @Roles(Role.ADMIN, Role.DEV) //
     @ApiOperation({ summary: 'Cria um novo item visual (Apenas Admin/Dev)' })
     create(@Body() createVisualItemDto: CreateVisualItemDto) {
@@ -40,18 +44,23 @@ export class VisualItemController {
     }
 
     // 2. GET /visual-items (Listar Todos)
+    @Public()
+    @UseGuards(OptionalJwtAuthGuard)
     @Get()
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV) // Todos logados podem ver
     @ApiOperation({
         summary: 'Lista todos os itens visuais (Catálogo de demonstração)',
     })
-    findAll() {
-        return this.visualItemService.findAll();
+    findAll(@Query('type') type?: string, @Req() req?: any) {
+        // Tenta obter a role do objeto 'user' que pode ter sido injetado pelo token
+        const userRole = req.user?.role as Role | undefined;
+
+        return this.visualItemService.findAll(type, userRole);
     }
 
     // 3. GET /visual-items/:id (Buscar por ID)
+    @Public()
+    @UseGuards(OptionalJwtAuthGuard)
     @Get(':id')
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV)
     @ApiOperation({ summary: 'Busca um item visual específico pelo ID' })
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.visualItemService.findOne(id);
@@ -59,7 +68,8 @@ export class VisualItemController {
 
     // 4. PATCH /visual-items/:id (Atualizar)
     @Patch(':id')
-    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @UseGuards(OptionalJwtAuthGuard) // Protege todas as rotas
+    @ApiBearerAuth()
     @Roles(Role.ADMIN, Role.DEV) //
     @ApiOperation({ summary: 'Atualiza um item visual (Apenas Admin/Dev)' })
     update(
@@ -71,7 +81,8 @@ export class VisualItemController {
 
     // 5. DELETE /visual-items/:id (Remover)
     @Delete(':id')
-    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @UseGuards(AuthGuard('jwt'), RolesGuard) // Protege todas as rotas
+    @ApiBearerAuth()
     @Roles(Role.ADMIN, Role.DEV) // ⬅
     @ApiOperation({ summary: 'Remove um item visual (Apenas Admin/Dev)' })
     remove(@Param('id', ParseIntPipe) id: number) {

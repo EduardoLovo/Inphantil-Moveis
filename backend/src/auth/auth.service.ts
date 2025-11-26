@@ -23,6 +23,7 @@ export class AuthService {
         success: boolean,
         message: string,
         req?: any, // O request é opcional
+        userId?: number,
     ) {
         // Tenta obter o IP real (pode variar dependendo do seu proxy/load balancer)
         // 1. Use req.header() para acessar os cabeçalhos de forma robusta
@@ -40,6 +41,7 @@ export class AuthService {
                 message,
                 ipAddress,
                 userAgent,
+                userId,
             },
         });
     }
@@ -84,6 +86,7 @@ export class AuthService {
             true,
             'Registro de usuário bem-sucedido',
             req,
+            user.id,
         );
 
         const payload = {
@@ -158,6 +161,7 @@ export class AuthService {
             true,
             'Login bem-sucedido',
             req, // <--- Passando o Request
+            user.id,
         );
 
         return {

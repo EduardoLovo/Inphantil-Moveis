@@ -1,0 +1,95 @@
+/* ========================================================== */
+/* VARIÁVEIS DE COR (Para legibilidade do log) */
+/* ========================================================== */
+:root {
+    --color-success: #28a745;
+    --color-failure: #dc3545;
+    --color-border: #e0e0e0;
+    --color-header-bg: #f5f5f5;
+    --color-text-dark: #333;
+    --header-height: 70px; /* Variável global para espaçamento */
+}
+
+/* ========================================================== */
+/* LAYOUT DA PÁGINA */
+/* ========================================================== */
+.logs-page-container {
+    /* Padding Top alto para compensar o header fixo */
+    padding-top: calc(var(--header-height) + 30px);
+    padding-bottom: 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: var(--color-text-dark);
+}
+
+.page-description {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.error-log-message {
+    color: var(--color-failure);
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.loading-container {
+    padding-top: 100px;
+    text-align: center;
+}
+
+/* ========================================================== */
+/* ESTILOS DA TABELA */
+/* ========================================================== */
+
+.table-wrapper {
+    overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    min-width: 900px; /* Garante que a tabela não fique espremida em mobile */
+}
+
+/* Cabeçalho da Tabela */
+.logs-table thead {
+    background-color: var(--color-header-bg);
+}
+
+.table-header {
+    border: 1px solid var(--color-border);
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+/* Células e Linhas */
+.log-row:nth-child(even) {
+    background-color: #f9f9f9; /* Zebra striping */
+}
+
+.log-row:hover {
+    background-color: #f1f1f1; /* Destaque ao passar o mouse */
+}
+
+.log-cell {
+    border: 1px solid var(--color-border);
+    padding: 10px 8px;
+    vertical-align: top;
+}
+
+/* Estilos de Status */
+.success-status {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.failure-status {
+    color: var(--color-failure);
+    font-weight: bold;
+}

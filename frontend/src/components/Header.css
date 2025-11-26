@@ -1,36 +1,32 @@
-/* Altura do Header (Usada no espaçador) */
+/* ========================================================== */
+/* VARIÁVEIS DE COR E LAYOUT GLOBAL */
+/* ========================================================== */
 :root {
+    /* Alturas */
     --header-height: 70px;
-    --mobile-nav-height: 60px; /* Altura do menu fixo no celular */
+    --mobile-nav-height: 60px;
 
-    /* Fundo/Neutro Claro (Parede, Fundo Principal) */
-    --color-background-light: #b0b6ba;
-
-    /* Texto Principal / Contraste Escuro */
-    --color-text-primary: #313b2f;
-
-    /* Acento Neutro / Madeira Clara (Tons de bege, almofadas) */
-    --color-neutral-accent: #6a736f;
-
-    /* Acento Suave / Destaque (Detalhes do cobertor, Salmão Muted) */
-    --color-accent-soft: #cbcfd1;
-
-    /* Cor de Ação/Links (Substitui o azul antigo por uma cor de ação padrão e acessível) */
-    --color-action-link: #fefe85;
+    /* PALETA MONTESSORIANA (Cores Fornecidas) */
+    --color-background-light: #b0b6ba; /* Cinza suave */
+    --color-text-primary: #313b2f; /* Verde musgo escuro (Dropdown Items) */
+    --color-neutral-accent: #6a736f; /* Cinza médio/oliva (Hover) */
+    --color-accent-soft: #cbcfd1; /* Cinza muito claro (Dropdown Item Hover BG) */
+    --color-action-link: #fefe85; /* Amarelo/Ouro (Cor principal do texto e logo) */
+    --color-danger: #dc3545; /* Cor para Admin Link/Erros */
 }
 
 /* ========================================================== */
-/* HEADER FIXO (DESKTOP E MOBILE) */
+/* HEADER FIXO (DESKTOP) */
 /* ========================================================== */
 .main-header {
     position: fixed;
-    top: 0; /* Fixo no topo por padrão */
+    top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
     height: var(--header-height);
 
-    /* Estilo Transparente/Ofuscado */
+    /* Fundo Transparente Escurecido */
     background-color: rgba(0, 0, 0, 0.281);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -47,32 +43,39 @@
     padding: 0 20px;
 }
 
-/* Seção de Logo */
+/* LOGO E TÍTULO */
 .logo-section {
     display: flex;
     align-items: center;
+    text-decoration: none;
+    /* Aplica a cor amarela/ouro para todo o bloco do logo */
+    color: var(--color-action-link);
 }
 
-.header-logo {
-    height: 40px; /* Tamanho da sua logo */
+/* CORRIGIDO: Tamanho Fixo para o Ícone ou Imagem da Logo */
+.header-logo,
+.header-icon {
+    width: 32px;
+    height: 32px;
     margin-right: 10px;
+    color: var(--color-action-link);
 }
 
 .logo-title {
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
-    color: var(--color-action-link);
+    color: #fefe85;
 }
 
-/* Navegação */
+/* NAVEGAÇÃO */
 .main-nav a,
 .main-nav button,
 .welcome-message {
     margin-left: 15px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     text-decoration: none;
-    color: var(--color-action-link);
+    color: #fefe85;
     transition: color 0.2s;
 }
 
@@ -80,53 +83,165 @@
     color: var(--color-neutral-accent);
 }
 
+/* Botão Logout */
 .logout-button {
     background: none;
-    border: 1px solid rgb(156, 156, 156);
-    color: rgb(158, 158, 158);
+    border: 1px solid var(--color-neutral-accent);
+    color: var(--color-neutral-accent);
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 .logout-button:hover {
-    background-color: rgba(255, 0, 0, 0.1);
+    background-color: rgba(106, 115, 111, 0.1);
+}
+
+/* Link ADM em destaque */
+.main-nav a[to='/admin'] {
+    color: var(--color-danger) !important;
+    font-weight: bold;
 }
 
 /* ========================================================== */
-/* RESPONSIVIDADE (MOBILE - BOTTOM BAR) */
+/* DROPDOWN (CLICÁVEL - FUNCIONAL EM MOBILE) */
+/* ========================================================== */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    background-color: rgb(221, 235, 171);
+    min-width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    border-radius: 4px;
+    padding: 5px 0;
+}
+
+.dropdown-section-title {
+    display: block;
+    font-weight: bold;
+    padding: 8px 10px;
+    border-top: 1px solid var(--color-neutral-accent);
+    /* margin: 0 10px; */
+    /* margin-bottom: 5px; */
+    color: var(--color-text-primary);
+}
+
+/* LÓGICA DE EXIBIÇÃO POR ESTADO */
+.nav-dropdown.is-open .dropdown-menu {
+    display: block;
+}
+
+/* Rotação da Flecha */
+.nav-dropdown .arrow {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+    font-weight: bold;
+    color: var(--color-action-link);
+}
+
+.nav-dropdown.is-open .arrow {
+    transform: rotate(180deg);
+}
+
+/* Estilo dos links internos do submenu */
+.dropdown-menu a {
+    color: var(--color-text-primary);
+    padding: 8px 15px;
+    display: block;
+    margin-left: 0;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--color-accent-soft);
+}
+
+/* ========================================================== */
+/* RESPONSIVIDADE (MOBILE - BARRA INFERIOR) */
 /* ========================================================== */
 @media screen and (max-width: 768px) {
     .main-header {
-        top: auto; /* Remove o topo */
-        bottom: 0; /* FIXO NA PARTE INFERIOR */
+        /* FIXO NA PARTE INFERIOR */
+        top: auto;
+        bottom: 0;
         height: var(--mobile-nav-height);
-        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra para cima */
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     }
 
     .header-content {
-        /* Garante que o conteúdo ocupe a largura total */
+        /* Transforma em uma barra de linha */
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        height: 100%; /* Garante que ocupe a altura da barra */
         padding: 0 10px;
     }
 
-    /* Ocultar elementos maiores (Logo e Título) na barra inferior */
+    /* Ocultar Logo e Título no mobile */
     .logo-section {
         display: none;
     }
 
-    /* Navegação se torna flexível e ocupa todo o espaço */
+    /* Navegação ocupa toda a largura da barra */
     .main-nav {
         width: 100%;
         display: flex;
-        justify-content: space-around; /* Distribui links uniformemente */
+        justify-content: space-around;
         align-items: center;
+        height: 100%;
+        padding: 0;
     }
 
+    /* Estilos dos Links (Ajuste fino) */
     .main-nav a,
     .main-nav button,
     .welcome-message {
         margin: 0;
-        font-size: 0.8rem; /* Links menores */
-        padding: 5px;
+        padding: 5px 2px;
+        font-size: 0.75rem; /* Fonte menor para caber */
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    /* Ajuste para o item Dropdown na barra */
+    .nav-dropdown {
+        position: static;
+        margin-left: 0;
+        flex-grow: 1;
+        /* Limpeza das regras de flutuação que não pertencem ao estado fechado */
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .nav-dropdown.is-open .dropdown-menu {
+        display: block;
+
+        /* Posiciona o menu flutuante em relação à janela (Viewport) */
+        position: fixed;
+
+        /* Posiciona acima da barra inferior de navegação */
+        bottom: var(--mobile-nav-height);
+
+        /* Centraliza horizontalmente */
+        left: 50%;
+        transform: translateX(-50%);
+
+        /* Estilo visual para o menu flutuante */
+        top: auto; /* Desativa top: 100% */
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Garantir que o link de Catálogo se ajuste no mobile */
+    .dropdown-toggle {
+        white-space: nowrap;
     }
 }

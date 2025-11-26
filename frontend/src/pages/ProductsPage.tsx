@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useProductStore } from '../store/ProductStore';
 import { useAuthStore } from '../store/AuthStore';
 import { Link } from 'react-router-dom';
+import './ProductsPage.css';
 
 const ProductsPage = () => {
     // Pega os dados e o método de busca
@@ -38,39 +39,28 @@ const ProductsPage = () => {
     // Obs: A rota GET /products é pública, mas o botão de editar só aparece para Admin/Dev logados
 
     return (
-        <div style={{ maxWidth: '1200px', margin: '50px auto' }}>
-            <h1>Catálogo de Produtos</h1>
+        <div className="products-page-container">
+            <h1 className="page-title">Catálogo de Produtos</h1>
 
             {user && (
-                <p>
+                <p className="user-welcome-message">
                     Olá, {user.name}. Seu nível de acesso é: {user.role}
                 </p>
             )}
 
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '20px',
-                    marginTop: '30px',
-                }}
-            >
+            {/* 3. Grid de Produtos */}
+            <div className="products-grid">
                 {products.map((product) => (
                     <div
                         key={product.id}
-                        style={{
-                            border: '1px solid #ddd',
-                            padding: '15px',
-                            borderRadius: '8px',
-                            boxShadow: '2px 2px 5px rgba(0,0,0,0.05)',
-                        }}
+                        className="product-card" // Classe do Card
                     >
                         <h3>{product.name}</h3>
                         <p>
                             Preço: <strong>{formatPrice(product.price)}</strong>
                         </p>
                         <p>Estoque: {product.stock}</p>
-                        <p style={{ fontSize: '0.9em', color: '#666' }}>
+                        <p className="product-category">
                             {product.category?.name
                                 ? `Categoria: ${product.category.name}`
                                 : 'Sem Categoria'}
@@ -80,11 +70,7 @@ const ProductsPage = () => {
                         {canEdit && (
                             <Link
                                 to={`/products/edit/${product.id}`}
-                                style={{
-                                    display: 'block',
-                                    marginTop: '10px',
-                                    color: '#007bff',
-                                }}
+                                className="product-edit-link" // Classe do Link
                             >
                                 Editar Produto
                             </Link>
@@ -94,7 +80,9 @@ const ProductsPage = () => {
             </div>
 
             {products.length === 0 && (
-                <p>Nenhum produto cadastrado no momento.</p>
+                <p className="no-products-message">
+                    Nenhum produto cadastrado no momento.
+                </p>
             )}
         </div>
     );

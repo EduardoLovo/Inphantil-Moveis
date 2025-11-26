@@ -99,57 +99,35 @@ body {
     display: inline-block;
     padding: 10px 20px;
     background-color: var(--color-text-primary);
-    color: var(--color-neutral-accent);
     text-decoration: none;
     border-radius: 5px;
     margin-top: 15px;
+    color: #cbcfd1;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-button a {
+    background-color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 15px;
+    color: #cbcfd1;
+    font-size: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-button:hover {
+    transform: translateY(-5px);
 }
 
 /* ========================================================== */
 /* RESPONSIVIDADE (MOBILE) */
 /* ========================================================== */
 @media screen and (max-width: 768px) {
-    /* Remove a altura do topo e adiciona na base para dar espaço ao menu */
-    .header-spacer {
-        height: 0;
+    .main-content {
+        min-height: 100vh;
     }
-
-    /* Adiciona margem na base do conteúdo principal para não ser coberto pelo footer fixo */
-    .app-main-content {
-        padding-bottom: var(--mobile-nav-height);
-    }
-
-    .logo-title {
-        font-size: 1.5rem; /* Diminui o logo no mobile */
-    }
-
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-        height: auto; /* Permite que o header se expanda */
-        padding: 10px 20px;
-    }
-
-    .main-header {
-        height: auto;
-        /* Redefinir a altura do spacer para a nova altura do header */
-        /* Isso pode ser mais complexo sem JS, mas faremos uma estimativa visual */
-    }
-
-    .main-nav {
-        margin-top: 5px;
-        display: flex;
-        flex-wrap: wrap; /* Permite que os links quebrem a linha */
-        font-size: 0.9rem;
-    }
-
-    .main-nav a,
-    .main-nav button,
-    .welcome-message {
-        margin-left: 0;
-        margin-right: 10px; /* Adiciona espaço entre os itens no mobile */
-    }
-
     .hero-text-overlay h2 {
         font-size: 1.5rem; /* Diminui o texto sobreposto */
     }

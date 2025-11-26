@@ -22,16 +22,17 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('categories')
 @Controller('categories')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@ApiBearerAuth()
 export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
     @Post()
     @Roles(Role.DEV, Role.ADMIN)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Criar nova categoria (Admin/Seller)' })
     @ApiResponse({ status: 201, description: 'Categoria criada.' })
     @ApiResponse({ status: 409, description: 'Conflito (Nome já existe).' })
@@ -39,16 +40,16 @@ export class CategoryController {
         return this.categoryService.create(createCategoryDto);
     }
 
+    @Public()
     @Get()
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV) // Todos logados podem ver
     @ApiOperation({ summary: 'Listar todas as categorias' })
     @ApiResponse({ status: 200, description: 'Lista de categorias.' })
     findAll() {
         return this.categoryService.findAll();
     }
 
+    @Public()
     @Get(':id')
-    @Roles(Role.ADMIN, Role.SELLER, Role.USER, Role.DEV)
     @ApiOperation({ summary: 'Buscar categoria por ID' })
     @ApiResponse({ status: 404, description: 'Categoria não encontrada.' })
     findOne(@Param('id', ParseIntPipe) id: number) {
@@ -57,6 +58,8 @@ export class CategoryController {
 
     @Patch(':id')
     @Roles(Role.ADMIN, Role.DEV)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Atualizar categoria (Admin/Seller)' })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -67,6 +70,8 @@ export class CategoryController {
 
     @Delete(':id')
     @Roles(Role.ADMIN, Role.DEV) // Apenas ADMIN pode deletar estrutura
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Remover categoria (Apenas Admin)' })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.categoryService.remove(id);

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core'; // ⬅️ Importe o APP_GUARD
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config'; // Importe
@@ -12,25 +13,36 @@ import { AddressModule } from './address/address.module';
 import { OrderModule } from './order/order.module';
 import { VisualItemModule } from './visual-item/visual-item.module';
 import { SocialModule } from './social/social.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { LogCleanupModule } from './log-cleanup/log-cleanup.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; // ⬅️ Importe seu guarda
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      // Adicione esta linha
-      isGlobal: true, // Torna as configs globais
-    }),
-    PrismaModule,
-    AuthModule,
-    LogModule,
-    RecaptchaModule,
-    ProductModule,
-    CategoryModule,
-    AddressModule,
-    OrderModule,
-    VisualItemModule,
-    SocialModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ScheduleModule.forRoot(),
+        ConfigModule.forRoot({
+            // Adicione esta linha
+            isGlobal: true, // Torna as configs globais
+        }),
+        PrismaModule,
+        AuthModule,
+        LogModule,
+        RecaptchaModule,
+        ProductModule,
+        CategoryModule,
+        AddressModule,
+        OrderModule,
+        VisualItemModule,
+        SocialModule,
+        LogCleanupModule,
+    ],
+    controllers: [AppController],
+    providers: [
+        {
+            provide: APP_GUARD,
+            useClass: JwtAuthGuard, // ⬅️ Aplica este guarda a toda a aplicação
+        },
+        AppService,
+    ],
 })
 export class AppModule {}

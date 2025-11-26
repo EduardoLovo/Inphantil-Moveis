@@ -7,6 +7,11 @@ export class LogService {
 
     async findAllAuthLogs() {
         return this.prisma.authLog.findMany({
+            include: {
+                user: {
+                    select: { id: true, email: true, name: true, role: true }, // Limita os campos (sem senha)
+                },
+            },
             orderBy: {
                 createdAt: 'desc', // Logs mais recentes primeiro
             },
