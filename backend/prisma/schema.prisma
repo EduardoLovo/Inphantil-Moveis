@@ -27,6 +27,7 @@ model User {
   addresses Address[]
   orders    Order[]
   authLogs  AuthLog[]
+  contactMessages ContactMessage[] // <--- Adicione esta linha
 }
 
 model Address {
@@ -201,4 +202,18 @@ model VisualItem {
   quantity   Int? 
   isExternal Boolean @default(false) 
   isTapete Boolean @default(false)
+}
+
+// ... (outros modelos)
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  read      Boolean  @default(false) // Para marcar se você já leu
+  createdAt DateTime @default(now())
+  userId    Int?     // Pode ser nulo (visitante)
+  user      User?    @relation(fields: [userId], references: [id])
 }

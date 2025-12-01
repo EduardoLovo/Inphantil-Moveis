@@ -56,8 +56,8 @@
     /* Estilo BASE do CARD_STYLE original */
     padding: 20px;
     margin: 10px;
-    width: 150px;
-    height: 250px;
+    width: 200px;
+    height: 230px;
     border: 1px solid var(--color-text-primary);
     background-color: var(--color-neutral-accent);
     border-radius: 8px;

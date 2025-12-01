@@ -1,0 +1,22 @@
+.direito {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.esquerdo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    transform: scaleX(-1);
+}
+
+.titulo-lado {
+    text-align: center;
+}
+
+.tapete svg {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}

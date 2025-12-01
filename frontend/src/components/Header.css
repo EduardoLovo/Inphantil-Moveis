@@ -27,7 +27,7 @@
     height: var(--header-height);
 
     /* Fundo Transparente Escurecido */
-    background-color: rgba(0, 0, 0, 0.281);
+    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -50,6 +50,10 @@
     text-decoration: none;
     /* Aplica a cor amarela/ouro para todo o bloco do logo */
     color: var(--color-action-link);
+}
+
+.logo-section h1 {
+    margin-bottom: 5px;
 }
 
 /* CORRIGIDO: Tamanho Fixo para o Ícone ou Imagem da Logo */

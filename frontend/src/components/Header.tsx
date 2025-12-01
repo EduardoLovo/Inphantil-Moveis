@@ -58,11 +58,16 @@ const Header = () => {
                         className="header-logo"
                     />
                     <h1 className="logo-title">Inphantil Móveis</h1>
+                    <span className="welcome-message">
+                        Olá, {user?.name || 'Visitante'}!
+                    </span>
                 </Link>
 
                 {/* 3. Navegação Dinâmica */}
                 <nav className="main-nav">
                     <Link to="/">Início</Link>
+                    <Link to="/contact">Contato</Link>
+                    <Link to="/pos-compra">Montagem e Garantia</Link>
                     <div
                         className={`nav-dropdown ${
                             isCatalogOpen ? 'is-open' : ''
@@ -74,7 +79,7 @@ const Header = () => {
                             className="dropdown-toggle"
                             onClick={toggleCatalog} // Alterna no clique
                         >
-                            Catálogo ▼
+                            Catálogos ▼
                         </Link>
 
                         <div className="dropdown-menu">
@@ -83,10 +88,22 @@ const Header = () => {
                                 Composições
                             </span>
                             <Link
-                                to="/apliques"
+                                to="/composicao-lencol"
                                 onClick={() => setIsCatalogOpen(false)}
                             >
-                                Apliques
+                                Lençois
+                            </Link>
+                            <Link
+                                to="/composicao-sintetico"
+                                onClick={() => setIsCatalogOpen(false)}
+                            >
+                                Camas
+                            </Link>
+                            <Link
+                                to="/composicao-sintetico"
+                                onClick={() => setIsCatalogOpen(false)}
+                            >
+                                Protetores
                             </Link>
 
                             <span className="dropdown-section-title">
@@ -134,6 +151,7 @@ const Header = () => {
                             >
                                 Pantone
                             </Link>
+                            <span className="dropdown-section-title"></span>
                         </div>
                     </div>
 
@@ -141,9 +159,7 @@ const Header = () => {
                         <>
                             {/* LINK "ADM": Aparece SÓ se o usuário tiver as roles específicas */}
                             {canAccessAdmin && <Link to="/admin">Adm</Link>}
-                            <span className="welcome-message">
-                                Olá, {user?.name || 'Visitante'}!
-                            </span>
+
                             <Link to="/dashboard">Meu perfil</Link>
                             <button
                                 onClick={handleLogout}

@@ -19,6 +19,13 @@ import AdminCategoryPage from './pages/AdminCategoryPage';
 import CreateTecidoPage from './pages/CreateTecidoPage';
 import CreateSinteticoPage from './pages/CreateSinteticoPage';
 import SinteticosPage from './pages/SinteticosPage';
+import PageCreateItem from './pages/PageCreateItem';
+import PosCompraPage from './pages/PosCompraPage';
+import ContactPage from './pages/ContactPage';
+import AdminContactPage from './pages/AdminContactPage';
+import ComposicaoPage from './pages/ComposicaoLencolPage';
+import ComposicaoSinteticoPage from './pages/ComposicaoSinteticoPage';
+import { Desenhos } from './pages/Desenhos';
 
 function App() {
     return (
@@ -32,7 +39,14 @@ function App() {
                 <Route path="/catalogo/apliques" element={<ApliquesPage />} />
                 <Route path="/apliques" element={<ApliquesPage />} />
                 <Route path="/tecidos-lencol" element={<TecidosPage />} />
-                <Route path="/sinteticos" element={<SinteticosPage />} />{' '}
+                <Route path="/sinteticos" element={<SinteticosPage />} />
+                <Route path="/pos-compra" element={<PosCompraPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/composicao-lencol" element={<ComposicaoPage />} />
+                <Route
+                    path="/composicao-sintetico"
+                    element={<ComposicaoSinteticoPage />}
+                />
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
@@ -81,6 +95,18 @@ function App() {
                         path="/admin/sinteticos/new"
                         element={<CreateSinteticoPage />}
                     />
+                    <Route
+                        path="/admin/create/item"
+                        element={<PageCreateItem />}
+                    />
+                    <Route
+                        path="/admin/contacts"
+                        element={<AdminContactPage />}
+                    />{' '}
+                    <Route
+                        path="/composicao-protetores"
+                        element={<Desenhos />}
+                    />{' '}
                     {/* NOVO */}
                 </Route>
             </Routes>

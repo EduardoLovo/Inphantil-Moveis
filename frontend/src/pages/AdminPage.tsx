@@ -7,6 +7,7 @@ import {
     FaChartBar,
     FaPalette,
     FaCalculator,
+    FaEnvelope,
 } from 'react-icons/fa';
 import { SlLogin } from 'react-icons/sl';
 // Define as rotas administrativas e as permissões necessárias
@@ -24,7 +25,7 @@ const ADMIN_CARDS: AdminCard[] = [
         title: 'Gerenciar Catálogos',
         description: 'Criar, editar e visualizar todos os catálogos.',
         IconComponent: FaBox, // Substitua por seu link Cloudinary
-        link: '/admin/catalogs',
+        link: '/admin/create/item',
         requiredRoles: ['DEV', 'ADMIN'],
     },
     {
@@ -64,6 +65,13 @@ const ADMIN_CARDS: AdminCard[] = [
         link: '/admin/visuals',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
+    {
+        title: 'Mensagens de Contato',
+        description: 'Visualizar e-mails e dúvidas enviadas pelos clientes.',
+        IconComponent: FaEnvelope,
+        link: '/admin/contacts',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
 ];
 
 const CALCULADORAS_CARDS: AdminCard[] = [
@@ -90,15 +98,15 @@ const CALCULADORAS_CARDS: AdminCard[] = [
     },
 ];
 
-const CRIARNOVOSPRODUTOS_CARDS: AdminCard[] = [
-    {
-        title: 'Calculadora Cama Sob Medida',
-        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
-        link: '/calculadora-cama-sob-medida',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-];
+// const CRIARNOVOSPRODUTOS_CARDS: AdminCard[] = [
+//     {
+//         title: 'Calculadora Cama Sob Medida',
+//         description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
+//         IconComponent: FaCalculator,
+//         link: '/calculadora-cama-sob-medida',
+//         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+//     },
+// ];
 const AdminPage = () => {
     const { user } = useAuthStore();
 

@@ -1,0 +1,101 @@
+/* ========================================================== */
+/* ESTILOS ESPECÍFICOS DO SIMULADOR SINTÉTICO */
+/* ========================================================== */
+
+/* Importa estilos base se necessário, mas definimos os específicos aqui */
+
+.comp-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: calc(var(--header-height, 70px) + 30px);
+    text-align: center;
+    min-height: 80vh;
+}
+
+/* Área de Visualização (Preview) */
+.comp-result-area {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 12px;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    border: 1px solid #eee;
+}
+
+.comp-preview-box {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 20px auto;
+    background-color: white;
+    border: 5px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* --- CAMADAS (LAYERS) --- */
+.layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.layer-back {
+    z-index: 1;
+}
+
+/* Correção: Esta camada deve ser totalmente visível */
+.layer-front {
+    z-index: 2;
+    opacity: 1 !important; /* Força opacidade total */
+    mix-blend-mode: normal !important; /* CRUCIAL: Remove qualquer mistura de cores */
+    background-color: white;
+}
+
+.layer-front img {
+    opacity: 1 !important;
+    mix-blend-mode: normal !important;
+}
+
+/* Estilos de Texto de Resultado */
+.codigo-resultado {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.codigo-resultado p {
+    margin: 5px 0;
+    color: var(--color-text-primary, #333);
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Botão de Reset */
+.comp-reset-btn {
+    padding: 12px 25px;
+    background-color: var(--color-action-link, #fefe85);
+    color: var(--color-text-primary, #333);
+    border: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    transition: transform 0.2s;
+}
+
+.comp-reset-btn:hover {
+    transform: scale(1.05);
+}
