@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/AuthStore';
 import './Header.css'; // 1. NOVO ARQUIVO CSS
 import { useEffect, useRef, useState } from 'react';
+import { FaShoppingCart } from 'react-icons/fa';
+import { useCartStore } from '../store/CartStore';
 
 // Você deve adicionar a imagem da sua logo (ex: no public/logo.png)
 const LOGO_IMAGE =
@@ -11,7 +13,7 @@ const Header = () => {
     const { isLoggedIn, user, logout } = useAuthStore();
     const [isCatalogOpen, setIsCatalogOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
+    const cartCount = useCartStore((state) => state.getCount());
     const handleLogout = () => {
         logout();
     };
@@ -100,7 +102,7 @@ const Header = () => {
                                 Camas
                             </Link>
                             <Link
-                                to="/composicao-sintetico"
+                                to="/composicao-protetores"
                                 onClick={() => setIsCatalogOpen(false)}
                             >
                                 Protetores
@@ -153,6 +155,12 @@ const Header = () => {
                             </Link>
                             <span className="dropdown-section-title"></span>
                         </div>
+                        <Link to="/cart" className="cart-link">
+                            <FaShoppingCart />
+                            {cartCount > 0 && (
+                                <span className="cart-badge">{cartCount}</span>
+                            )}
+                        </Link>
                     </div>
 
                     {isLoggedIn ? (

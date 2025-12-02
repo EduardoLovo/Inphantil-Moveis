@@ -1,0 +1,88 @@
+.address-form-container {
+    padding: 10px;
+}
+
+.address-form-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--color-text-primary, #333);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Layout do Formulário */
+.address-form .form-group {
+    margin-bottom: 15px;
+}
+
+.address-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.address-form .form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.address-form .form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.flex-1 {
+    flex: 1;
+}
+.flex-2 {
+    flex: 2;
+}
+
+/* CEP Spinner */
+.cep-input-wrapper {
+    position: relative;
+}
+
+.cep-spinner {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    color: var(--color-action-link);
+}
+
+/* Botões */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.save-btn {
+    background-color: var(--color-success, #28a745);
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}

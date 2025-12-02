@@ -1,0 +1,217 @@
+.checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: calc(var(--header-height, 70px) + 40px);
+    padding-bottom: 80px;
+    min-height: 80vh;
+    font-family: 'Inter', sans-serif;
+    color: var(--color-text-primary, #333);
+}
+
+.checkout-container h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+
+/* Seção de Endereços */
+.checkout-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--color-action-link, #ffd639);
+    padding-bottom: 10px;
+}
+
+.address-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.address-card {
+    border: 2px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.address-card:hover {
+    border-color: #ccc;
+}
+
+.address-card.selected {
+    border-color: var(--color-success, #28a745);
+    background-color: #f0fff4;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.1);
+}
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.badge-default {
+    background-color: var(--color-action-link, #ffd639);
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* Resumo do Pedido */
+.checkout-summary {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.summary-items {
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.summary-item-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.summary-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 20px 0;
+    color: var(--color-text-primary);
+}
+
+.confirm-order-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--color-success, #28a745);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+
+.confirm-order-btn:hover {
+    background-color: #218838;
+}
+
+.confirm-order-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.checkout-error {
+    color: var(--color-danger, #dc3545);
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ... estilos anteriores ... */
+
+.address-card {
+    position: relative; /* Necessário para posicionamento absoluto se quiser, ou flex */
+    border: 2px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Alinha ao topo */
+    margin-bottom: 10px;
+}
+
+/* NOVO: Estilo do botão de deletar */
+.delete-address-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    transition: color 0.2s;
+    /* Opcional: Se quiser garantir que fique no canto superior direito absoluto */
+    /* position: absolute; top: 10px; right: 10px; */
+}
+
+.delete-address-btn:hover {
+    color: var(--color-danger, #dc3545);
+}
+
+.add-address-small-btn {
+    background: none;
+    border: 1px solid var(--color-action-link);
+    color: var(--color-text-primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.add-address-small-btn:hover {
+    background-color: var(--color-action-link);
+}
+
+/* ... restante do CSS ... */
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-summary {
+        position: static;
+        order: -1; /* Coloca o resumo no topo no mobile, se preferir, ou remova para ficar embaixo */
+    }
+}

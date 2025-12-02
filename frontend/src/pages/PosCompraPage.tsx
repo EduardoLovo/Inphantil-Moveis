@@ -12,60 +12,6 @@ import './PosCompraPage.css';
 // Definição das seções de conteúdo
 const SECTIONS = [
     {
-        id: 'montagem',
-        title: 'Instruções de Montagem',
-        icon: FaTools,
-        content: (
-            <div>
-                <h2>Como montar sua Cama Montessoriana</h2>
-                <p>
-                    Todos os nossos produtos acompanham manual de instrução
-                    impresso e kit de ferragens.
-                </p>
-
-                <div className="info-card-highlight">
-                    <h3>⚠️ Dicas Importantes:</h3>
-                    <ul>
-                        <li>
-                            Realize a montagem em uma superfície limpa e plana.
-                        </li>
-
-                        <li>
-                            Confira todas as peças antes de iniciar (Base,
-                            borda, colchão).
-                        </li>
-
-                        <li>
-                            Este é o vídeo de montagem da cama, é importante
-                            seguir os passos nele descritos, não alterando a
-                            ordem de montagem!
-                        </li>
-
-                        <iframe
-                            width="753"
-                            height="480"
-                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                            title="Montagem da Cama Montessoriana Phant"
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allowFullScreen
-                        ></iframe>
-                    </ul>
-                </div>
-
-                <h3>Vídeos Tutoriais</h3>
-                <p>
-                    Acesse nosso canal no YouTube para ver o passo a passo
-                    detalhado:
-                </p>
-                <button className="action-btn-outline">
-                    Ver Canal no YouTube
-                </button>
-            </div>
-        ),
-    },
-    {
         id: 'garantia',
         title: 'Política de Garantia',
         icon: FaShieldAlt,
@@ -213,27 +159,225 @@ const SECTIONS = [
         ),
     },
     {
+        id: 'montagem',
+        title: 'Instruções de Montagem',
+        icon: FaTools,
+        content: (
+            <div className="pos-compra-div">
+                <h2>Como montar sua Cama Montessoriana</h2>
+                <p>
+                    Todos os nossos produtos acompanham manual de instrução
+                    impresso e kit de ferragens.
+                </p>
+
+                <div className="info-card-highlight">
+                    <h3>⚠️ Dicas Importantes:</h3>
+                    <ul>
+                        <li>
+                            Realize a montagem em uma superfície limpa e plana.
+                        </li>
+
+                        <li>
+                            Confira todas as peças antes de iniciar (Base,
+                            borda, colchão).
+                        </li>
+
+                        <li>
+                            Este é o vídeo de montagem da cama, é importante
+                            seguir os passos nele descritos, não alterando a
+                            ordem de montagem!
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3>MONTAGEM DA CAMA PHANT</h3>
+                    <p>
+                        Este é o vídeo de montagem da cama, é importante seguir
+                        os passos nele descritos, não alterando a ordem de
+                        montagem!
+                    </p>
+                    <iframe
+                        width="753"
+                        height="480"
+                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                        title="Montagem da Cama Montessoriana Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
+                <hr />
+                <div>
+                    <h3>MONTAGEM DO PROTETOR DE PAREDE</h3>
+                    <p>
+                        Este é o vídeo de montagem do protetor de parede, é
+                        importante seguir os passos nele descritos, não
+                        alterando a ordem de montagem!
+                    </p>
+                    <iframe
+                        width="753"
+                        height="480"
+                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                        title="Montagem da Cama Montessoriana Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
+                <hr />
+                <div>
+                    <h3>MONTAGEM DA CABANA MOSQUETEIRO</h3>
+                    <p>
+                        Este é o vídeo de montagem da Cabana Mosqueteiro, é
+                        importante seguir os passos nele descritos, não
+                        alterando a ordem de montagem!
+                    </p>
+                    <iframe
+                        width="753"
+                        height="480"
+                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                        title="Montagem da Cama Montessoriana Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
+                <hr />
+                <div>
+                    <h3>MONTAGEM DA CABANA DE BRINCAR</h3>
+                    <p>
+                        Este é o vídeo de montagem da Cabana de Brincar, é
+                        importante seguir os passos nele descritos, não
+                        alterando a ordem de montagem!
+                    </p>
+                    <iframe
+                        width="753"
+                        height="480"
+                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                        title="Montagem da Cama Montessoriana Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
+                <hr />
+                <div>
+                    <h3>MONTAGEM DA ÁRVORE DE NATAL</h3>
+                    <p>
+                        Este é o vídeo de montagem da Árvore de Natal, é
+                        importante seguir os passos nele descritos, não
+                        alterando a ordem de montagem!
+                    </p>
+                    <iframe
+                        width="753"
+                        height="480"
+                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                        title="Montagem da Cama Montessoriana Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
+
+                {/* <h3>Vídeos Tutoriais</h3>
+                <p>
+                    Acesse nosso canal no YouTube para ver o passo a passo
+                    detalhado:
+                </p>
+                <button className="action-btn-outline">
+                    Ver Canal no YouTube
+                </button> */}
+            </div>
+        ),
+    },
+    {
+        id: 'alinhamento',
+        title: 'Alinhamento da Cama Phant',
+        icon: FaShippingFast,
+        content: (
+            <div>
+                <h2>Alinhamento da Cama Phant</h2>
+                <p>
+                    Esse é o vídeo de alinhamento da nossa cama. É muito
+                    importante que seja feito de tempos em tempos, pois irá
+                    conservar sua cama sempre alinhada.
+                </p>
+                <iframe
+                    width="873"
+                    height="480"
+                    src="https://www.youtube.com/embed/EI-uWTHEtZA"
+                    title="Alinhamento de Cama Phant"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                ></iframe>
+            </div>
+        ),
+    },
+
+    {
         id: 'cuidados',
         title: 'Limpeza e Cuidados',
         icon: FaHandSparkles,
         content: (
             <div>
-                <h2>Como cuidar do seu móvel</h2>
-                <p>
-                    Para manter a beleza e durabilidade da madeira e dos
-                    tecidos:
-                </p>
-                <h3>Madeira / MDF</h3>
-                <p>
-                    Utilize apenas um pano levemente umedecido com água, seguido
-                    de um pano seco. Não use lustra-móveis ou solventes.
-                </p>
-                <h3>Tecidos (Sintéticos e Algodão)</h3>
-                <p>
-                    Para limpezas leves, use aspirador de pó ou escova de cerdas
-                    macias. Em caso de manchas, utilize sabão neutro e água, sem
-                    encharcar.
-                </p>
+                <ul>
+                    <h2>Como cuidar do seu móvel</h2>
+                    <li>Limpeza da Cama, Tapete e Protetor de parede 🚰</li>
+
+                    <li>
+                        Para limpar seu produto você deve usar sabão de coco em
+                        barra ou sabonete neutro ou infantil e uma esponja
+                        macia. 🧼🧽🪣
+                    </li>
+                    <li>
+                        Coloque água em um recipiente pequeno com o sabão
+                        dentro, umedeça a esponja na mistura e passe por toda a
+                        peça, deixe agir por 5 minutos e depois retire o sabão
+                        com um pano molhado, repita por algumas vezes até
+                        retirar todo sabão. Essa limpeza deve ser feita semanal
+                        ou quinzenalmente. No dia a dia utilize apenas um pano
+                        úmido com água.
+                    </li>
+                    <li>
+                        ⚠️ NÃO UTILIZAR: Veja, detergente líquido, álcool ou
+                        demais produtos químicos, pois são agressivos aos
+                        materiais utilizados e à saúde de seu filho!
+                    </li>
+                    <li>
+                        Recomendamos retirar o colchão e colocá-lo em local
+                        arejado semanal ou quinzenalmente para evitar que haja
+                        proliferação de Mofo e Ácaro. Caso o produto fique em
+                        local de alta umidade realizar esse procedimento
+                        semanalmente. Utilizar um protetor impermeável auxilia a
+                        manter a integridade do colchão, pois evita que absorva
+                        líquidos que porventura venha a cair sobre o colchão. Em
+                        cidades muito úmidas o tapete de drenagem abaixo do
+                        colchão ajuda na ventilação🚱
+                    </li>
+                    <li>
+                        Sua cama já vai higienizada e pronta para uso, indicamos
+                        apenas este cuidado com o colchão!
+                    </li>
+                </ul>
+
+                <iframe
+                    width="853"
+                    height="480"
+                    src="https://www.youtube.com/embed/DEH1n_AANnA"
+                    title="Inphantil Limpeza dos Produtos"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                ></iframe>
             </div>
         ),
     },

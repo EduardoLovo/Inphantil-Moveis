@@ -3,13 +3,15 @@ import { useProductStore } from '../store/ProductStore';
 import { useAuthStore } from '../store/AuthStore';
 import { Link } from 'react-router-dom';
 import './ProductsPage.css';
+import { FaCartPlus } from 'react-icons/fa';
+import { useCartStore } from '../store/CartStore';
 
 const ProductsPage = () => {
     // Pega os dados e o método de busca
     const { products, isLoading, error, fetchProducts } = useProductStore();
     // Pega os dados do usuário para mostrar o nome e verificar a permissão de edição
     const user = useAuthStore((state) => state.user);
-
+    const addItem = useCartStore((state) => state.addItem); // 2. Pegue a função addItem
     // Chama a API quando o componente é montado
     useEffect(() => {
         // Busca produtos apenas se a lista estiver vazia
@@ -65,6 +67,15 @@ const ProductsPage = () => {
                                 ? `Categoria: ${product.category.name}`
                                 : 'Sem Categoria'}
                         </p>
+                        <button
+                            className="add-cart-button"
+                            onClick={() => addItem(product)}
+                            disabled={
+                                !product.isAvailable || product.stock <= 0
+                            }
+                        >
+                            <FaCartPlus /> Adicionar
+                        </button>
 
                         {/* Botão de Edição Visível Apenas para quem pode editar */}
                         {canEdit && (

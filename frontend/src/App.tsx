@@ -26,6 +26,9 @@ import AdminContactPage from './pages/AdminContactPage';
 import ComposicaoPage from './pages/ComposicaoLencolPage';
 import ComposicaoSinteticoPage from './pages/ComposicaoSinteticoPage';
 import { Desenhos } from './pages/Desenhos';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import AdminOrdersPage from './pages/AdminOrdersPage';
 
 function App() {
     return (
@@ -47,6 +50,8 @@ function App() {
                     path="/composicao-sintetico"
                     element={<ComposicaoSinteticoPage />}
                 />
+                {/* <Route path="/admin/orders" element={<AdminOrdersPage />} /> */}
+
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
@@ -58,11 +63,7 @@ function App() {
                         path="/admin/categories"
                         element={<AdminCategoryPage />}
                     />{' '}
-                    {/* NOVO: Rota de Categorias */}
-                    <Route
-                        path="/admin/orders"
-                        element={<h1>Gerenciamento de Pedidos</h1>}
-                    />
+                    <Route path="/admin/orders" element={<AdminOrdersPage />} />
                     <Route path="/admin/logs" element={<AdminLogsPage />} />
                     <Route
                         path="/admin/visuals"
@@ -107,7 +108,8 @@ function App() {
                         path="/composicao-protetores"
                         element={<Desenhos />}
                     />{' '}
-                    {/* NOVO */}
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
                 </Route>
             </Routes>
             <Footer />

@@ -1,20 +1,31 @@
+.contentDesenhos {
+    margin-top: 60px;
+    color: #000000;
+}
 .contentDesenhos h1 {
     padding: 15px 30px;
+    color: #000000;
 }
+
 button {
     padding: 10px;
     margin: 8px;
-    /* border: 2px solid #ccc; */
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
     width: 70px;
+    color: #0c0c0c;
+    box-shadow: 0 0 10px #00000070;
+}
+
+button:hover {
+    box-shadow: 0 0 0px #00000070;
 }
 
 button.selected {
-    border: 2px solid #50d657d8;
-    background-color: #f2ffeec9;
-    color: #7c7c7c;
+    border: 2px solid #302b2bd8;
+    color: #747474;
+    box-shadow: 0 0 0px #00000070;
 }
 
 .botoesCoresDesenho {
@@ -239,16 +250,6 @@ button.selected {
     width: 80%;
 }
 
-.cursor-pincel {
-    /* Ajuste o caminho e as coordenadas (0 20) conforme a ponta do seu pincel */
-    cursor: url('/images/cursor-pintura.png') 0 20, auto !important;
-}
-
 .area-desenho svg {
-    cursor: url('/images/cursor-pintura.png') 0 20, crosshair;
-}
-.botoesCoresDesenho button.selected {
-    border: 3px solid #333;
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: url('/images/cursor.png') 0 20, crosshair;
 }
