@@ -66,7 +66,6 @@ const CreateSinteticoPage: React.FC = () => {
             type: 'SINTETICO' as VisualItemType,
         };
 
-      
         if (!payload.code || !payload.imageUrl) {
             setMessage({
                 text: 'Código e URL da Imagem são obrigatórios.',
@@ -169,7 +168,7 @@ const CreateSinteticoPage: React.FC = () => {
                                     Selecione uma cor (Opcional)
                                 </option>
                                 {COLORS.map((c) => (
-                                    <option key={c} value={c}>
+                                    <option key={c} value={c} className='color-opcao'>
                                         {c}
                                     </option>
                                 ))}

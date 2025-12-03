@@ -71,6 +71,15 @@ model Category {
   products Product[]
 }
 
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  key       String? // ID do Cloudinary para deletar lá depois
+  alt       String? // Texto para SEO (ex: "Cama montessoriana rosa")
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
 model Product {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -92,6 +101,7 @@ model Product {
   isFeatured  Boolean @default(false)
 
   mainImage String?
+  images ProductImage[] 
 
   categoryId Int?
   category   Category?   @relation(fields: [categoryId], references: [id])

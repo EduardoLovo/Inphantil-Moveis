@@ -251,5 +251,5 @@ button.selected {
 }
 
 .area-desenho svg {
-    cursor: url('/images/cursor.png') 0 20, crosshair;
+    cursor: url('/images/cursor.png') 0 0, crosshair;
 }

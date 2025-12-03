@@ -36,10 +36,20 @@ export class ProductService {
 
     // 1. Criar Produto
     async create(createProductDto: CreateProductDto) {
-        const productData = this.parseProductData(createProductDto);
+        // Separa as imagens do resto dos dados
+        const { images, ...rest } = this.parseProductData(createProductDto);
 
         return this.prisma.product.create({
-            data: productData,
+            data: {
+                ...rest,
+                images: {
+                    create:
+                        images && Array.isArray(images)
+                            ? images.map((url: string) => ({ url }))
+                            : [],
+                },
+            },
+            include: { images: true }, // Retorna o produto com as imagens criadas
         });
     }
 
@@ -48,6 +58,7 @@ export class ProductService {
         return this.prisma.product.findMany({
             include: {
                 category: true, // Inclui os dados da categoria relacionada
+                images: true, // <--- IMPORTANTE: Incluir as imagens na busca
             },
             orderBy: {
                 createdAt: 'desc',
@@ -61,6 +72,7 @@ export class ProductService {
             where: { id },
             include: {
                 category: true, // Inclui os dados da categoria
+                images: true, // <--- IMPORTANTE: Incluir as imagens
             },
         });
 
@@ -72,16 +84,22 @@ export class ProductService {
 
     // 4. Atualizar Produto
     async update(id: number, updateProductDto: UpdateProductDto) {
-        await this.findOne(id); // Verifica se existe e lança 404
+        await this.findOne(id);
 
-        const productData = this.parseProductData(updateProductDto);
+        const { images, ...rest } = this.parseProductData(updateProductDto);
 
         return this.prisma.product.update({
             where: { id },
-            data: productData,
-            include: {
-                category: true,
+            data: {
+                ...rest,
+                images: images
+                    ? {
+                          deleteMany: {}, // 1. Apaga todas as imagens antigas deste produto
+                          create: images.map((url: string) => ({ url })),
+                      }
+                    : undefined,
             },
+            include: { images: true },
         });
     }
 

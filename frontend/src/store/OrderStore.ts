@@ -9,6 +9,7 @@ interface OrderState {
     error: string | null;
 
     fetchAllOrders: () => Promise<void>;
+    fetchMyOrders: () => Promise<void>;
     updateOrderStatus: (
         orderId: number,
         newStatus: OrderStatus
@@ -31,6 +32,21 @@ export const useOrderStore = create<OrderState>((set) => ({
         } catch (error) {
             const msg = axios.isAxiosError(error)
                 ? error.response?.data?.message || 'Erro ao carregar pedidos.'
+                : 'Erro de conexão.';
+            set({ isLoading: false, error: msg });
+        }
+    },
+
+    fetchMyOrders: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            // Chama a rota GET /orders (que já filtra pelo usuário no backend)
+            const response = await api.get('/orders');
+            set({ orders: response.data, isLoading: false });
+        } catch (error) {
+            const msg = axios.isAxiosError(error)
+                ? error.response?.data?.message ||
+                  'Erro ao carregar seus pedidos.'
                 : 'Erro de conexão.';
             set({ isLoading: false, error: msg });
         }

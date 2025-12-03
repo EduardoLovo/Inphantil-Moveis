@@ -436,7 +436,7 @@ const SECTIONS = [
         title: 'Dúvidas Frequentes',
         icon: FaQuestionCircle,
         content: (
-            <div>
+            <div className='perguntas-comuns'>
                 <h2>Perguntas Comuns</h2>
                 <details>
                     <summary>As camas suportam quantos quilos?</summary>

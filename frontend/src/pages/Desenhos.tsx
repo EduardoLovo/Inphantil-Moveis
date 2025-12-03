@@ -4,6 +4,11 @@ import './Desenhos.css';
 
 import { NuvemSVG } from '../components/Desenhos/NuvemSVG';
 import { MontanhaSVG } from '../components/Desenhos/MontanhaSVG';
+import { OndaSVG } from '../components/Desenhos/OndaSVG';
+import { PicoSVG } from '../components/Desenhos/PicoSVG';
+import { EncaixeSVG } from '../components/Desenhos/EncaixeSVG';
+import { CamaSVG } from '../components/Desenhos/CamaSVG';
+import { TapeteSVG } from '../components/Desenhos/TapeteSVG';
 
 // Definição dos tipos
 interface Cor {
@@ -134,7 +139,22 @@ export const Desenhos = () => {
                 return <NuvemSVG {...commonProps} lado="esquerdo" />;
             case 'montanha':
                 return <MontanhaSVG {...commonProps} lado="direito" />;
-
+            case 'montanha-lado-esquerdo':
+                return <MontanhaSVG {...commonProps} lado="esquerdo" />;
+            case 'onda':
+                return <OndaSVG {...commonProps} lado="direito" />;
+            case 'onda-lado-esquerdo':
+                return <OndaSVG {...commonProps} lado="esquerdo" />;
+            case 'pico':
+                return <PicoSVG {...commonProps} lado="direito" />;
+            case 'pico-lado-esquerdo':
+                return <PicoSVG {...commonProps} lado="esquerdo" />;
+            case 'encaixe':
+                return <EncaixeSVG {...commonProps} lado="direito" />;
+            case 'cama':
+                return <CamaSVG {...commonProps} lado="direito" />;
+            case 'tapete':
+                return <TapeteSVG {...commonProps} lado="direito" />;
             default:
                 return null;
         }
@@ -149,7 +169,32 @@ export const Desenhos = () => {
             nuvem: ['cor1', 'cor2'],
             'nuvem-lado-esquerdo': ['cor1', 'cor2'],
             montanha: ['cor1', 'cor2', 'cor3'],
-            // Mapeie os outros...
+            'montanha-lado-esquerdo': ['cor1', 'cor2', 'cor3'],
+            onda: ['cor1', 'cor2'],
+            'onda-lado-esquerdo': ['cor1', 'cor2'],
+            pico: ['cor1', 'cor2', 'cor3'],
+            'pico-lado-esquerdo': ['cor1', 'cor2', 'cor3'],
+            encaixe: ['cor1', 'cor2'],
+            cama: ['cor1', 'cor2'],
+            tapete: [
+                'cor1',
+                'cor2',
+                'cor3',
+                'cor4',
+                'cor5',
+                'cor6',
+                'cor7',
+                'cor8',
+                'cor9',
+                'cor10',
+                'cor11',
+                'cor12',
+                'cor13',
+                'cor14',
+                'cor15',
+                'cor16',
+                'cor17',
+            ],
         };
 
         const ids = mapDesenhoCores[tipoDoDesenho] || [];
@@ -243,9 +288,89 @@ export const Desenhos = () => {
                         checked={tipoDoDesenho === 'montanha'}
                         onChange={(e) => setTipoDoDesenho(e.target.value)}
                     />
-                    Nuvem (Lado direito)
+                    Montanha (Lado direito)
                 </label>
-                {/* Adicione os outros inputs... */}
+
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="montanha-lado-esquerdo"
+                        checked={tipoDoDesenho === 'montanha-lado-esquerdo'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Montanha (Lado esquerdo)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="onda"
+                        checked={tipoDoDesenho === 'onda'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Onda (Lado direito)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="onda-lado-esquerdo"
+                        checked={tipoDoDesenho === 'onda-lado-esquerdo'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Onda (Lado esquerdo)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="pico"
+                        checked={tipoDoDesenho === 'pico'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Pico (Lado direito)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="pico-lado-esquerdo"
+                        checked={tipoDoDesenho === 'pico-lado-esquerdo'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Pico (Lado esquerdo)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="encaixe"
+                        checked={tipoDoDesenho === 'encaixe'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Encaixe
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="cama"
+                        checked={tipoDoDesenho === 'cama'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Cama
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="tapete"
+                        checked={tipoDoDesenho === 'tapete'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Tapete
+                </label>
             </div>
         </div>
     );

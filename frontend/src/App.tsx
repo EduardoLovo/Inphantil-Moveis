@@ -29,6 +29,9 @@ import { Desenhos } from './pages/Desenhos';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
+import AdminProductsPage from './pages/AdminProductsPage';
+import EditProductPage from './pages/EditProductPage';
+import CreateProductPage from './pages/CreateProductPage';
 
 function App() {
     return (
@@ -55,10 +58,6 @@ function App() {
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
-                    <Route
-                        path="/admin/products"
-                        element={<h1>Gerenciamento de Produtos</h1>}
-                    />
                     <Route
                         path="/admin/categories"
                         element={<AdminCategoryPage />}
@@ -110,6 +109,19 @@ function App() {
                     />{' '}
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route
+                        path="/admin/products"
+                        element={<AdminProductsPage />}
+                    />
+                    {/* Futuras rotas de criação/edição */}
+                    <Route
+                        path="/admin/products/new"
+                        element={<CreateProductPage />}
+                    />
+                    <Route
+                        path="/admin/products/edit/:id"
+                        element={<EditProductPage />}
+                    />
                 </Route>
             </Routes>
             <Footer />

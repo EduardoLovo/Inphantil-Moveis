@@ -101,13 +101,14 @@ const Header = () => {
                             >
                                 Camas
                             </Link>
-                            <Link
-                                to="/composicao-protetores"
-                                onClick={() => setIsCatalogOpen(false)}
-                            >
-                                Protetores
-                            </Link>
-
+                            {canAccessAdmin && (
+                                <Link
+                                    to="/composicao-protetores"
+                                    onClick={() => setIsCatalogOpen(false)}
+                                >
+                                    Protetores
+                                </Link>
+                            )}
                             <span className="dropdown-section-title">
                                 Catálogos
                             </span>
@@ -146,12 +147,6 @@ const Header = () => {
                                 onClick={() => setIsCatalogOpen(false)}
                             >
                                 Lençois Pronta-Entrega
-                            </Link>
-                            <Link
-                                to="/products?category=protetores"
-                                onClick={() => setIsCatalogOpen(false)}
-                            >
-                                Pantone
                             </Link>
                             <span className="dropdown-section-title"></span>
                         </div>

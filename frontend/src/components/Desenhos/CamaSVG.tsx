@@ -1,5 +1,5 @@
 import React from 'react';
-import './DesenhosSVG.css';
+import './DesenhoSVG.css';
 
 interface Props {
     colors: Record<string, string>; // Recebe o objeto com todas as cores
@@ -15,7 +15,7 @@ export const CamaSVG: React.FC<Props> = ({ colors, onClick }) => {
         <div className="direito">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                // width="300mm"
+                width="300mm"
                 height="100mm"
                 fill-rule="evenodd"
                 clip-rule="evenodd"

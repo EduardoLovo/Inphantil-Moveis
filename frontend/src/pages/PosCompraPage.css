@@ -190,6 +190,11 @@ details[open] summary::after {
     animation: fadeIn 0.4s ease-in-out;
 }
 
+.perguntas-comuns p {
+    color: #295834;
+    font-weight: 100;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

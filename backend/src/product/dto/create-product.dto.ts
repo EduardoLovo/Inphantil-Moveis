@@ -6,6 +6,7 @@ import {
     IsOptional,
     IsBoolean,
     Min,
+    IsArray,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -97,6 +98,17 @@ export class CreateProductDto {
     @IsString()
     @IsOptional()
     mainImage?: string;
+
+    @ApiProperty({
+        example: ['https://img1.com', 'https://img2.com'],
+        description: 'Lista de imagens da galeria.',
+        required: false,
+        type: [String], // Indica array no Swagger
+    })
+    @IsOptional()
+    @IsArray() 
+    @IsString({ each: true }) // Valida se cada item do array é string
+    images?: string[];
 
     @ApiProperty({
         example: true,
