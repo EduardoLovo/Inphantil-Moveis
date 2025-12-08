@@ -24,7 +24,6 @@
 /* ========================================================== */
 .admin-page-container {
     padding: 50px;
-    /* max-width: 1200px; */
     margin: 40px auto;
     font-family: Arial, sans-serif;
     color: #313b2f;
@@ -100,4 +99,21 @@
     color: var(--color-text-secondary);
     margin: 5px 0 10px 0;
     flex-grow: 1; /* Garante que todos os cards tenham a mesma altura */
+}
+
+@media (max-width: 480px) {
+    .admin-cards-grid {
+        justify-content: center;
+    }
+
+    .admin-page-container {
+        padding: 10px;
+        text-align: center;
+        margin: 0px;
+    }
+
+    .admin-page-container p {
+        width: 100%;
+        margin: 0px;
+    }
 }

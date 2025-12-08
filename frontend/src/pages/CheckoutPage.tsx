@@ -189,7 +189,7 @@ const CheckoutPage: React.FC = () => {
                                     </div>
 
                                     <p>
-                                        {addr.street}, {addr.number}{' '}
+                                        Rua: {addr.street}, {addr.number}{' '}
                                         {addr.complement}
                                     </p>
                                     <p>

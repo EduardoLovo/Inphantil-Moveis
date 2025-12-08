@@ -103,6 +103,53 @@
     font-weight: 600;
 }
 
+.dash-address-card {
+    background-color: #f9f9f9;
+    border: 1px solid var(--color-neutral-accent);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.dash-address-card p {
+    margin: 5px 0;
+}
+
+.addr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0; /* Linha divisória sutil */
+    margin-bottom: 12px;
+}
+
+.btn-delete-icon {
+    color: var(--color-danger);
+    cursor: pointer;
+    transition: color 0.2s;
+    background-color: #6e6e6e31;
+    border: none;
+}
+
+.btn-add-small {
+    background-color: var(--color-success);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-add-small:hover {
+    background-color: #218838;
+}
 /* ========================================================== */
 /* BOTÃO E NAVEGAÇÃO RÁPIDA */
 /* ========================================================== */
@@ -146,4 +193,128 @@
 
 .logout-btn:hover {
     background-color: #a72535;
+}
+
+.order-item {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Borda sutil */
+    border-radius: 12px; /* Cantos arredondados */
+    padding: 20px;
+    margin-bottom: 16px; /* Espaço entre os cards */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Efeito Hover (Opcional: dá uma sensação de interatividade) */
+.order-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: #ccc;
+}
+
+/* --- CABEÇALHO (ID e Status) --- */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0; /* Linha divisória sutil */
+    margin-bottom: 12px;
+}
+
+.order-id {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333; /* Cor escura para destaque */
+}
+
+/* Badge de Status (Pílula) */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cores específicas para cada status (ajuste conforme seus nomes de status) */
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.status-paid {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+.status-in_production {
+    background-color: #cff4fc;
+    color: #055160;
+}
+.status-shipped {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+.status-delivered {
+    background-color: #d4edda; /* Verde mais forte */
+    color: #155724;
+}
+.status-canceled {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* --- INFORMAÇÕES (Data e Total) --- */
+.order-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.order-info strong {
+    color: #333;
+    font-size: 1.1rem; /* Destaque para o preço */
+}
+
+/* --- LISTA DE PRODUTOS (Tags) --- */
+.order-products {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os itens quebrem linha se forem muitos */
+    gap: 8px; /* Espaço entre as etiquetas */
+}
+
+.order-product-tag {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    color: #495057;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* --- RESPONSIVIDADE (Mobile) --- */
+@media (max-width: 480px) {
+    .order-item {
+        padding: 15px;
+    }
+
+    .order-header {
+        flex-direction: row; /* Mantém lado a lado mesmo no mobile */
+    }
+
+    .order-info {
+        flex-direction: column; /* Empilha Data e Total no mobile */
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .order-product-tag {
+        font-size: 0.8rem;
+        width: 100%; /* No mobile, pode ser melhor listar um por linha se os nomes forem longos */
+    }
 }

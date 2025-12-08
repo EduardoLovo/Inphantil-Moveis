@@ -51,6 +51,12 @@
     border-color: #ccc;
 }
 
+.address-card p {
+    margin: 5px 0;
+    font-size: 0 ninerem;
+    color: var(--color-text-secondary, #666);
+}
+
 .address-card.selected {
     border-color: var(--color-success, #28a745);
     background-color: #f0fff4;

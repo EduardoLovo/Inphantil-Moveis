@@ -72,7 +72,7 @@
 .cart-item {
     display: grid;
     /* Nome | Controles | Subtotal | Remover */
-    grid-template-columns: 2fr 150px 120px 50px;
+    grid-template-columns: 2fr 150px 150px 50px;
     align-items: center;
     background-color: white;
     padding: 20px;
@@ -113,6 +113,7 @@
     display: flex;
     align-items: center;
     padding: 5px;
+    width: 100%;
     transition: color 0.2s;
 }
 
@@ -127,10 +128,18 @@
 }
 
 .item-subtotal {
-    text-align: right;
+    /* text-align: center; */
     font-weight: bold;
     font-size: 1.1rem;
     color: var(--color-text-primary);
+    margin-right: 100px;
+}
+
+.item-subtotal p {
+    /* margin: 0px 100px 1px 0; */
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
 }
 
 .remove-btn {

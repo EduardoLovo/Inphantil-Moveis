@@ -49,11 +49,11 @@ const Footer: React.FC = () => {
                         <li>
                             <FaWhatsapp className="social-icon" />
                             <a
-                                href="https://wa.me/5544999999999"
+                                href="https://wa.me/5561982388828"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                (44) 99999-9999
+                                (61) 98238-8828
                             </a>
                         </li>
                         <li>

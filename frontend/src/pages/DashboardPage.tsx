@@ -16,6 +16,7 @@ import { api } from '../services/api';
 import AddressForm from '../components/AddressForm';
 import { useOrderStore } from '../store/OrderStore';
 import type { Address } from '../types/address';
+import axios from 'axios';
 
 const DashboardPage = () => {
     // Pega o estado e o método de logout
@@ -47,12 +48,21 @@ const DashboardPage = () => {
     };
 
     const handleDeleteAddress = async (id: number) => {
-        if (window.confirm('Excluir este endereço?')) {
+        // No checkout pode ter 'e: MouseEvent' antes
+        // e.stopPropagation(); // Mantenha se for no CheckoutPage
+
+        if (window.confirm('Tem certeza que deseja excluir este endereço?')) {
             try {
                 await api.delete(`/addresses/${id}`);
+                // Lógica de limpar seleção (se CheckoutPage) ...
                 fetchAddresses();
-            } catch (e) {
-                alert('Erro ao excluir.');
+            } catch (error) {
+                // CORREÇÃO AQUI: Pega a mensagem do backend
+                if (axios.isAxiosError(error) && error.response) {
+                    alert(error.response.data.message);
+                } else {
+                    alert('Erro ao excluir endereço.');
+                }
             }
         }
     };

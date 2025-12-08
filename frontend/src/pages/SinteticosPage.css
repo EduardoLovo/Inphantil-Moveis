@@ -4,8 +4,7 @@
 .sintetico-page-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
-    padding-top: calc(var(--header-height, 70px) + 30px);
+    padding: 50px 20px;
     padding-bottom: 80px;
     text-align: center;
 }
@@ -47,6 +46,7 @@
     font-size: 0.9rem;
     transition: all 0.2s;
     text-transform: capitalize; /* Primeira letra maiúscula */
+    width: 120px;
 }
 
 .filter-button:hover {
@@ -228,7 +228,11 @@
 }
 .out-badge {
     background-color: var(--color-stock-out);
-    color: white;
+    /* color: white; */
+}
+
+.form-select option {
+    width: 250px;
 }
 /* Responsividade */
 @media (max-width: 600px) {

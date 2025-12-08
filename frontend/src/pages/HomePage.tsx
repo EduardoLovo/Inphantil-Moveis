@@ -75,11 +75,11 @@ const AMBIENTES = [
     },
     {
         id: 6,
-        title: 'Sonho de Princesa',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
+        title: 'Natal Inphantil',
+        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764856806/PHOTO-2021-10-07-19-27-57_mgcgxl.jpg',
         gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572690/cld-sample-3.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572688/cld-sample.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1764856817/PHOTO-2021-10-07-19-27-57_3_ciotxn.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1764856789/PHOTO-2021-10-07-20-14-23_o3ijms.jpg',
         ],
     },
 ];
@@ -162,7 +162,7 @@ const HomePage = () => {
                     <div className="header-spacer"></div>
 
                     <motion.img
-                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1763578452/PHOTO-2021-10-07-19-27-57_o8idi8.jpg"
+                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1764856446/PHOTO-2021-10-07-20-14-23_ltkrpr.jpg"
                         alt="Camas Montessorianas"
                         className="hero-image"
                         // Pequeno efeito de zoom na imagem ao carregar
@@ -240,19 +240,7 @@ const HomePage = () => {
                         </a>
                     </button>
                 </motion.section>
-                <hr />
-                <motion.section
-                    className="info-section"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.3 }}
-                    variants={slideInLeft}
-                >
-                    <h2>Instagram</h2>
-                    <p>Siga-nos no Instagram para mais inspirações!</p>
-                    seçao de feed
-                    <FaInstagram />
-                </motion.section>
+
                 <hr />
 
                 <motion.section
@@ -260,7 +248,7 @@ const HomePage = () => {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.3 }}
-                    variants={slideInRight}
+                    variants={slideInLeft}
                 >
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                         <h2>Inspire-se</h2>
@@ -319,6 +307,19 @@ const HomePage = () => {
                     >
                         Ver Catálogo Completo
                     </Link>
+                </motion.section>
+                <hr />
+                <motion.section
+                    className="info-section"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={slideInRight}
+                >
+                    <h2>Instagram</h2>
+                    <p>Siga-nos no Instagram para mais inspirações!</p>
+                    seçao de feed
+                    <FaInstagram />
                 </motion.section>
             </main>
             {/* 5. RENDERIZAÇÃO DO MODAL SE HOUVER SELEÇÃO */}

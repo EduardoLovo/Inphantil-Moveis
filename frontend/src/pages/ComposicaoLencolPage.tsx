@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '../services/api';
-import { FaSearch, FaUndo, FaLayerGroup, FaMagic } from 'react-icons/fa';
+import { FaSearch, FaUndo, FaMagic } from 'react-icons/fa';
 import type { VisualItem } from '../types/visual-item';
 import './ComposicaoLencolPage.css';
 
@@ -128,8 +128,8 @@ const ComposicaoPage: React.FC = () => {
             {etapa === 'RESULTADO' &&
                 tecidoSelecionado &&
                 apliqueSelecionado && (
-                    <div className="comp-result-area">
-                        <div className="comp-preview-box">
+                    <div className="comp-result-area-lencol">
+                        <div className="comp-preview-box-lencol">
                             {/* Camadas da Composição */}
                             <img
                                 src={tecidoSelecionado}
@@ -140,12 +140,6 @@ const ComposicaoPage: React.FC = () => {
                                 src={apliqueSelecionado}
                                 alt="Aplique"
                                 className="layer layer-middle"
-                            />
-                            {/* Terceira camada (se o tecido tiver transparência ou efeito de dobra, repete-se ele por cima) */}
-                            <img
-                                src={tecidoSelecionado}
-                                alt="Efeito"
-                                className="layer layer-front"
                             />
                         </div>
 

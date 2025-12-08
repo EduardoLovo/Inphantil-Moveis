@@ -14,7 +14,6 @@
 /* LAYOUT E TABELA */
 /* ========================================================== */
 .admin-page-container {
-    padding-top: calc(var(--header-height, 70px) + 30px);
     max-width: 1200px;
     margin: 0 auto;
     padding-bottom: 50px;

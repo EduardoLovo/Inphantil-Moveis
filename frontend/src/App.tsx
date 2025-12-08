@@ -32,10 +32,12 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminProductsPage from './pages/AdminProductsPage';
 import EditProductPage from './pages/EditProductPage';
 import CreateProductPage from './pages/CreateProductPage';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
     return (
         <>
+            <ScrollToTop />
             <Header />
             <Routes>
                 <Route path="/" element={<HomePage />} />

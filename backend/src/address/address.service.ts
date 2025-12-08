@@ -2,10 +2,12 @@ import {
     Injectable,
     NotFoundException,
     ForbiddenException,
+    BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AddressService {
@@ -82,8 +84,21 @@ export class AddressService {
     async remove(id: number, userId: number) {
         await this.findOne(id, userId); // Garante existência e posse
 
-        return this.prisma.address.delete({
-            where: { id },
-        });
+        try {
+            return await this.prisma.address.delete({
+                where: { id },
+            });
+        } catch (error) {
+            // 3. Verifica se é erro de restrição de chave estrangeira (P2003)
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2003') {
+                    throw new BadRequestException(
+                        'Não é possível excluir este endereço pois existem pedidos vinculados a ele.',
+                    );
+                }
+            }
+            // Se for outro erro, relança
+            throw error;
+        }
     }
 }
