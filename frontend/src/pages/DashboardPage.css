@@ -86,9 +86,6 @@
 
 .info-section-title {
     font-size: 1.4rem;
-    border-bottom: 2px solid var(--color-accent-soft);
-    padding-bottom: 5px;
-    margin-bottom: 15px;
 }
 
 .info-detail {
@@ -295,6 +292,44 @@
     color: #495057;
     display: inline-flex;
     align-items: center;
+}
+/* Container que alinha Título (Esq) e Link (Dir) */
+.section-header-row {
+    display: flex;
+    justify-content: space-between; /* Um em cada ponta */
+    align-items: center; /* Alinha verticalmente no centro */
+
+    /* Movemos a borda para o container para pegar a largura toda */
+    border-bottom: 2px solid var(--color-accent-soft);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Ajuste no Título para remover a borda antiga (se houver) e margens */
+.section-header-row .info-section-title {
+    border-bottom: none; /* Remove a borda individual do h2 */
+    padding-bottom: 0;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Estilo do Link de Editar */
+.edit-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre texto e ícone */
+    text-decoration: none;
+    color: var(--color-action-link);
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.edit-profile-link:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
 }
 
 /* --- RESPONSIVIDADE (Mobile) --- */

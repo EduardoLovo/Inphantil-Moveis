@@ -14,6 +14,7 @@ interface OrderState {
         orderId: number,
         newStatus: OrderStatus
     ) => Promise<void>;
+    deleteOrder: (id: number) => Promise<void>;
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
@@ -71,6 +72,22 @@ export const useOrderStore = create<OrderState>((set) => ({
         } catch (error) {
             console.error(error);
             alert('Erro ao atualizar status.');
+        }
+    },
+
+    deleteOrder: async (id) => {
+        try {
+            await api.delete(`/orders/${id}`);
+
+            // Remove o pedido da lista localmente para atualizar a tela sem recarregar
+            set((state) => ({
+                orders: state.orders.filter((order) => order.id !== id),
+            }));
+
+            alert('Pedido excluído com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao excluir pedido.');
         }
     },
 }));

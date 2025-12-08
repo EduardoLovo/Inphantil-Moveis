@@ -178,4 +178,36 @@ export class OrderService {
             },
         });
     }
+
+    async remove(id: number) {
+        // 1. Busca o pedido com os itens para saber o que devolver ao estoque
+        const order = await this.prisma.order.findUnique({
+            where: { id },
+            include: { items: true },
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
+        }
+
+        // 2. Transação: Restaura Estoque + Deleta Pedido
+        return this.prisma.$transaction(async (tx) => {
+            // A. Devolve a quantidade de cada item para o produto correspondente
+            for (const item of order.items) {
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: {
+                        stock: {
+                            increment: item.quantity, // Soma de volta ao estoque
+                        },
+                    },
+                });
+            }
+
+            // B. Deleta o pedido (os OrderItems são deletados automaticamente por causa do onDelete: Cascade no Schema)
+            return tx.order.delete({
+                where: { id },
+            });
+        });
+    }
 }

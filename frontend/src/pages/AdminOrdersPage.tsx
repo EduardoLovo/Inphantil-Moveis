@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useOrderStore } from '../store/OrderStore';
 import { useAuthStore } from '../store/AuthStore';
 import { Navigate } from 'react-router-dom';
-import { FaShoppingCart, FaBoxOpen } from 'react-icons/fa';
+import { FaShoppingCart, FaTrashAlt } from 'react-icons/fa';
 import { OrderStatus } from '../types/order';
 import './AdminCategoryPage.css';
 import './AdminOrdersPage.css'; // Estilos específicos (status colors)
@@ -17,8 +17,14 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const AdminOrdersPage: React.FC = () => {
-    const { orders, isLoading, error, fetchAllOrders, updateOrderStatus } =
-        useOrderStore();
+    const {
+        orders,
+        isLoading,
+        error,
+        fetchAllOrders,
+        updateOrderStatus,
+        deleteOrder,
+    } = useOrderStore();
     const { user } = useAuthStore();
 
     const canAccess =
@@ -49,6 +55,16 @@ const AdminOrdersPage: React.FC = () => {
         } else {
             // Reverte visualmente se cancelar (opcional, pois o react re-renderiza)
             e.target.value = orders.find((o) => o.id === id)?.status || '';
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (
+            window.confirm(
+                'ATENÇÃO: Isso excluirá o pedido permanentemente e devolverá os itens ao estoque. Continuar?'
+            )
+        ) {
+            await deleteOrder(id);
         }
     };
 
@@ -132,7 +148,7 @@ const AdminOrdersPage: React.FC = () => {
                                         {STATUS_LABELS[order.status]}
                                     </span>
                                 </td>
-                                <td className="table-cell">
+                                <td className="table-cell colum-acao">
                                     <select
                                         className="status-select"
                                         value={order.status}
@@ -151,6 +167,14 @@ const AdminOrdersPage: React.FC = () => {
                                             )
                                         )}
                                     </select>
+                                    <button
+                                        className="action-button delete-button"
+                                        onClick={() => handleDelete(order.id)}
+                                        title="Excluir Pedido"
+                                        style={{ marginLeft: '10px' }}
+                                    >
+                                        <FaTrashAlt />
+                                    </button>
                                 </td>
                             </tr>
                         ))}

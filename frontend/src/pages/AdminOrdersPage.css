@@ -42,8 +42,20 @@
     font-size: 0.9rem;
     background-color: white;
     cursor: pointer;
+    color: #333333;
 }
 
 .status-select:hover {
     border-color: var(--color-action-link);
+}
+
+.delete-button {
+    width: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.colum-acao {
+    display: flex;
+    justify-content: space-around;
 }

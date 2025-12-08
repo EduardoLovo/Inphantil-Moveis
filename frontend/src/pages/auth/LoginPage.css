@@ -127,3 +127,19 @@
     font-weight: 600;
     text-align: center;
 }
+
+.login-link-text {
+    text-align: center;
+    width: 100%;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: var(--color-neutral-accent);
+}
+
+.link-esqueci-senha {
+    color: var(--color-neutral-accent);
+    font-weight: 600;
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+}

@@ -9,13 +9,14 @@
 
 button {
     padding: 10px;
-    margin: 8px;
+    margin: 4px;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
     width: 70px;
     color: #0c0c0c;
     box-shadow: 0 0 10px #00000070;
+    border: none;
 }
 
 button:hover {
@@ -23,7 +24,7 @@ button:hover {
 }
 
 button.selected {
-    border: 2px solid #302b2bd8;
+    border: 1px solid #302b2bd8;
     color: #747474;
     box-shadow: 0 0 0px #00000070;
 }
@@ -31,189 +32,7 @@ button.selected {
 .botoesCoresDesenho {
     display: flex;
     flex-wrap: wrap;
-}
-.am1 {
-    background-color: #ffd653;
-}
-.am19 {
-    background-color: #eedc9c;
-}
-.am14 {
-    background-color: #f4e0ad;
-}
-.am21 {
-    background-color: #e6d3a6;
-}
-.am24 {
-    background-color: #e7e0d1;
-}
-.az1 {
-    background-color: #3b3d4b;
-}
-.az5 {
-    background-color: #415997;
-}
-.az3 {
-    background-color: #586c8a;
-}
-.az6 {
-    background-color: #718db1;
-}
-.az10 {
-    background-color: #9ebdd0;
-}
-.az11 {
-    background-color: #c4ced6;
-}
-.b3 {
-    background-color: #a49d90;
-}
-.b6 {
-    background-color: #c4bcad;
-}
-.b8 {
-    background-color: #dad6cb;
-}
-.b10 {
-    background-color: #e1d7c6;
-}
-.b19 {
-    background-color: #baaa95;
-}
-.bc1 {
-    background-color: #ffffff;
-}
-.bc6 {
-    background-color: #e9e9e7;
-}
-.cz1 {
-    background-color: #505557;
-}
-.cz3 {
-    background-color: #999a98;
-}
-.cz6 {
-    background-color: #b4b7ba;
-}
-.cz25n {
-    background-color: #bfc6c9;
-}
-.cz26n {
-    background-color: #cbcbcb;
-}
-.l2 {
-    background-color: #795999;
-}
-.l3 {
-    background-color: #bca0cc;
-}
-.l5 {
-    background-color: #c4aed0;
-}
-.l11 {
-    background-color: #d4c7d9;
-}
-.lj2 {
-    background-color: #d26a3e;
-}
-.lj3 {
-    background-color: #ead2c6;
-}
-.lj7 {
-    background-color: #ebc594;
-}
-.lj11 {
-    background-color: #de948f;
-}
-.lj21 {
-    background-color: #f8bf9a;
-}
-.m3 {
-    background-color: #bc9d6e;
-}
-.r1 {
-    background-color: #ce567e;
-}
-.r12 {
-    background-color: #e0c7d2;
-}
-.r16 {
-    background-color: #d4a299;
-}
-.r17 {
-    background-color: #cda7a0;
-}
-.r22 {
-    background-color: #efc5be;
-}
-.r24 {
-    background-color: #e7b7cf;
-}
-.r25 {
-    background-color: #ce9694;
-}
-.r32 {
-    background-color: #decdbf;
-}
-.r33 {
-    background-color: #ead2c6;
-}
-.rb1 {
-    background-color: #e1b8b9;
-}
-.rb2 {
-    background-color: #e9c8ca;
-}
-.rb4 {
-    background-color: #eed7d9;
-}
-.t1 {
-    background-color: #94dbe0;
-}
-.t2 {
-    background-color: #00adad;
-}
-.t12 {
-    background-color: #bdd6d9;
-}
-.vd1 {
-    background-color: #817d6a;
-}
-.vd6n {
-    background-color: #808a73;
-}
-.vd7n {
-    background-color: #829e86;
-}
-.vd16 {
-    background-color: #a7ceb9;
-}
-.vd21 {
-    background-color: #a3bca6;
-}
-.vd22 {
-    background-color: #a3ac9b;
-}
-.vd23 {
-    background-color: #a8decc;
-}
-.vd25 {
-    background-color: #bfcab4;
-}
-.vd36 {
-    background-color: #a8d0bd;
-}
-.vd39 {
-    background-color: #bdd5bc;
-}
-.vm1 {
-    background-color: #7a393e;
-}
-.vm3 {
-    background-color: #863339;
-}
-.vm5 {
-    background-color: #cc333d;
+    justify-content: center;
 }
 
 .resultadoNomeDasCores {
@@ -253,3 +72,4 @@ button.selected {
 .area-desenho svg {
     cursor: url('/images/cursor.png') 0 0, crosshair;
 }
+

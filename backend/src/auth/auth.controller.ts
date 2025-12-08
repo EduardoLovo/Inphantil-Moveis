@@ -7,6 +7,7 @@ import {
     UseGuards,
     Request, // Importado de @nestjs/common
     Get,
+    Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -22,12 +23,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { GetUser } from './decorators/get-user.decorator';
 import { Public } from './decorators/public.decorator';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('auth') // 2. Agrupa os endpoints sob a tag 'auth' (que definimos no main.ts)
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
-   
+
     @Public()
     @Post('register')
     @ApiOperation({ summary: 'Registrar um novo usuário (Retorna Token)' }) // 3. Descreve o endpoint
@@ -41,7 +44,6 @@ export class AuthController {
         return this.authService.register(registerDto, req);
     }
 
-    
     @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
@@ -68,5 +70,29 @@ export class AuthController {
     })
     getProfile(@GetUser() user: User) {
         return user;
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Patch('profile')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Atualizar dados do usuário logado' })
+    updateProfile(@Request() req: any, @Body() dto: UpdateUserDto) {
+        return this.authService.updateProfile(req.user.id, dto);
+    }
+
+    // ROTA: Esqueci a Senha (Público)
+    @Public() // Se estiver usando seu decorator Public
+    @Post('forgot-password')
+    @ApiOperation({ summary: 'Solicitar recuperação de senha' })
+    forgotPassword(@Body() dto: ForgotPasswordDto) {
+        return this.authService.forgotPassword(dto.email);
+    }
+
+    // ROTA: Redefinir Senha (Público, com token)
+    @Public()
+    @Post('reset-password')
+    @ApiOperation({ summary: 'Redefinir senha usando o token' })
+    resetPassword(@Body() dto: ResetPasswordDto) {
+        return this.authService.resetPassword(dto.token, dto.newPassword);
     }
 }

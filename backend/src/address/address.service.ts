@@ -3,6 +3,7 @@ import {
     NotFoundException,
     ForbiddenException,
     BadRequestException,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -82,14 +83,14 @@ export class AddressService {
 
     // 5. Deletar
     async remove(id: number, userId: number) {
-        await this.findOne(id, userId); // Garante existência e posse
+        await this.findOne(id, userId); // Garante que existe e é do usuário
 
         try {
             return await this.prisma.address.delete({
                 where: { id },
             });
         } catch (error) {
-            // 3. Verifica se é erro de restrição de chave estrangeira (P2003)
+            // 1. Verifica o erro padrão do Prisma (P2003)
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2003') {
                     throw new BadRequestException(
@@ -97,8 +98,26 @@ export class AddressService {
                     );
                 }
             }
-            // Se for outro erro, relança
-            throw error;
+
+            // 2. Verifica o erro "Desconhecido" que contém o código do Postgres (23001)
+            if (error instanceof Prisma.PrismaClientUnknownRequestError) {
+                // Verifica se a mensagem interna contém o código de erro ou o texto da constraint
+                if (
+                    error.message.includes('23001') ||
+                    error.message.includes('violates RESTRICT setting') ||
+                    error.message.includes('foreign key constraint')
+                ) {
+                    throw new BadRequestException(
+                        'Não é possível excluir este endereço pois existem pedidos vinculados a ele.',
+                    );
+                }
+            }
+
+            // Se for qualquer outro erro, relança ou joga um 500
+            console.error('Erro ao excluir endereço:', error);
+            throw new InternalServerErrorException(
+                'Erro inesperado ao excluir o endereço.',
+            );
         }
     }
 }

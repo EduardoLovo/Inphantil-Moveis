@@ -154,10 +154,6 @@
     color: #fefe85;
 }
 
-.nav-dropdown.is-open {
-    transform: rotate(180deg);
-}
-
 /* Estilo dos links internos do submenu */
 .dropdown-menu a {
     color: var(--color-text-primary);

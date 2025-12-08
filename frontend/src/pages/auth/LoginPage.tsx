@@ -77,6 +77,9 @@ const LoginPage = () => {
                         Entrar
                     </button>
                 </form>
+                <Link to="/forgot-password" className="link-esqueci-senha">
+                    Esqueci minha senha
+                </Link>
                 {error && <p className="error-message">{error}</p>}
                 <p className="login-link-text">
                     Não tem conta?{' '}

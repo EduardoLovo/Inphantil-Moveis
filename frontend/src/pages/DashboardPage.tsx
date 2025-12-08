@@ -7,6 +7,7 @@ import {
     FaInfoCircle,
     FaMapMarkerAlt,
     FaPlus,
+    FaRegEdit,
     FaSignOutAlt,
     FaTrash,
     FaUserCircle,
@@ -127,9 +128,17 @@ const DashboardPage = () => {
                 <hr className="profile-divider" />
 
                 {/* --- DADOS PESSOAIS --- */}
-                <h2 className="info-section-title">
-                    <FaInfoCircle className="info-icon" /> Meus Dados
-                </h2>
+                <div className="section-header-row">
+                    <h2 className="info-section-title">
+                        <FaInfoCircle className="info-icon" /> Meus Dados
+                    </h2>
+
+                    <Link to="/profile/edit" className="edit-profile-link">
+                        <span>Editar Perfil</span>{' '}
+                        {/* Use span em vez de p para evitar margens */}
+                        <FaRegEdit className="info-icon" />
+                    </Link>
+                </div>
                 <div className="info-detail-group">
                     <div className="info-detail">
                         <label>Email:</label> <p>{user.email}</p>

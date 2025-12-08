@@ -33,10 +33,15 @@ import AdminProductsPage from './pages/AdminProductsPage';
 import EditProductPage from './pages/EditProductPage';
 import CreateProductPage from './pages/CreateProductPage';
 import ScrollToTop from './components/ScrollToTop';
+import GoogleAnalytics from './components/GoogleAnalytics';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import EditProfilePage from './pages/auth/EditProfilePage';
 
 function App() {
     return (
         <>
+            <GoogleAnalytics />
             <ScrollToTop />
             <Header />
             <Routes>
@@ -55,7 +60,11 @@ function App() {
                     path="/composicao-sintetico"
                     element={<ComposicaoSinteticoPage />}
                 />
-                {/* <Route path="/admin/orders" element={<AdminOrdersPage />} /> */}
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPasswordPage />}
+                />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
@@ -125,6 +134,7 @@ function App() {
                         element={<EditProductPage />}
                     />
                 </Route>
+                <Route path="/profile/edit" element={<EditProfilePage />} />
             </Routes>
             <Footer />
         </>

@@ -7,6 +7,7 @@ import {
     UseGuards,
     ParseIntPipe,
     Patch,
+    Delete,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -74,5 +75,19 @@ export class OrderController {
         @Body() updateDto: UpdateOrderStatusDto,
     ) {
         return this.orderService.updateStatus(id, updateDto);
+    }
+
+    @Delete(':id')
+    @UseGuards(RolesGuard) // Garante a verificação de Roles
+    @Roles(Role.DEV) // Apenas Admin e Dev podem excluir
+    @ApiOperation({
+        summary: 'Excluir um pedido e restaurar estoque (Admin/Dev)',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Pedido excluído e estoque restaurado.',
+    })
+    remove(@Param('id', ParseIntPipe) id: number) {
+        return this.orderService.remove(id);
     }
 }
