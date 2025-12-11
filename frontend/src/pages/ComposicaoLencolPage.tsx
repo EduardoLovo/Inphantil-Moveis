@@ -99,12 +99,12 @@ const ComposicaoPage: React.FC = () => {
         );
 
     return (
-        <div className="comp-container">
-            <h1 className="comp-title">
+        <div className="simulador-container">
+            <h1 className="simulador-title">
                 <FaMagic /> Simulador de Composições
             </h1>
 
-            <div className="comp-instructions">
+            <div className="simulador-instructions">
                 {etapa === 'ESCOLHA_TECIDO' && (
                     <p>
                         Passo 1: Escolha o <strong>Tecido</strong> de fundo.
@@ -119,7 +119,7 @@ const ComposicaoPage: React.FC = () => {
                 {etapa === 'RESULTADO' && (
                     <p>Resultado Final! Que tal essa combinação?</p>
                 )}
-                <small className="comp-note">
+                <small className="simulador-disclaimer">
                     Cores podem variar conforme a tela do dispositivo.
                 </small>
             </div>
@@ -128,22 +128,28 @@ const ComposicaoPage: React.FC = () => {
             {etapa === 'RESULTADO' &&
                 tecidoSelecionado &&
                 apliqueSelecionado && (
-                    <div className="comp-result-area-lencol">
-                        <div className="comp-preview-box-lencol">
-                            {/* Camadas da Composição */}
+                    <div className="simulador-result-wrapper">
+                        <div className="simulador-images-row">
+                            {/* Imagem do Tecido */}
                             <img
                                 src={tecidoSelecionado}
                                 alt="Fundo"
-                                className="layer layer-back"
+                                className="simulador-result-img"
+                                title="Tecido Selecionado"
                             />
+                            {/* Imagem do Aplique */}
                             <img
                                 src={apliqueSelecionado}
                                 alt="Aplique"
-                                className="layer layer-middle"
+                                className="simulador-result-img"
+                                title="Aplique Selecionado"
                             />
                         </div>
 
-                        <button onClick={resetar} className="comp-reset-btn">
+                        <button
+                            onClick={resetar}
+                            className="simulador-btn-reset"
+                        >
                             <FaUndo /> Criar Nova Composição
                         </button>
                     </div>
@@ -151,11 +157,11 @@ const ComposicaoPage: React.FC = () => {
 
             {/* LISTA DE TECIDOS */}
             {etapa === 'ESCOLHA_TECIDO' && (
-                <div className="comp-grid">
+                <div className="simulador-grid-list">
                     {tecidosOrdenados.map((item) => (
                         <div
                             key={item.id}
-                            className="comp-card"
+                            className="simulador-item-card"
                             onClick={() => handleSelectTecido(item.imageUrl)}
                         >
                             <img src={item.imageUrl} alt={item.name} />
@@ -167,22 +173,23 @@ const ComposicaoPage: React.FC = () => {
 
             {/* LISTA DE APLIQUES (COM BUSCA) */}
             {etapa === 'ESCOLHA_APLIQUE' && (
-                <div className="comp-aplique-section">
-                    <div className="comp-search-bar">
-                        <FaSearch className="search-icon" />
+                <div className="simulador-aplique-section">
+                    <div className="simulador-search-container">
+                        <FaSearch className="simulador-search-icon" />
                         <input
                             type="text"
+                            className="simulador-search-input"
                             placeholder="Pesquisar código do aplique..."
                             value={busca}
                             onChange={(e) => setBusca(e.target.value)}
                         />
                     </div>
 
-                    <div className="comp-grid">
+                    <div className="simulador-grid-list">
                         {apliquesFiltrados.map((item) => (
                             <div
                                 key={item.id}
-                                className="comp-card"
+                                className="simulador-item-card"
                                 onClick={() =>
                                     handleSelectAplique(item.imageUrl)
                                 }
@@ -192,8 +199,11 @@ const ComposicaoPage: React.FC = () => {
                             </div>
                         ))}
                     </div>
+
                     {apliquesFiltrados.length === 0 && (
-                        <p>Nenhum aplique encontrado.</p>
+                        <p className="simulador-empty-msg">
+                            Nenhum aplique encontrado.
+                        </p>
                     )}
                 </div>
             )}

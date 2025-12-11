@@ -41,3 +41,13 @@ a.action-button {
     text-decoration: none;
     display: inline-flex;
 }
+
+.action-cell {
+    justify-content: space-evenly;
+    align-items: center;
+    height: 75px;
+}
+
+.category-button-add {
+    padding: 10px;
+}

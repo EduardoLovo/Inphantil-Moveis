@@ -1,30 +1,39 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/AuthStore';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; // Importar o hook
 import './LoginPage.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     // Obtém o método login da Store
     const login = useAuthStore((state) => state.login);
-
-    // 🚨 Nota: Como estamos no desenvolvimento, usaremos um token mockado
-    // até que o widget do reCAPTCHA seja implementado.
-    const RECAPTCHA_MOCK_TOKEN = 'teste';
+    const { executeRecaptcha } = useGoogleReCaptcha();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
+        // Verificação de segurança: se o script não carregou, não permita o envio
+        if (!executeRecaptcha) {
+            setError(
+                'O serviço de segurança ainda não foi carregado. Tente novamente.'
+            );
+            return;
+        }
+
         try {
+            const token = await executeRecaptcha('login');
             await login({
                 email,
                 password,
-                gRecaptchaResponse: RECAPTCHA_MOCK_TOKEN,
+                gRecaptchaResponse: token,
             });
             // Se o login for bem-sucedido, redireciona para a página inicial ou dashboard
             navigate('/dashboard');
@@ -63,17 +72,34 @@ const LoginPage = () => {
                     {/* Campo Senha */}
                     <div className="form-group-login">
                         <label htmlFor="password">Senha:</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="form-input"
-                        />
+                        <div className="password-input-container">
+                            {' '}
+                            {/* Container relativo */}
+                            <input
+                                id="password"
+                                // Alterna entre 'text' e 'password'
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="form-input"
+                            />
+                            {/* Ícone clicável */}
+                            <button
+                                type="button" // Importante: type="button" para não submeter o form
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="submit" className="login-button">
+                    <button
+                        type="submit"
+                        className="login-button"
+                        disabled={!executeRecaptcha}
+                    >
                         Entrar
                     </button>
                 </form>

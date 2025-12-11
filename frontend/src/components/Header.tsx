@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom'; // Importe useLocation
+import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/AuthStore';
+import { useCartStore } from '../store/CartStore'; // 1. IMPORTE A STORE DO CARRINHO
 import {
-    FaBed,
     FaBars,
     FaHome,
     FaUser,
@@ -10,26 +10,36 @@ import {
     FaSignOutAlt,
     FaListUl,
     FaCog,
+    FaSwatchbook,
+    FaPuzzlePiece,
+    FaCut,
+    FaCalculator,
+    FaLayerGroup,
 } from 'react-icons/fa';
+import { CiShoppingCart } from 'react-icons/ci';
 import './Header.css';
 
 const LOGO_IMAGE =
     'https://res.cloudinary.com/dtghitaah/image/upload/v1763574971/logo_vetor_xzh0vd.png';
+
 const Header = () => {
     const { isLoggedIn, user, logout } = useAuthStore();
+
+    // 2. PEGUE A CONTAGEM DA STORE
+    // O Zustand vai renderizar o componente automaticamente quando isso mudar
+    const cartCount = useCartStore((state) => state.getCount());
+
     const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // NOVO: Estado do Menu Mobile
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const location = useLocation(); // Para fechar o menu ao mudar de rota
+    const location = useLocation();
 
-    // Fecha o menu mobile ao mudar de rota
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsCatalogOpen(false);
     }, [location]);
 
-    // Lógica de clique fora (Desktop Dropdown)
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -55,7 +65,6 @@ const Header = () => {
         setIsCatalogOpen((prev) => !prev);
     };
 
-    // Verifica permissão de admin
     const canAccessAdmin =
         user &&
         (user.role === 'ADMIN' ||
@@ -66,17 +75,20 @@ const Header = () => {
         <>
             <header className="main-header">
                 <div className="header-content">
-                    {/* --- LOGO (Apenas Desktop) --- */}
+                    {/* --- LOGO --- */}
                     <Link to="/" className="logo-section desktop-only">
                         <img
                             src={LOGO_IMAGE}
                             alt="Inphantil Logo"
                             className="header-logo"
-                        />{' '}
+                        />
                         <h1 className="logo-title">Inphantil</h1>
+                        <span className="welcome-message">
+                            Olá, {user?.name || 'Visitante'}!
+                        </span>
                     </Link>
 
-                    {/* --- NAVEGAÇÃO DESKTOP (Escondida no Mobile) --- */}
+                    {/* --- NAVEGAÇÃO DESKTOP --- */}
                     <nav className="main-nav desktop-only">
                         <Link to="/">Início</Link>
 
@@ -109,14 +121,6 @@ const Header = () => {
                                 >
                                     Camas
                                 </Link>
-                                {canAccessAdmin && (
-                                    <Link
-                                        to="/composicao-protetores"
-                                        onClick={() => setIsCatalogOpen(false)}
-                                    >
-                                        Protetores
-                                    </Link>
-                                )}
                                 <span className="dropdown-section-title">
                                     Catálogos
                                 </span>
@@ -127,22 +131,10 @@ const Header = () => {
                                     Apliques
                                 </Link>
                                 <Link
-                                    to="/"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Apliques para Cabana
-                                </Link>
-                                <Link
                                     to="/sinteticos"
                                     onClick={() => setIsCatalogOpen(false)}
                                 >
                                     Cores para camas
-                                </Link>
-                                <Link
-                                    to="/products?category=protetores"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Cores para tapete
                                 </Link>
                                 <Link
                                     to="/tecidos-lencol"
@@ -150,13 +142,6 @@ const Header = () => {
                                 >
                                     Tecidos para Lençol
                                 </Link>
-                                <Link
-                                    to="/products?category=protetores"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Lençois Pronta-Entrega
-                                </Link>
-                                <span className="dropdown-section-title"></span>
                             </div>
                         </div>
 
@@ -170,10 +155,22 @@ const Header = () => {
                                         Adm
                                     </Link>
                                 )}
-                                <span className="welcome-message">
-                                    Olá, {user?.name || 'Visitante'}!
-                                </span>
-                                <Link to="/dashboard">Dashboard</Link>
+
+                                {/* 3. ÍCONE DO CARRINHO COM BADGE (Desktop) */}
+                                <Link
+                                    to="/cart"
+                                    className="cart-icon-wrapper"
+                                    title="Meu Carrinho"
+                                >
+                                    <CiShoppingCart size={28} />
+                                    {cartCount > 0 && (
+                                        <span className="cart-badge">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+
+                                <Link to="/dashboard">Meu Perfil</Link>
                                 <button
                                     onClick={handleLogout}
                                     className="logout-button"
@@ -189,15 +186,27 @@ const Header = () => {
                         )}
                     </nav>
 
-                    {/* --- NAVEGAÇÃO MOBILE (3 ÍCONES) --- */}
+                    {/* --- NAVEGAÇÃO MOBILE --- */}
                     <nav className="mobile-nav-bar mobile-only">
-                        {/* 1. CASA (Início) */}
                         <Link to="/" className="mobile-icon-link">
                             <FaHome size={24} />
                             <span>Início</span>
                         </Link>
 
-                        {/* 2. HAMBURGUER (Abre o Menu) */}
+                        {/* Botão Carrinho no Mobile (Central ou onde preferir) */}
+                        <Link
+                            to="/cart"
+                            className="mobile-icon-link cart-icon-wrapper"
+                        >
+                            <CiShoppingCart size={28} />
+                            {cartCount > 0 && (
+                                <span className="cart-badge-mobile">
+                                    {cartCount}
+                                </span>
+                            )}
+                            <span>Cart</span>
+                        </Link>
+
                         <button
                             className={`mobile-icon-btn ${
                                 isMobileMenuOpen ? 'active' : ''
@@ -214,69 +223,56 @@ const Header = () => {
                             <span>Menu</span>
                         </button>
 
-                        {/* 3. USUÁRIO (Dashboard ou Login) */}
                         <Link
                             to={isLoggedIn ? '/dashboard' : '/login'}
                             className="mobile-icon-link"
                         >
                             <FaUser size={24} />
-                            <span>{isLoggedIn ? 'Perfil' : 'Entrar'}</span>
+                            <span>Perfil</span>
                         </Link>
                     </nav>
                 </div>
             </header>
 
-            {/* --- MENU GAVETA (DRAWER) MOBILE --- */}
-            {/* Renderiza fora do header para facilitar o z-index */}
+            {/* --- MENU GAVETA MOBILE --- */}
             <div className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="drawer-content">
-                    <h3>Navegação</h3>
+                    <h3>Catálogos</h3>
                     <Link to="/products" className="drawer-link">
-                        <FaListUl /> Catálogo Completo
+                        <FaListUl /> Todos Produtos
                     </Link>
                     <Link to="/sinteticos" className="drawer-link">
-                        🎨 Sintéticos & Cores
+                        <FaSwatchbook /> Cores
                     </Link>
                     <Link to="/apliques" className="drawer-link">
-                        🧩 Apliques
+                        <FaPuzzlePiece /> Apliques
                     </Link>
                     <Link to="/tecidos-lencol" className="drawer-link">
-                        🧵 Tecidos
+                        <FaCut /> Tecidos
                     </Link>
+
+                    <hr />
+                    <h3>Ferramentas</h3>
                     <Link to="/composicao-sintetico" className="drawer-link">
-                        ✨ Simulador
+                        <FaLayerGroup /> Simulador
                     </Link>
-                    <Link to="/composicao-lencol" className="drawer-link">
-                        ✨ Simulador
+                    <Link to="/calculadora-colchao" className="drawer-link">
+                        <FaCalculator /> Calculadora
                     </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
-                    </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
-                    </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
-                    </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
-                    </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
-                    </Link>
-                    <Link to="/simulador-sintetico" className="drawer-link">
-                        ✨ Simulador
+
+                    {/* Link Carrinho no Menu também */}
+                    <Link to="/cart" className="drawer-link">
+                        <CiShoppingCart size={20} /> Carrinho ({cartCount})
                     </Link>
 
                     {isLoggedIn && canAccessAdmin && (
                         <>
                             <hr />
-                            <h3>Administração</h3>
                             <Link
                                 to="/admin"
                                 className="drawer-link admin-link"
                             >
-                                <FaCog /> Painel Admin
+                                <FaCog /> Admin
                             </Link>
                         </>
                     )}
@@ -288,14 +284,13 @@ const Header = () => {
                                 onClick={handleLogout}
                                 className="drawer-link logout-link"
                             >
-                                <FaSignOutAlt /> Sair da Conta
+                                <FaSignOutAlt /> Sair
                             </button>
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Overlay escuro para fechar ao clicar fora */}
             {isMobileMenuOpen && (
                 <div
                     className="mobile-overlay"

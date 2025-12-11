@@ -47,4 +47,8 @@
         align-items: flex-start;
         gap: 15px;
     }
+
+    .form-row {
+        display: block;
+    }
 }

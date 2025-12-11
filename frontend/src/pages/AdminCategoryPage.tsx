@@ -185,9 +185,8 @@ const AdminCategoryPage: React.FC = () => {
                                             handleDelete(category.id)
                                         }
                                     >
-                                        <FaTrashAlt /> Excluir
+                                        <FaTrashAlt />
                                     </button>
-                                    {/* Link para uma futura rota de Edição: /admin/categories/edit/:id */}
                                 </td>
                             </tr>
                         ))}

@@ -7,9 +7,11 @@ import { JwtModule } from '@nestjs/jwt'; // 3. Importe o JwtModule
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 4. Importe Configs
 import { JwtStrategy } from './jwt.strategy';
 import { RecaptchaModule } from 'src/recaptcha/recaptcha.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
     imports: [
+        HttpModule,
         PrismaModule, // Para o AuthService poder usar o PrismaClient
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({

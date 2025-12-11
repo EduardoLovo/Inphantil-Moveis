@@ -48,6 +48,9 @@ h3,
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
+.grecaptcha-badge {
+    visibility: hidden;
+}
 
 @media (prefers-color-scheme: light) {
     :root {

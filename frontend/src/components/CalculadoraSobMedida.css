@@ -14,7 +14,7 @@
 /* ========================================================== */
 
 .calculator-container {
-    padding: 150px 20px;
+    padding: 120px 20px;
     background-color: var(--color-background-light);
     min-height: calc(100vh - var(--header-height, 70px) - 100px);
     display: flex;

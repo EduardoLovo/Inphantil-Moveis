@@ -52,6 +52,10 @@
 
 /* Responsividade */
 @media (max-width: 600px) {
+    .calculator-container {
+        padding: 20px;
+    }
+
     .form-row {
         flex-direction: column;
         gap: 0;

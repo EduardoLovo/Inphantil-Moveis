@@ -364,7 +364,7 @@ body {
 /* Ajustes para telas muito pequenas (iPhone SE, etc) */
 @media (max-width: 480px) {
     .hero-section {
-        height: 45vh;
+        height: 93vh;
     }
 
     .hero-text-overlay h2 {

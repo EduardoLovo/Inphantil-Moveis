@@ -115,7 +115,7 @@ function App() {
                         element={<AdminContactPage />}
                     />{' '}
                     <Route
-                        path="/composicao-protetores"
+                        path="/composicao/protetores"
                         element={<Desenhos />}
                     />{' '}
                     <Route path="/cart" element={<CartPage />} />

@@ -17,6 +17,7 @@ const AdminProductsPage: React.FC = () => {
         (user.role === 'ADMIN' ||
             user.role === 'DEV' ||
             user.role === 'SELLER');
+
     const canDelete = user && (user.role === 'ADMIN' || user.role === 'DEV');
 
     if (!canManage) {

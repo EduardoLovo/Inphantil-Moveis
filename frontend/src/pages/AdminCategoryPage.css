@@ -16,7 +16,8 @@
 .admin-page-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding-bottom: 50px;
+    padding: 120px 50px;
+    min-height: 60vh;
 }
 
 .category-form-container {
@@ -112,7 +113,7 @@
 
 .category-button-add {
     /* Reutiliza o estilo do botão da calculadora (amarelo/ouro) */
-    padding: 10px 20px;
+    width: auto;
     background-color: var(--color-action-link);
     color: var(--color-text-primary);
     border: none;
@@ -130,6 +131,7 @@
 /* Responsividade Mobile */
 @media screen and (max-width: 600px) {
     .category-form {
+        display: block;
         flex-direction: column;
         gap: 10px;
     }

@@ -57,19 +57,19 @@ const ADMIN_CARDS: AdminCard[] = [
         link: '/admin/logs',
         requiredRoles: ['DEV'], // Apenas Dev (como no backend)
     },
-    {
-        title: 'Catálogo de Demonstração (Visual)',
-        description:
-            'Gerenciar apliques, tecidos e itens visuais para o catálogo.',
-        IconComponent: FaPalette,
-        link: '/admin/visuals',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
+
     {
         title: 'Mensagens de Contato',
         description: 'Visualizar e-mails e dúvidas enviadas pelos clientes.',
         IconComponent: FaEnvelope,
         link: '/admin/contacts',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Protetores de Parede',
+        description: 'Composições de Protetores.',
+        IconComponent: FaEnvelope,
+        link: '/composicao/protetores',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
 ];
@@ -98,15 +98,6 @@ const CALCULADORAS_CARDS: AdminCard[] = [
     },
 ];
 
-// const CRIARNOVOSPRODUTOS_CARDS: AdminCard[] = [
-//     {
-//         title: 'Calculadora Cama Sob Medida',
-//         description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-//         IconComponent: FaCalculator,
-//         link: '/calculadora-cama-sob-medida',
-//         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-//     },
-// ];
 const AdminPage = () => {
     const { user } = useAuthStore();
 
