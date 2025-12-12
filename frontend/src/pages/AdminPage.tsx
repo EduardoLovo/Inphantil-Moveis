@@ -72,6 +72,20 @@ const ADMIN_CARDS: AdminCard[] = [
         link: '/composicao/protetores',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
+    {
+        title: 'Apliques para cortar',
+        description: 'Composições de Protetores.',
+        IconComponent: FaEnvelope,
+        link: '/admin/apliques/low-stock',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Apliques para comprar',
+        description: 'Composições de Protetores.',
+        IconComponent: FaEnvelope,
+        link: '/admin/apliques/restock',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
 ];
 
 const CALCULADORAS_CARDS: AdminCard[] = [

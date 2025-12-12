@@ -34,11 +34,11 @@ const Footer: React.FC = () => {
                             <Link to="/apliques">Apliques Decorativos</Link>
                         </li>
                         <li>
-                            <Link to="/calculadora-colchao">
-                                Calculadora Sob Medida
-                            </Link>
+                            <Link to="/contact">Contato</Link>
                         </li>
-                        {/* Adicione mais rotas se necessário */}
+                        <li>
+                            <Link to="/pos-venda">Informações pós venda</Link>
+                        </li>
                     </ul>
                 </div>
 

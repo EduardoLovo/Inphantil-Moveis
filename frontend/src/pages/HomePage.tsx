@@ -13,66 +13,35 @@ import { useState } from 'react';
 const AMBIENTES = [
     {
         id: 1,
-        title: 'Quarto Selva Mágica',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg', // Capa
+        title: 'Quarto Azul',
+        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1765558529/WhatsApp_Image_2025-11-26_at_10.52.10_dxfnhn.jpg', // Capa
         gallery: [
             // Fotos internas
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558529/WhatsApp_Image_2025-11-26_at_10.52.10_dxfnhn.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558534/WhatsApp_Image_2025-11-26_at_10.51.33_qwloca.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558525/WhatsApp_Image_2025-12-05_at_11.47.56_smwokd.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558521/WhatsApp_Image_2025-12-05_at_11.47.57_ejji7b.jpg',
         ],
     },
     {
         id: 2,
-        title: 'Cantinho da Leitura',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
+        title: 'Quarto Rosa',
+        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1765559086/WhatsApp_Image_2025-11-25_at_08.40.20_g2omjy.jpg',
         gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559090/WhatsApp_Image_2025-11-25_at_08.40.12_vsbv9e.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559073/WhatsApp_Image_2025-12-02_at_16.28.08_j8um3j.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765561261/WhatsApp_Image_2025-12-11_at_10.29.03_myvevo.jpg',
         ],
     },
     {
         id: 3,
-        title: 'Sonho de Princesa',
+        title: 'Quarto Cinza',
         cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
         gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572690/cld-sample-3.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572688/cld-sample.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559818/WhatsApp_Image_2025-11-17_at_08.44.22_vxc1ff.jpg',
         ],
     },
-    {
-        id: 4,
-        title: 'Sonho de Princesa',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-        gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572690/cld-sample-3.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572688/cld-sample.jpg',
-        ],
-    },
-    {
-        id: 5,
-        title: 'Sonho de Princesa',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-        gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572690/cld-sample-3.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1763572688/cld-sample.jpg',
-        ],
-    },
+
     {
         id: 6,
         title: 'Natal Inphantil',
@@ -90,26 +59,58 @@ const GalleryModal: React.FC<{
     title: string;
     onClose: () => void;
 }> = ({ images, title, onClose }) => {
+    const [zoomedImage, setZoomedImage] = useState<string | null>(null);
     return (
-        <div className="gallery-modal-overlay" onClick={onClose}>
-            <div
-                className="gallery-modal-content"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button className="gallery-close-btn" onClick={onClose}>
-                    <FaTimes />
-                </button>
-                <h2>{title}</h2>
-                <div className="gallery-grid">
-                    {images.map((img, idx) => (
-                        <img
-                            key={idx}
-                            src={img}
-                            alt={`Detalhe ${idx}`}
-                            className="gallery-item-img"
-                        />
-                    ))}
+        <>
+            <div className="gallery-modal-overlay" onClick={onClose}>
+                <div
+                    className="gallery-modal-content"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button className="gallery-close-btn" onClick={onClose}>
+                        <FaTimes />
+                    </button>
+                    <h2>{title}</h2>
+                    <div className="gallery-grid">
+                        {images.map((img, idx) => (
+                            <img
+                                key={idx}
+                                src={img}
+                                alt={`Detalhe ${idx}`}
+                                className="gallery-item-img"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setZoomedImage(img);
+                                }}
+                            />
+                        ))}
+                    </div>
                 </div>
+            </div>
+            {zoomedImage && (
+                <ImageZoomModal
+                    image={zoomedImage}
+                    onClose={() => setZoomedImage(null)}
+                />
+            )}
+        </>
+    );
+};
+
+const ImageZoomModal: React.FC<{
+    image: string;
+    onClose: () => void;
+}> = ({ image, onClose }) => {
+    return (
+        <div className="zoom-modal-overlay" onClick={onClose}>
+            <button className="zoom-close-btn" onClick={onClose}>
+                <FaTimes />
+            </button>
+            <div
+                className="zoom-modal-content"
+                onClick={(e) => e.stopPropagation()} // Impede fechar ao clicar na imagem
+            >
+                <img src={image} alt="Zoom" className="zoom-image" />
             </div>
         </div>
     );

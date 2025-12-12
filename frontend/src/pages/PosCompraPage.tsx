@@ -152,7 +152,9 @@ const SECTIONS = [
                     <li>
                         Para solicitar suporte, entre em contato pelo nosso
                         canal oficial de atendimento via
-                        <strong> WhatsApp: (61) 9 8238-8828</strong>
+                        <p>
+                            <strong> WhatsApp: (61) 98238-8828</strong>
+                        </p>
                     </li>
                 </ul>
             </div>
@@ -436,7 +438,7 @@ const SECTIONS = [
         title: 'Dúvidas Frequentes',
         icon: FaQuestionCircle,
         content: (
-            <div className='perguntas-comuns'>
+            <div className="perguntas-comuns">
                 <h2>Perguntas Comuns</h2>
                 <details>
                     <summary>As camas suportam quantos quilos?</summary>
@@ -501,12 +503,12 @@ const PosCompraPage: React.FC = () => {
                         <h4>Ainda precisa de ajuda?</h4>
                         <p>Fale conosco no WhatsApp:</p>
                         <a
-                            href="https://wa.me/5544999999999"
+                            href="https://wa.me/5561982388828"
                             target="_blank"
                             rel="noreferrer"
                             className="contact-link"
                         >
-                            (44) 99999-9999
+                            (61) 98238-8828
                         </a>
                     </div>
                 </aside>

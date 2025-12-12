@@ -40,8 +40,6 @@ const ProductsPage = () => {
     const canEdit = user && (user.role === 'ADMIN' || user.role === 'DEV');
     // Obs: A rota GET /products é pública, mas o botão de editar só aparece para Admin/Dev logados
 
-    console.log(products);
-
     return (
         <div className="products-page-container">
             <h1 className="page-title">Catálogo de Produtos</h1>
@@ -61,11 +59,16 @@ const ProductsPage = () => {
                     >
                         <h3>{product.name}</h3>
 
-                        <img
-                            src={product.mainImage}
-                            alt={product.name}
-                            className="product-image"
-                        />
+                        <Link
+                            to={`/products/${product.id}`}
+                            className="product-image-link"
+                        >
+                            <img
+                                src={product.mainImage}
+                                alt={product.name}
+                                className="product-image"
+                            />
+                        </Link>
 
                         <p className="price-stock">
                             Preço: <strong>{formatPrice(product.price)}</strong>

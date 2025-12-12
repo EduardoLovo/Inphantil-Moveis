@@ -19,8 +19,7 @@ import {
 import { CiShoppingCart } from 'react-icons/ci';
 import './Header.css';
 
-const LOGO_IMAGE =
-    'https://res.cloudinary.com/dtghitaah/image/upload/v1763574971/logo_vetor_xzh0vd.png';
+const LOGO_IMAGE = '/logo.svg';
 
 const Header = () => {
     const { isLoggedIn, user, logout } = useAuthStore();
@@ -91,7 +90,8 @@ const Header = () => {
                     {/* --- NAVEGAÇÃO DESKTOP --- */}
                     <nav className="main-nav desktop-only">
                         <Link to="/">Início</Link>
-
+                        <Link to="/pos-venda">Informações pós venda</Link>
+                        <Link to="/contact">Contato</Link>
                         <div
                             className={`nav-dropdown ${
                                 isCatalogOpen ? 'is-open' : ''
@@ -249,6 +249,9 @@ const Header = () => {
                     </Link>
                     <Link to="/tecidos-lencol" className="drawer-link">
                         <FaCut /> Tecidos
+                    </Link>
+                    <Link to="/pos-venda" className="drawer-link">
+                        <FaCut /> Informações pós venda
                     </Link>
 
                     <hr />

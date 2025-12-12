@@ -6,9 +6,9 @@
 
 .products-page-container {
     max-width: 100%;
-    padding: 0 20px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
+    padding: 100px 50px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
     min-height: 80vh; /* Garante que a página tenha alguma altura */
-    padding-top: 50px;
+    /* padding-top: 50px; */
 }
 
 .page-title {
@@ -130,4 +130,13 @@
     margin-top: 10px;
     color: var(--color-action-link, #007bff);
     font-weight: bold;
+}
+
+.product-image {
+    transition: transform 0.5s;
+}
+
+.product-image:hover {
+    /* scale: 1.02; */
+    transform: translateY(-3px); /* Efeito suave ao passar o mouse */
 }

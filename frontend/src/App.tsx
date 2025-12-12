@@ -37,6 +37,9 @@ import GoogleAnalytics from './components/GoogleAnalytics';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import EditProfilePage from './pages/auth/EditProfilePage';
+import ProductDetailsPage from './pages/ProductDetailsPage';
+import LowStockApliquesPage from './pages/LowStockApliquesPage';
+import RestockApliquesPage from './pages/RestockApliquesPage';
 
 function App() {
     return (
@@ -65,7 +68,8 @@ function App() {
                     element={<ForgotPasswordPage />}
                 />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
-
+                <Route path="/products/:id" element={<ProductDetailsPage />} />
+                <Route path="/pos-venda" element={<PosCompraPage />} />
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
@@ -132,6 +136,14 @@ function App() {
                     <Route
                         path="/admin/products/edit/:id"
                         element={<EditProductPage />}
+                    />
+                    <Route
+                        path="/admin/apliques/low-stock"
+                        element={<LowStockApliquesPage />}
+                    />
+                    <Route
+                        path="/admin/apliques/restock"
+                        element={<RestockApliquesPage />}
                     />
                 </Route>
                 <Route path="/profile/edit" element={<EditProfilePage />} />

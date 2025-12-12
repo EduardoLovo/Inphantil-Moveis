@@ -24,7 +24,7 @@ button:hover {
 }
 
 button.selected {
-    border: 1px solid #302b2bd8;
+    /* border: 1px solid #302b2bd8; */
     color: #747474;
     box-shadow: 0 0 0px #00000070;
 }
@@ -72,4 +72,3 @@ button.selected {
 .area-desenho svg {
     cursor: url('/images/cursor.png') 0 0, crosshair;
 }
-
