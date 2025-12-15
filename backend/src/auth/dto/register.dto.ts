@@ -31,7 +31,7 @@ export class RegisterDto {
         minLength: 8,
     }) // 4. Adicione
     @IsString()
-    @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
+    @MinLength(6, { message: 'A senha deve ter no mínimo 8 caracteres' })
     password!: string;
 
     @ApiProperty({

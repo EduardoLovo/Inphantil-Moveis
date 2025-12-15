@@ -31,17 +31,16 @@ const CalculadoraSobMedida: React.FC = () => {
 
     // Função para formatar os valores (de cm para m, com vírgula)
     const formatarMedida = (valor: string): string => {
-        let rawValue = valor.replace(/\D/g, '');
+        // Remove tudo que não for dígito (0-9)
+        const rawValue = valor.replace(/\D/g, '');
+        
         if (rawValue === '') return '';
 
-        // Se tiver mais de 2 dígitos, formatamos com duas casas decimais
-        if (rawValue.length > 2) {
-            let numericValue = (parseInt(rawValue, 10) / 100).toFixed(2);
-            return numericValue.replace('.', ',');
-        }
-
-        // Se tiver 1 ou 2 dígitos (ex: 50cm), apenas exibe o valor
-        return rawValue;
+        // Sempre divide por 100 para criar o efeito de centavos/decimais
+        // Ex: "1" -> 0.01 -> "0,01"
+        // Ex: "188" -> 1.88 -> "1,88"
+        const numericValue = (parseInt(rawValue, 10) / 100).toFixed(2);
+        return numericValue.replace('.', ',');
     };
 
     // 4. Tipagem do evento de formulário

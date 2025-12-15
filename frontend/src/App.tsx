@@ -18,7 +18,7 @@ import CreateApliquePage from './pages/CreateApliquePage';
 import AdminCategoryPage from './pages/AdminCategoryPage';
 import CreateTecidoPage from './pages/CreateTecidoPage';
 import CreateSinteticoPage from './pages/CreateSinteticoPage';
-import SinteticosPage from './pages/SinteticosPage';
+import SinteticosPageTapetes from './pages/SinteticosPageTapetes';
 import PageCreateItem from './pages/PageCreateItem';
 import PosCompraPage from './pages/PosCompraPage';
 import ContactPage from './pages/ContactPage';
@@ -40,6 +40,7 @@ import EditProfilePage from './pages/auth/EditProfilePage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import LowStockApliquesPage from './pages/LowStockApliquesPage';
 import RestockApliquesPage from './pages/RestockApliquesPage';
+import SinteticosPage from './pages/SinteticosPage';
 
 function App() {
     return (
@@ -55,6 +56,10 @@ function App() {
                 <Route path="/catalogo/apliques" element={<ApliquesPage />} />
                 <Route path="/apliques" element={<ApliquesPage />} />
                 <Route path="/tecidos-lencol" element={<TecidosPage />} />
+                <Route
+                    path="/sinteticos/tapetes"
+                    element={<SinteticosPageTapetes />}
+                />
                 <Route path="/sinteticos" element={<SinteticosPage />} />
                 <Route path="/pos-compra" element={<PosCompraPage />} />
                 <Route path="/contact" element={<ContactPage />} />

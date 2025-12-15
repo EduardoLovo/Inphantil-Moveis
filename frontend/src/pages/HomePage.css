@@ -70,12 +70,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(
-        0,
-        0,
-        0,
-        0.4
-    ); /* Um pouco mais escuro para leitura */
+    background-color: rgba(0, 0, 0, 0.301);
     color: white;
     display: flex;
     flex-direction: column;

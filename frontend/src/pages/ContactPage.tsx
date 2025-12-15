@@ -68,7 +68,7 @@ const ContactPage: React.FC = () => {
                         <FaPhone className="info-icon" />
                         <div>
                             <h4>WhatsApp / Telefone</h4>
-                            <p>(44) 99999-9999</p>
+                            <p>(61) 98238-8828</p>
                         </div>
                     </div>
 

@@ -10,6 +10,9 @@ import {
     FaEnvelope,
 } from 'react-icons/fa';
 import { SlLogin } from 'react-icons/sl';
+import { FaHelmetSafety } from 'react-icons/fa6';
+import { GiRolledCloth } from 'react-icons/gi';
+import { RiScissorsCutLine } from 'react-icons/ri';
 // Define as rotas administrativas e as permissões necessárias
 interface AdminCard {
     title: string;
@@ -68,21 +71,21 @@ const ADMIN_CARDS: AdminCard[] = [
     {
         title: 'Protetores de Parede',
         description: 'Composições de Protetores.',
-        IconComponent: FaEnvelope,
+        IconComponent: FaHelmetSafety,
         link: '/composicao/protetores',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
     {
         title: 'Apliques para cortar',
         description: 'Composições de Protetores.',
-        IconComponent: FaEnvelope,
+        IconComponent: RiScissorsCutLine,
         link: '/admin/apliques/low-stock',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
     {
         title: 'Apliques para comprar',
         description: 'Composições de Protetores.',
-        IconComponent: FaEnvelope,
+        IconComponent: GiRolledCloth,
         link: '/admin/apliques/restock',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },

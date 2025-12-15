@@ -168,7 +168,11 @@ const CreateSinteticoPage: React.FC = () => {
                                     Selecione uma cor (Opcional)
                                 </option>
                                 {COLORS.map((c) => (
-                                    <option key={c} value={c} className='color-opcao'>
+                                    <option
+                                        key={c}
+                                        value={c}
+                                        className="color-opcao"
+                                    >
                                         {c}
                                     </option>
                                 ))}
@@ -199,7 +203,7 @@ const CreateSinteticoPage: React.FC = () => {
                         </div>
 
                         <div className="form-group checkbox-group">
-                            <label>É Tapete?</label>
+                            <label>Apenas para Tapete:</label>
                             <input
                                 type="checkbox"
                                 checked={isTapete}

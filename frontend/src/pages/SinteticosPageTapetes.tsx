@@ -3,7 +3,8 @@ import { useSinteticoStore } from '../store/SinteticoStore';
 import { useAuthStore } from '../store/AuthStore';
 import { FaEdit, FaTimes } from 'react-icons/fa';
 import type { VisualItem } from '../types/visual-item';
-// import './SinteticosPage.css';
+
+import './SinteticosPageTapetes.css';
 
 const FILTER_OPTIONS = [
     'TODOS',
@@ -88,6 +89,7 @@ const EditSinteticoModal: React.FC<{
     const [inStock, setInStock] = useState(item.inStock);
     const [isExternal, setIsExternal] = useState(item.isExternal || false);
     const [isTapete, setIsTapete] = useState(item.isTapete || false);
+
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -101,7 +103,7 @@ const EditSinteticoModal: React.FC<{
                 color: color || null,
                 inStock,
                 isExternal,
-                isTapete
+                isTapete,
             });
             onClose();
         } catch (error) {
@@ -161,7 +163,7 @@ const EditSinteticoModal: React.FC<{
                             />
                         </div>
                         <div className="form-group checkbox-group">
-                            <label>Externo:</label>
+                            <label>Faz externo:</label>
                             <input
                                 type="checkbox"
                                 checked={isExternal}
@@ -200,7 +202,7 @@ const EditSinteticoModal: React.FC<{
 // =========================================================
 // 3. COMPONENTE DA PÁGINA
 // =========================================================
-const SinteticosPage: React.FC = () => {
+const SinteticosPageTapetes: React.FC = () => {
     const { sinteticos, isLoading, error, fetchSinteticos, updateSintetico } =
         useSinteticoStore();
     const user = useAuthStore((state) => state.user);
@@ -233,10 +235,6 @@ const SinteticosPage: React.FC = () => {
 
     // Filtros
     const filteredItems = sinteticos.filter((item) => {
-        // --- MODIFICAÇÃO: Excluir itens que são Tapetes ---
-        if (item.isTapete) return false;
-        // -------------------------------------------------
-
         if (selectedFilter === 'TODOS') return true;
         if (selectedFilter === 'EXTERNO') return item.isExternal;
         return item.color === selectedFilter;
@@ -265,7 +263,7 @@ const SinteticosPage: React.FC = () => {
 
     return (
         <div className="sintetico-page-container">
-            <h1>Catálogo de Cores</h1>
+            <h1>Catálogo de Cores para Tapete</h1>
 
             <div className="filter-bar">
                 {FILTER_OPTIONS.map((filter) => (
@@ -335,4 +333,4 @@ const SinteticosPage: React.FC = () => {
     );
 };
 
-export default SinteticosPage;
+export default SinteticosPageTapetes;

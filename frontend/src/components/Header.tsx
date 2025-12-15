@@ -103,7 +103,7 @@ const Header = () => {
                                 className="dropdown-toggle"
                                 onClick={toggleCatalog}
                             >
-                                Catálogo ▼
+                                Catálogos ▼
                             </Link>
                             <div className="dropdown-menu">
                                 <span className="dropdown-section-title">
@@ -131,10 +131,16 @@ const Header = () => {
                                     Apliques
                                 </Link>
                                 <Link
+                                    to="/sinteticos/tapetes"
+                                    onClick={() => setIsCatalogOpen(false)}
+                                >
+                                    Cores para Tapete
+                                </Link>
+                                <Link
                                     to="/sinteticos"
                                     onClick={() => setIsCatalogOpen(false)}
                                 >
-                                    Cores para camas
+                                    Cores para Cama
                                 </Link>
                                 <Link
                                     to="/tecidos-lencol"
