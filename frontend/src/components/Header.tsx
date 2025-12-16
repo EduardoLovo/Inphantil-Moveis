@@ -128,7 +128,13 @@ const Header = () => {
                                     to="/apliques"
                                     onClick={() => setIsCatalogOpen(false)}
                                 >
-                                    Apliques
+                                    Apliques para Lençol
+                                </Link>
+                                <Link
+                                    to="/tecidos-lencol"
+                                    onClick={() => setIsCatalogOpen(false)}
+                                >
+                                    Tecidos para Lençol
                                 </Link>
                                 <Link
                                     to="/sinteticos/tapetes"
@@ -143,10 +149,10 @@ const Header = () => {
                                     Cores para Cama
                                 </Link>
                                 <Link
-                                    to="/tecidos-lencol"
+                                    to="/products"
                                     onClick={() => setIsCatalogOpen(false)}
                                 >
-                                    Tecidos para Lençol
+                                    Loja
                                 </Link>
                             </div>
                         </div>

@@ -14,8 +14,6 @@
 /* LAYOUT E TABELA */
 /* ========================================================== */
 .admin-page-container {
-    max-width: 1200px;
-    margin: 0 auto;
     padding: 120px 50px;
     min-height: 60vh;
 }
@@ -59,7 +57,7 @@
     margin-top: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     border-radius: 6px;
-    overflow: hidden; /* Para garantir que o border-radius funcione */
+    overflow: hidden;
 }
 
 .table-header {
@@ -109,6 +107,7 @@
 
 .delete-button:hover {
     background-color: rgba(220, 53, 69, 0.1);
+    background-color: rgb(61, 83, 19);
 }
 
 .category-button-add {

@@ -8,7 +8,8 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useProductStore } from '../store/ProductStore'; // Importando a store de produtos
 
 const AMBIENTES = [
     {
@@ -39,6 +40,10 @@ const AMBIENTES = [
         cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
         gallery: [
             'https://res.cloudinary.com/dtghitaah/image/upload/v1765559818/WhatsApp_Image_2025-11-17_at_08.44.22_vxc1ff.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893515/WhatsApp_Image_2025-12-16_at_08.24.26_qo4mwn.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-16_at_08.25.10_xwdjy4.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-02_at_13.47.57_t8owco.jpg',
+            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-02_at_13.48.26_fih9fq.jpg',
         ],
     },
 
@@ -122,6 +127,20 @@ const HomePage = () => {
         title: string;
     } | null>(null);
 
+    const { products, fetchProducts } = useProductStore();
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    // Formatação de preço (reutilizando lógica)
+    const formatPrice = (price: number) => {
+        return price.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+        });
+    };
+
     // Slide da Esquerda
     const slideInLeft: Variants = {
         hidden: { opacity: 0, x: -100 },
@@ -131,6 +150,8 @@ const HomePage = () => {
             transition: { duration: 0.8, ease: 'easeOut' },
         },
     };
+
+    const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 4);
 
     // Slide da Direita (se quiser alternar)
     const slideInRight: Variants = {
@@ -200,6 +221,86 @@ const HomePage = () => {
                         Veja nossos produtos mais vendidos e encontre o item
                         perfeito para o seu lar.
                     </p>
+                    {/* Grid de Produtos Destacados */}
+                    {featuredProducts.length > 0 ? (
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns:
+                                    'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '20px',
+                                margin: '30px 0',
+                                width: '100%',
+                            }}
+                        >
+                            {featuredProducts.map((product) => (
+                                <Link
+                                    key={product.id}
+                                    to={`/products/${product.id}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'inherit',
+                                    }}
+                                >
+                                    <div
+                                        className="featured-card"
+                                        style={{
+                                            border: '1px solid #eee',
+                                            borderRadius: '12px',
+                                            padding: '15px',
+                                            textAlign: 'center',
+                                            boxShadow:
+                                                '0 4px 6px rgba(0,0,0,0.05)',
+                                            background: '#fff',
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'space-between',
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s',
+                                        }}
+                                    >
+                                        <div style={{ marginBottom: '10px' }}>
+                                            <img
+                                                src={product.mainImage}
+                                                alt={product.name}
+                                                style={{
+                                                    // width: '100%',
+                                                    height: '180px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <h3
+                                                style={{
+                                                    fontSize: '1.1rem',
+                                                    margin: '10px 0',
+                                                    color: '#444',
+                                                }}
+                                            >
+                                                {product.name}
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontWeight: 'bold',
+                                                    color: '#d66f56', // Cor temática aproximada
+                                                    fontSize: '1.2rem',
+                                                }}
+                                            >
+                                                {formatPrice(product.price)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <p style={{ fontStyle: 'italic', margin: '20px 0' }}>
+                            Carregando destaques...
+                        </p>
+                    )}
                     <Link to="/products" className="cta-button">
                         Ver Catálogo Completo
                     </Link>
@@ -318,7 +419,9 @@ const HomePage = () => {
                     variants={slideInRight}
                 >
                     <h2>Instagram</h2>
-                    <p>Siga-nos no Instagram para mais inspirações!</p>
+                    <p>
+                        Siga-nos no Instagram para mais inspirações! @inphantil
+                    </p>
                     seçao de feed
                     <FaInstagram />
                 </motion.section>

@@ -73,7 +73,7 @@ const AdminContactPage: React.FC = () => {
                                     <a
                                         href={`mailto:${msg.email}`}
                                         style={{
-                                            color: 'var(--color-action-link)',
+                                            color: 'green',
                                             fontWeight: 'bold',
                                         }}
                                     >
@@ -85,7 +85,7 @@ const AdminContactPage: React.FC = () => {
                                 </td>
                                 <td
                                     className="table-cell"
-                                    style={{ minWidth: '300px' }}
+                                    style={{ maxWidth: '300px' }}
                                 >
                                     {msg.message}
                                 </td>

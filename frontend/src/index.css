@@ -4,19 +4,10 @@
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
-
     color-scheme: light dark;
-    /* color: rgba(255, 255, 255, 0.87); */
-    /* background-color: #b0b6ba; */
-
     background: #fafafa;
-
     background-repeat: no-repeat;
-
-    /* 3. Garante que a imagem cubra toda a área visível, sem esticar */
     background-size: cover;
-
-    /* 4. O MAIS IMPORTANTE: Fixa a imagem no viewport */
     background-attachment: fixed;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -34,10 +25,11 @@ html,
 body {
     margin: 0;
     padding: 0;
-    height: 100%; /* Garante que o body ocupe a altura total */
+    min-height: 100dvh;
     scroll-behavior: smooth;
     font-family: 'Inter', Arial, sans-serif;
     width: 100%;
+    overflow-x: hidden;
     color: #474747;
 }
 h1,

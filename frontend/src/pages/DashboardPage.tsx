@@ -114,9 +114,9 @@ const DashboardPage = () => {
                     <FaUserCircle className="profile-icon" /> Meu Perfil
                 </h1>
 
-                <p className="welcome-message">
+                <p className="cc">
                     Bem-vindo(a),{' '}
-                    <span className="user-name-highlight">{user.name}</span>!
+                    <span className="user-name-highlight">{user.name}</span>
                 </p>
                 {user.role !== 'USER' && (
                     <p className="role-message">
