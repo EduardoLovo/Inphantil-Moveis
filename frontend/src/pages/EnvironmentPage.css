@@ -1,0 +1,377 @@
+/* Container ocupa a tela inteira menos o cabeçalho do site (ajuste o height se necessário) */
+.env-page-container {
+    display: flex;
+    height: calc(100vh - 0px);
+    background-color: #f4f6f8;
+    overflow: hidden; /* Impede scroll na página inteira, usa scroll interno */
+}
+
+/* --- SIDEBAR --- */
+.env-sidebar {
+    width: 320px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.env-sidebar-header {
+    padding: 100px 20px 0 20px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.env-sidebar-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.env-sidebar-header p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Lista Scrollável do Menu */
+.env-list {
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Item do Menu */
+.env-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background 0.2s, border-left 0.2s;
+    border-left: 4px solid transparent;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.env-item:hover {
+    background-color: #f8f9fa;
+}
+
+.env-item.active {
+    background-color: #f0f7ff;
+    border-left-color: #007bff; /* Cor destaque */
+}
+
+.env-item-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 15px;
+    flex-shrink: 0;
+    border: 1px solid #eee;
+}
+
+.env-item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.env-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.env-name {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.env-count {
+    font-size: 0.8rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* --- ÁREA PRINCIPAL --- */
+.env-content {
+    flex: 1;
+    overflow-y: auto; /* Scroll independente */
+    position: relative;
+    background-color: #fff;
+}
+
+/* Hero Header (Capa Grande) */
+.env-hero {
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.env-hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    padding: 30px;
+    color: white;
+}
+
+.env-hero-overlay h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.env-hero-overlay p {
+    margin: 5px 0 0;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Seção da Galeria */
+.env-gallery-section {
+    padding: 30px;
+}
+
+.env-gallery-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+    border-left: 5px solid #007bff;
+    padding-left: 10px;
+}
+
+.env-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.env-photo-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+    aspect-ratio: 4/3;
+    background: #eee;
+}
+
+.env-photo-card:hover {
+    transform: translateY(-5px);
+}
+
+.env-photo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Loading e Empty States */
+.env-loading,
+.env-empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.2rem;
+    color: #666;
+    gap: 10px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+.admin-edit-btn {
+    width: 250px;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #ffc107;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* ... CSS anterior ... */
+
+/* Efeito de Hover no Card da Galeria */
+.env-photo-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+    aspect-ratio: 4/3;
+    background: #eee;
+    cursor: pointer; /* Indica clicável */
+    position: relative;
+}
+
+.env-photo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Texto "Ver Ampliado" que aparece ao passar o mouse */
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card-hover-overlay span {
+    color: white;
+    font-weight: 600;
+    border: 1px solid white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.env-photo-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* --- MODAL STYLES --- */
+
+/* Fundo Escuro */
+.env-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000; /* Garante que fique acima de tudo, inclusive sidebar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Conteúdo do Modal */
+.env-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.env-modal-content img {
+    max-width: 100%;
+    max-height: 90vh; /* Limita altura para não estourar a tela */
+    display: block;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+/* Botão Fechar */
+.env-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.env-modal-close:hover {
+    color: #ff4444;
+}
+
+/* Responsivo para Celular */
+@media (max-width: 768px) {
+    .env-page-container {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .env-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .env-sidebar-header {
+        padding: 20px;
+    }
+
+    .env-list {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .env-item {
+        min-width: 200px;
+        border-bottom: none;
+        border-right: 1px solid #eee;
+    }
+
+    .env-hero {
+        height: 200px;
+    }
+
+    .env-modal-close {
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+}

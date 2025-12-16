@@ -230,3 +230,22 @@ model ContactMessage {
   userId    Int?     // Pode ser nulo (visitante)
   user      User?    @relation(fields: [userId], references: [id])
 }
+
+// Modelo para os Ambientes (Quartos decorados/Inspirações)
+model Environment {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(150)
+  cover     String   // URL da imagem de capa (aparece no card)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images    EnvironmentImage[] // Relação com as fotos da galeria interna
+}
+
+model EnvironmentImage {
+  id            Int         @id @default(autoincrement())
+  url           String
+  key           String?     // Opcional: ID do Cloudinary para deleção futura
+  environmentId Int
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+}

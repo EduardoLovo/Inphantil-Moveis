@@ -10,53 +10,14 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useEffect, useState } from 'react';
 import { useProductStore } from '../store/ProductStore'; // Importando a store de produtos
+import { api } from '../services/api';
 
-const AMBIENTES = [
-    {
-        id: 1,
-        title: 'Quarto Azul',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1765558529/WhatsApp_Image_2025-11-26_at_10.52.10_dxfnhn.jpg', // Capa
-        gallery: [
-            // Fotos internas
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558529/WhatsApp_Image_2025-11-26_at_10.52.10_dxfnhn.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558534/WhatsApp_Image_2025-11-26_at_10.51.33_qwloca.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558525/WhatsApp_Image_2025-12-05_at_11.47.56_smwokd.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765558521/WhatsApp_Image_2025-12-05_at_11.47.57_ejji7b.jpg',
-        ],
-    },
-    {
-        id: 2,
-        title: 'Quarto Rosa',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1765559086/WhatsApp_Image_2025-11-25_at_08.40.20_g2omjy.jpg',
-        gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559090/WhatsApp_Image_2025-11-25_at_08.40.12_vsbv9e.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559073/WhatsApp_Image_2025-12-02_at_16.28.08_j8um3j.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765561261/WhatsApp_Image_2025-12-11_at_10.29.03_myvevo.jpg',
-        ],
-    },
-    {
-        id: 3,
-        title: 'Quarto Cinza',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764781802/3_h1ncze.jpg',
-        gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765559818/WhatsApp_Image_2025-11-17_at_08.44.22_vxc1ff.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893515/WhatsApp_Image_2025-12-16_at_08.24.26_qo4mwn.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-16_at_08.25.10_xwdjy4.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-02_at_13.47.57_t8owco.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1765893514/WhatsApp_Image_2025-12-02_at_13.48.26_fih9fq.jpg',
-        ],
-    },
-
-    {
-        id: 6,
-        title: 'Natal Inphantil',
-        cover: 'https://res.cloudinary.com/dtghitaah/image/upload/v1764856806/PHOTO-2021-10-07-19-27-57_mgcgxl.jpg',
-        gallery: [
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764856817/PHOTO-2021-10-07-19-27-57_3_ciotxn.jpg',
-            'https://res.cloudinary.com/dtghitaah/image/upload/v1764856789/PHOTO-2021-10-07-20-14-23_o3ijms.jpg',
-        ],
-    },
-];
+interface Environment {
+    id: number;
+    title: string;
+    cover: string;
+    images: { id: number; url: string }[];
+}
 
 // 3. COMPONENTE DO MODAL DE GALERIA
 const GalleryModal: React.FC<{
@@ -122,12 +83,27 @@ const ImageZoomModal: React.FC<{
 };
 
 const HomePage = () => {
+    const [ambientes, setAmbientes] = useState<Environment[]>([]);
     const [selectedGallery, setSelectedGallery] = useState<{
         images: string[];
         title: string;
     } | null>(null);
 
     const { products, fetchProducts } = useProductStore();
+
+    // Efeito para carregar os dados ao abrir a página
+    useEffect(() => {
+        const fetchAmbientes = async () => {
+            try {
+                const response = await api.get('/environments');
+                setAmbientes(response.data);
+            } catch (error) {
+                console.error('Erro ao carregar ambientes:', error);
+            }
+        };
+
+        fetchAmbientes();
+    }, []);
 
     useEffect(() => {
         fetchProducts();
@@ -184,7 +160,7 @@ const HomePage = () => {
                     <div className="header-spacer"></div>
 
                     <motion.img
-                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1764856446/PHOTO-2021-10-07-20-14-23_ltkrpr.jpg"
+                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1765916535/aa2efe72-e873-42a7-9b39-26e6aef54a50_ajizym.jpg"
                         alt="Camas Montessorianas"
                         className="hero-image"
                         // Pequeno efeito de zoom na imagem ao carregar
@@ -359,55 +335,65 @@ const HomePage = () => {
                         </p>
                     </div>
 
-                    {/* 4. CARROSSEL SWIPER */}
+                    {/* 4. CARROSSEL SWIPER ATUALIZADO */}
                     <div className="carousel-container">
-                        <Swiper
-                            modules={[Navigation, Pagination, Autoplay]}
-                            spaceBetween={20}
-                            slidesPerView={1}
-                            navigation
-                            pagination={{ clickable: true }}
-                            autoplay={{ delay: 5000 }}
-                            breakpoints={{
-                                640: { slidesPerView: 2 },
-                                1024: { slidesPerView: 3 },
-                            }}
-                            className="photos-swiper"
-                        >
-                            {AMBIENTES.map((ambiente) => (
-                                <SwiperSlide key={ambiente.id}>
-                                    <div
-                                        className="swiper-card"
-                                        onClick={() =>
-                                            setSelectedGallery({
-                                                images: ambiente.gallery,
-                                                title: ambiente.title,
-                                            })
-                                        }
-                                    >
-                                        <div className="swiper-img-wrapper">
-                                            <img
-                                                src={ambiente.cover}
-                                                alt={ambiente.title}
-                                            />
-                                            <div className="swiper-overlay">
-                                                <FaCamera /> Ver +
-                                                {ambiente.gallery.length} fotos
+                        {ambientes.length === 0 ? (
+                            <p style={{ textAlign: 'center', padding: '20px' }}>
+                                Carregando ambientes...
+                            </p>
+                        ) : (
+                            <Swiper
+                                modules={[Navigation, Pagination, Autoplay]}
+                                spaceBetween={20}
+                                slidesPerView={1}
+                                navigation
+                                pagination={{ clickable: true }}
+                                autoplay={{ delay: 5000 }}
+                                breakpoints={{
+                                    640: { slidesPerView: 2 },
+                                    1024: { slidesPerView: 3 },
+                                }}
+                                className="photos-swiper"
+                            >
+                                {ambientes.map((ambiente) => (
+                                    <SwiperSlide key={ambiente.id}>
+                                        <div
+                                            className="swiper-card"
+                                            onClick={() =>
+                                                setSelectedGallery({
+                                                    // Converte o array de objetos {url} para array de strings
+                                                    images: ambiente.images.map(
+                                                        (img) => img.url
+                                                    ),
+                                                    title: ambiente.title,
+                                                })
+                                            }
+                                        >
+                                            <div className="swiper-img-wrapper">
+                                                <img
+                                                    src={ambiente.cover}
+                                                    alt={ambiente.title}
+                                                />
+                                                <div className="swiper-overlay">
+                                                    <FaCamera /> Ver +
+                                                    {ambiente.images.length}{' '}
+                                                    fotos
+                                                </div>
                                             </div>
+                                            <h3>{ambiente.title}</h3>
                                         </div>
-                                        <h3>{ambiente.title}</h3>
-                                    </div>
-                                </SwiperSlide>
-                            ))}
-                        </Swiper>
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        )}
                     </div>
 
                     <Link
-                        to="/products"
+                        to="/showroom"
                         className="cta-button"
                         style={{ marginTop: '40px' }}
                     >
-                        Ver Catálogo Completo
+                        Ver Todos Ambientes
                     </Link>
                 </motion.section>
                 <hr />

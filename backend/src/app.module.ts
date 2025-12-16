@@ -17,6 +17,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LogCleanupModule } from './log-cleanup/log-cleanup.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; // ⬅️ Importe seu guarda
 import { ContactModule } from './contact/contact.module';
+import { EnvironmentModule } from './environment/environment.module';
 
 @Module({
     imports: [
@@ -37,6 +38,7 @@ import { ContactModule } from './contact/contact.module';
         SocialModule,
         LogCleanupModule,
         ContactModule,
+        EnvironmentModule,
     ],
     controllers: [AppController],
     providers: [

@@ -41,6 +41,9 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 import LowStockApliquesPage from './pages/LowStockApliquesPage';
 import RestockApliquesPage from './pages/RestockApliquesPage';
 import SinteticosPage from './pages/SinteticosPage';
+import CreateEnvironmentPage from './pages/CreateEnvironmentPage';
+import EnvironmentPage from './pages/EnvironmentPage';
+import EditEnvironmentPage from './pages/EditEnvironmentPage';
 
 function App() {
     return (
@@ -75,6 +78,7 @@ function App() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
                 <Route path="/pos-venda" element={<PosCompraPage />} />
+                <Route path="/showroom" element={<EnvironmentPage />} />
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />
@@ -149,6 +153,14 @@ function App() {
                     <Route
                         path="/admin/apliques/restock"
                         element={<RestockApliquesPage />}
+                    />
+                    <Route
+                        path="/admin/ambientes/new"
+                        element={<CreateEnvironmentPage />}
+                    />
+                    <Route
+                        path="/admin/ambientes/edit/:id"
+                        element={<EditEnvironmentPage />}
                     />
                 </Route>
                 <Route path="/profile/edit" element={<EditProfilePage />} />

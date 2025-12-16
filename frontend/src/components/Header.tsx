@@ -149,6 +149,12 @@ const Header = () => {
                                     Cores para Cama
                                 </Link>
                                 <Link
+                                    to="/showroom"
+                                    onClick={() => setIsCatalogOpen(false)}
+                                >
+                                    Quartos
+                                </Link>
+                                <Link
                                     to="/products"
                                     onClick={() => setIsCatalogOpen(false)}
                                 >

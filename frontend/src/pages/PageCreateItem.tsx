@@ -1,14 +1,7 @@
 import { useAuthStore } from '../store/AuthStore';
 import { Link, Navigate } from 'react-router-dom';
 import './AdminPage.css';
-import {
-    FaBox,
-    FaListAlt,
-    FaChartBar,
-    FaPalette,
-    FaCalculator,
-} from 'react-icons/fa';
-import { SlLogin } from 'react-icons/sl';
+import { FaBox, FaListAlt, FaChartBar, FaImage } from 'react-icons/fa';
 // Define as rotas administrativas e as permissões necessárias
 interface AdminCard {
     title: string;
@@ -22,22 +15,29 @@ const CRIARNOVOSPRODUTOS_CARDS: AdminCard[] = [
     {
         title: 'Criar Novo Aplique',
         description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
+        IconComponent: FaBox,
         link: '/admin/apliques/new',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
     {
         title: 'Criar Novo Tecido',
         description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
+        IconComponent: FaListAlt,
         link: '/admin/tecidos/new',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
     {
         title: 'Criar Novo Sintetico',
         description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
+        IconComponent: FaChartBar,
         link: '/admin/sinteticos/new',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Criar Novo Ambiente',
+        description: 'Adicionar novo ambiente (Showroom) ao catálogo visual.',
+        IconComponent: FaImage, // Ícone novo
+        link: '/admin/ambientes/new',
         requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
     },
 ];
