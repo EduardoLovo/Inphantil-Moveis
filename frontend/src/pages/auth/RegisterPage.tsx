@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../../services/api';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; // Importar// import '../components/Calculadoras.css';
 import { useAuthStore } from '../../store/AuthStore';
+import './RegisterPage.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const RegisterPage: React.FC = () => {
     // Estados do formulário
@@ -17,6 +18,7 @@ const RegisterPage: React.FC = () => {
     // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
     const register = useAuthStore((state) => state.register);
@@ -54,7 +56,7 @@ const RegisterPage: React.FC = () => {
                 gRecaptchaResponse: token,
             });
 
-            alert('Cadastro realizado com sucesso! Faça login.');
+            alert('Cadastro realizado com sucesso!');
             navigate('/dashboard');
         } catch (err: any) {
             console.error(err);
@@ -67,11 +69,9 @@ const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div className="calculator-container">
-            <div className="calculator-card" style={{ maxWidth: '450px' }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    Criar Conta
-                </h1>
+        <div className="register-container">
+            <div className="register-card">
+                <h2>Criar Conta</h2>
 
                 {error && (
                     <div
@@ -85,8 +85,8 @@ const RegisterPage: React.FC = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="calculator-form">
-                    <div className="form-group">
+                <form onSubmit={handleSubmit} className="register-form ">
+                    <div className="form-group-register">
                         <label>Nome Completo:</label>
                         <input
                             name="name"
@@ -98,7 +98,7 @@ const RegisterPage: React.FC = () => {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group-register">
                         <label>E-mail:</label>
                         <input
                             name="email"
@@ -110,7 +110,7 @@ const RegisterPage: React.FC = () => {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group-register">
                         <label>Telefone (WhatsApp):</label>
                         <input
                             name="fone"
@@ -123,34 +123,51 @@ const RegisterPage: React.FC = () => {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Senha:</label>
-                        <input
-                            name="password"
-                            type="password"
-                            className="form-input"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            minLength={6}
-                        />
+                    <div className="form-group-register">
+                        <label htmlFor="password">Senha:</label>
+                        <div className="password-input-container">
+                            <input
+                                name="password"
+                                type={showPassword ? 'text' : 'password'}
+                                className="form-input"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                minLength={6}
+                            />
+                            <button
+                                type="button" // Importante: type="button" para não submeter o form
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
                     </div>
-
-                    <div className="form-group">
-                        <label>Confirmar Senha:</label>
-                        <input
-                            name="confirmPassword"
-                            type="password"
-                            className="form-input"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                        />
+                    <div className="form-group-register">
+                        <label htmlFor="password">Confirmar Senha:</label>
+                        <div className="password-input-container">
+                            <input
+                                name="confirmPassword"
+                                type={showPassword ? 'text' : 'password'}
+                                className="form-input"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                            />
+                            <button
+                                type="button" // Importante: type="button" para não submeter o form
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="calculate-button"
+                        className="register-button"
                         disabled={!executeRecaptcha}
                     >
                         {loading ? 'Cadastrando...' : 'Cadastrar'}

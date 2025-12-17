@@ -235,6 +235,10 @@
 }
 /* Responsividade */
 @media (max-width: 600px) {
+    .sintetico-page-container {
+        padding: 20px;
+    }
+
     .filter-button {
         flex-grow: 1;
         font-size: 0.8rem;

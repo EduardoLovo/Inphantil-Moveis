@@ -67,3 +67,26 @@
     margin-top: 10px;
     text-transform: uppercase;
 }
+@media (max-width: 750px) {
+    .tecido-page-container {
+        padding: 20px;
+        margin: 0;
+    }
+
+    .tecido-page-container h1,
+    .tecido-page-container p {
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+
+    .page-description {
+        width: 100%;
+        margin: 0px;
+        padding: 0;
+        font-size: 0.9rem;
+    }
+
+    .tecido-image {
+        max-width: 300px;
+    }
+}

@@ -1,11 +1,12 @@
 /* Container Principal */
 .simulador-container {
-    padding: 2rem;
-    background-color: #f9fafb;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    max-width: 1200px;
+    max-width: 1800px;
     margin: 0 auto;
+    padding: 20px;
+    padding-top: calc(var(--header-height, 70px) + 30px);
+    text-align: center;
+    min-height: 80vh;
+    font-family: 'Inter', sans-serif;
 }
 
 /* Título */
@@ -139,30 +140,27 @@
 
 /* --- BARRA DE BUSCA --- */
 .simulador-search-container {
-    display: flex;
-    align-items: center;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin-bottom: 20px;
     max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 30px auto;
+    position: relative;
+}
+
+.simulador-search-container input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
 }
 
 .simulador-search-icon {
-    color: #9ca3af;
-    margin-right: 10px;
-}
-
-.simulador-search-input {
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 1rem;
-    color: #374151;
-    background-color: transparent;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
 }
 
 .simulador-empty-msg {

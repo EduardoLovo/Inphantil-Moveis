@@ -1,9 +1,15 @@
-import React, { useEffect, useState, type FormEvent } from 'react';
+import React, { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useApliqueStore } from '../store/ApliqueStore';
-import './ApliquesPage.css'; // CSS atual
+import './ApliquesPage.css';
 import { useAuthStore } from '../store/AuthStore';
 import type { VisualItem } from '../types/visual-item';
-import { FaCube, FaEdit, FaSortNumericUp, FaTimes } from 'react-icons/fa';
+import {
+    FaCube,
+    FaEdit,
+    FaSearch,
+    FaSortNumericUp,
+    FaTimes,
+} from 'react-icons/fa';
 
 // =========================================================
 // 1. MODAL DE VISUALIZAÇÃO (Novo)
@@ -185,15 +191,11 @@ const ApliquesPage: React.FC = () => {
         useApliqueStore();
     const user = useAuthStore((state) => state.user);
 
-    // Estados para os dois modais
     const [editingItem, setEditingItem] = useState<VisualItem | null>(null);
     const [viewingItem, setViewingItem] = useState<VisualItem | null>(null);
+    const [busca, setBusca] = useState('');
 
-    // Permissões Específicas
-    // Quem pode editar? Apenas ADMIN e DEV
     const canEdit = user && (user.role === 'ADMIN' || user.role === 'DEV');
-
-    // Quem vê informações de estoque coloridas? ADMIN, DEV e SELLER
     const isStaff =
         user &&
         (user.role === 'ADMIN' ||
@@ -201,18 +203,31 @@ const ApliquesPage: React.FC = () => {
             user.role === 'SELLER');
 
     useEffect(() => {
-        if (apllyIcons.length === 0) {
-            fetchApliques();
-        }
-    }, [fetchApliques, apllyIcons.length]);
+        fetchApliques();
+    }, [fetchApliques]);
 
-    // Lógica de Clique Centralizada
+    // LÓGICA DE FILTRAGEM CORRIGIDA
+    const apliquesFiltrados = useMemo(() => {
+        const termo = busca.toLowerCase().trim();
+
+        const filtrados = apllyIcons.filter((item) => {
+            // Verificação de segurança (null check) para evitar erros de undefined
+            const codigo = item.code?.toLowerCase() || '';
+            const nome = item.name?.toLowerCase() || '';
+
+            return codigo.includes(termo) || nome.includes(termo);
+        });
+
+        // Ordenação por código
+        return [...filtrados].sort((a, b) =>
+            (a.code || '').localeCompare(b.code || '')
+        );
+    }, [apllyIcons, busca]);
+
     const handleCardClick = (item: VisualItem) => {
         if (canEdit) {
-            // Se for ADMIN/DEV -> Abre Edição
             setEditingItem(item);
         } else {
-            // Se for SELLER, USER ou Público -> Abre Visualização (Imagem Grande)
             setViewingItem(item);
         }
     };
@@ -251,24 +266,34 @@ const ApliquesPage: React.FC = () => {
                     : 'Clique na imagem para ampliar.'}
             </p>
 
+            {/* INPUT DE PESQUISA */}
+            <div className="simulador-search-container">
+                <FaSearch className="simulador-search-icon" />
+                <input
+                    type="text"
+                    placeholder="Pesquisar código ou nome..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="search-input"
+                />
+            </div>
+
             <div className="aplly-grid">
-                {apllyIcons.map((item) => (
+                {/* AQUI ESTÁ O USO DA LISTA FILTRADA */}
+                {apliquesFiltrados.map((item) => (
                     <div
                         key={item.id}
                         className={getCardClassName(item.inStock)}
-                        onClick={() => handleCardClick(item)} // Todos podem clicar agora
-                        style={{ cursor: 'pointer' }} // Cursor pointer para todos
+                        onClick={() => handleCardClick(item)}
+                        style={{ cursor: 'pointer' }}
                     >
-                        {/* Mostra ícone de edição apenas para quem pode editar */}
                         {canEdit && <FaEdit className="edit-icon" />}
-
                         <img
                             src={item.imageUrl}
                             alt={item.code}
                             className="aplly-image"
                         />
                         <h3 className="aplly-title">{item.code}</h3>
-
                         {isStaff && (
                             <span
                                 className={`stock-tag ${
@@ -277,14 +302,21 @@ const ApliquesPage: React.FC = () => {
                                         : 'tag-out-of-stock'
                                 }`}
                             >
-                                {item.inStock ? '' : ''}
+                                {item.inStock ? 'Em Estoque' : 'Esgotado'}
                             </span>
                         )}
                     </div>
                 ))}
             </div>
 
-            {/* Modal de Edição (Apenas Admin/Dev) */}
+            {/* FEEDBACK CASO NÃO ENCONTRE NADA */}
+            {apliquesFiltrados.length === 0 && (
+                <p className="no-results">
+                    Nenhum aplique encontrado para "{busca}".
+                </p>
+            )}
+
+            {/* MODAIS */}
             {editingItem && (
                 <EditModal
                     item={editingItem}
@@ -293,16 +325,11 @@ const ApliquesPage: React.FC = () => {
                 />
             )}
 
-            {/* Modal de Visualização (Todos os outros) */}
             {viewingItem && (
                 <ViewModal
                     item={viewingItem}
                     onClose={() => setViewingItem(null)}
                 />
-            )}
-
-            {apllyIcons.length === 0 && (
-                <p>Nenhum aplique cadastrado no momento.</p>
             )}
         </div>
     );

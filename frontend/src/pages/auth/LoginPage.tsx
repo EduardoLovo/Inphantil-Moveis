@@ -49,14 +49,9 @@ const LoginPage = () => {
 
     return (
         <div className="login-container">
-            {' '}
-            {/* Container Principal */}
             <div className="login-card">
-                {' '}
-                {/* Card com Sombra */}
                 <h2>Acesso do Cliente</h2>
                 <form onSubmit={handleSubmit} className="login-form">
-                    {/* Campo Email */}
                     <div className="form-group-login">
                         <label htmlFor="email">Email:</label>
                         <input

@@ -392,7 +392,9 @@ body {
     .hero-section {
         height: 50vh; /* Altura menor no celular */
     }
-
+    .hero-image {
+        object-position: center;
+    }
     .hero-text-overlay h2 {
         font-size: 1.8rem; /* Título menor */
     }

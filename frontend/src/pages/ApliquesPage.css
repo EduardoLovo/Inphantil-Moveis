@@ -93,7 +93,9 @@
     text-transform: uppercase;
 }
 
-/* ... (Estilos existentes) ... */
+.page-description {
+    padding-bottom: 10px;
+}
 
 /* ========================================================== */
 /* ESTILOS DO MODAL DE EDIÇÃO */
@@ -237,4 +239,27 @@
 .tag-out-of-stock {
     background-color: var(--color-stock-out);
     color: white;
+}
+
+@media (max-width: 768px) {
+    .aplly-page-container {
+        width: 100%;
+        margin: 0;
+        padding: 0px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .aplly-page-container h1 {
+        margin: 0 auto;
+        padding: 10px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .page-description {
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
 }

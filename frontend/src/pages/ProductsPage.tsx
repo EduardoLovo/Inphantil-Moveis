@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import './ProductsPage.css';
 import { FaCartPlus } from 'react-icons/fa';
 import { useCartStore } from '../store/CartStore';
+import toast, { Toaster } from 'react-hot-toast';
 
 const ProductsPage = () => {
     // Pega os dados e o método de busca
@@ -19,6 +20,18 @@ const ProductsPage = () => {
             fetchProducts();
         }
     }, [fetchProducts, products.length]);
+
+    // 2. Função para adicionar e avisar
+    const handleAddToCart = (product: any) => {
+        addItem(product);
+        toast.success(`${product.name} adicionado ao carrinho!`, {
+            position: 'bottom-right',
+            style: {
+                background: '#333',
+                color: '#fff',
+            },
+        });
+    };
 
     if (isLoading) {
         return <h1>Carregando Catálogo...</h1>;
@@ -42,6 +55,7 @@ const ProductsPage = () => {
 
     return (
         <div className="products-page-container">
+            <Toaster />
             <h1 className="page-title">Catálogo de Produtos</h1>
 
             {user && (
@@ -81,7 +95,7 @@ const ProductsPage = () => {
                         </p>
                         <button
                             className="add-cart-button"
-                            onClick={() => addItem(product)}
+                            onClick={() => handleAddToCart(product)}
                             disabled={
                                 !product.isAvailable || product.stock <= 0
                             }

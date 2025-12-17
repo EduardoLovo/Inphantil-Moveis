@@ -178,7 +178,6 @@ const ComposicaoPage: React.FC = () => {
                         <FaSearch className="simulador-search-icon" />
                         <input
                             type="text"
-                            className="simulador-search-input"
                             placeholder="Pesquisar código do aplique..."
                             value={busca}
                             onChange={(e) => setBusca(e.target.value)}

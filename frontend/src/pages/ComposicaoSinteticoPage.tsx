@@ -111,6 +111,9 @@ const ComposicaoSinteticoPage: React.FC = () => {
                     </p>
                 )}
                 {etapa === 'RESULTADO' && <p>Composição Final!</p>}
+                <small className="simulador-disclaimer">
+                    Cores podem variar conforme a tela do dispositivo.
+                </small>
             </div>
 
             {/* ÁREA DE RESULTADO */}
@@ -152,23 +155,6 @@ const ComposicaoSinteticoPage: React.FC = () => {
                                     }}
                                 />
                             </div>
-
-                            {/* 3. Borda Branca Decorativa (Opcional, ajuda a destacar) */}
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    width: '70%',
-                                    height: '70%', // Corresponde a 35% de raio (70% diametro)
-                                    borderRadius: '50%',
-                                    // border: '1px solid black',
-                                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
-                                    zIndex: 3,
-                                    pointerEvents: 'none',
-                                }}
-                            />
                         </div>
 
                         <div className="codigo-resultado">
