@@ -27,7 +27,7 @@ const ProductsPage = () => {
         toast.success(`${product.name} adicionado ao carrinho!`, {
             position: 'bottom-right',
             style: {
-                background: '#333',
+                background: '#838383ff',
                 color: '#fff',
             },
         });

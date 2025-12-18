@@ -192,7 +192,7 @@ details[open] summary::after {
 
 .perguntas-comuns p {
     color: #295834;
-    font-weight: 100;
+    font-weight: 400;
 }
 
 @keyframes fadeIn {

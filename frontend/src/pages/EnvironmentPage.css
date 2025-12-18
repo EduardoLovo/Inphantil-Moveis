@@ -1,12 +1,17 @@
-/* Container ocupa a tela inteira menos o cabeçalho do site (ajuste o height se necessário) */
+/* =========================================================
+   LAYOUT PRINCIPAL
+   ========================================================= */
+/* Container ocupa a tela inteira (ajuste o '0px' para a altura do seu Header se necessário) */
 .env-page-container {
     display: flex;
-    height: calc(100vh - 0px);
+    height: calc(100vh - 0px); /* Ex: se seu header tem 60px, use 60px aqui */
     background-color: #f4f6f8;
-    overflow: hidden; /* Impede scroll na página inteira, usa scroll interno */
+    overflow: hidden; /* Impede scroll na janela do navegador, forçando scroll interno */
 }
 
-/* --- SIDEBAR --- */
+/* =========================================================
+   SIDEBAR (MENU LATERAL)
+   ========================================================= */
 .env-sidebar {
     width: 320px;
     background-color: #ffffff;
@@ -18,7 +23,7 @@
 }
 
 .env-sidebar-header {
-    padding: 100px 20px 0 20px;
+    padding: 30px 20px 20px 20px; /* Ajustei o padding top */
     border-bottom: 1px solid #eee;
     background: #fff;
 }
@@ -35,16 +40,16 @@
     color: #888;
 }
 
-/* Lista Scrollável do Menu */
+/* Lista Scrollável */
 .env-list {
-    flex: 1;
+    flex: 1; /* Ocupa o restante da altura da sidebar */
     overflow-y: auto;
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-/* Item do Menu */
+/* Item da Lista */
 .env-item {
     display: flex;
     align-items: center;
@@ -61,7 +66,7 @@
 
 .env-item.active {
     background-color: #f0f7ff;
-    border-left-color: #007bff; /* Cor destaque */
+    border-left-color: #007bff; /* Azul destaque */
 }
 
 .env-item-thumb {
@@ -99,15 +104,17 @@
     gap: 5px;
 }
 
-/* --- ÁREA PRINCIPAL --- */
+/* =========================================================
+   ÁREA PRINCIPAL (CONTEÚDO)
+   ========================================================= */
 .env-content {
-    flex: 1;
-    overflow-y: auto; /* Scroll independente */
+    flex: 1; /* Ocupa o restante da largura */
+    overflow-y: auto; /* Scroll independente da sidebar */
     position: relative;
     background-color: #fff;
 }
 
-/* Hero Header (Capa Grande) */
+/* Hero Header (Imagem de Capa) */
 .env-hero {
     height: 400px;
     background-size: cover;
@@ -139,7 +146,9 @@
     gap: 8px;
 }
 
-/* Seção da Galeria */
+/* =========================================================
+   GALERIA DE FOTOS
+   ========================================================= */
 .env-gallery-section {
     padding: 30px;
 }
@@ -157,17 +166,21 @@
     gap: 20px;
 }
 
+/* Card da Foto Pequena */
 .env-photo-card {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
     aspect-ratio: 4/3;
     background: #eee;
+    cursor: pointer;
+    position: relative;
 }
 
 .env-photo-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .env-photo-card img {
@@ -177,7 +190,133 @@
     display: block;
 }
 
-/* Loading e Empty States */
+/* Overlay "Ver Ampliado" */
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card-hover-overlay span {
+    color: white;
+    font-weight: 600;
+    border: 1px solid white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.env-photo-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* =========================================================
+   MODAL (LIGHTBOX / ZOOM)
+   ========================================================= */
+/* Fundo Escuro */
+.env-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer; /* Indica que clicar fecha */
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Área central */
+.env-modal-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* TRUQUE: Deixa o clique passar através da div container para o overlay */
+}
+
+/* Container da Imagem */
+.img-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Corta a imagem se sair muito da tela */
+}
+
+.modal-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    pointer-events: auto; /* Reativa cliques na imagem (senão não dá zoom) */
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Botão Fechar Modal */
+.env-modal-close {
+    pointer-events: auto; /* Reativa cliques no botão */
+
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20; /* Fica acima da imagem */
+    color: white;
+    font-size: 1.5rem;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.env-modal-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Indicador de Zoom (+ / -) */
+.zoom-indicator {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    background: white;
+    padding: 12px;
+    border-radius: 50%;
+    display: flex;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 20;
+    transition: transform 0.2s;
+    cursor: pointer;
+    color: #333;
+}
+
+.zoom-indicator:hover {
+    transform: scale(1.1);
+}
+
+/* =========================================================
+   UTILITÁRIOS E ANIMAÇÕES
+   ========================================================= */
 .env-loading,
 .env-empty-state {
     display: flex;
@@ -216,11 +355,11 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
     }
 }
 
@@ -228,113 +367,13 @@
     animation: fadeIn 0.4s ease-out;
 }
 
-/* ... CSS anterior ... */
-
-/* Efeito de Hover no Card da Galeria */
-.env-photo-card {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s;
-    aspect-ratio: 4/3;
-    background: #eee;
-    cursor: pointer; /* Indica clicável */
-    position: relative;
-}
-
-.env-photo-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* Texto "Ver Ampliado" que aparece ao passar o mouse */
-.card-hover-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.card-hover-overlay span {
-    color: white;
-    font-weight: 600;
-    border: 1px solid white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.env-photo-card:hover .card-hover-overlay {
-    opacity: 1;
-}
-
-/* --- MODAL STYLES --- */
-
-/* Fundo Escuro */
-.env-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 1000; /* Garante que fique acima de tudo, inclusive sidebar */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    animation: fadeIn 0.2s ease-out;
-}
-
-/* Conteúdo do Modal */
-.env-modal-content {
-    position: relative;
-    max-width: 90%;
-    max-height: 90vh;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-.env-modal-content img {
-    max-width: 100%;
-    max-height: 90vh; /* Limita altura para não estourar a tela */
-    display: block;
-    border-radius: 4px;
-    object-fit: contain;
-}
-
-/* Botão Fechar */
-.env-modal-close {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.env-modal-close:hover {
-    color: #ff4444;
-}
-
-/* Responsivo para Celular */
+/* =========================================================
+   RESPONSIVIDADE (MOBILE)
+   ========================================================= */
 @media (max-width: 768px) {
     .env-page-container {
         flex-direction: column;
-        height: auto;
+        height: auto; /* Deixa a página crescer */
         overflow: visible;
     }
 
@@ -351,27 +390,36 @@
 
     .env-list {
         display: flex;
-        overflow-x: auto;
+        overflow-x: auto; /* Scroll horizontal no menu */
         padding-bottom: 10px;
     }
 
     .env-item {
         min-width: 200px;
+        flex-direction: column;
+        text-align: center;
         border-bottom: none;
         border-right: 1px solid #eee;
+        padding: 10px;
+    }
+
+    .env-item-thumb {
+        margin-right: 0;
+        margin-bottom: 8px;
     }
 
     .env-hero {
-        height: 200px;
+        height: 250px;
     }
 
-    .env-modal-close {
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
+    .env-hero-overlay h1 {
+        font-size: 1.8rem;
+    }
+
+    /* Ajuste do modal no mobile */
+    .env-modal-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
     }
 }

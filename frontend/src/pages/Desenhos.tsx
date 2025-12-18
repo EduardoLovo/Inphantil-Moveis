@@ -9,6 +9,7 @@ import { PicoSVG } from '../components/Desenhos/PicoSVG';
 import { EncaixeSVG } from '../components/Desenhos/EncaixeSVG';
 import { CamaSVG } from '../components/Desenhos/CamaSVG';
 import { TapeteSVG } from '../components/Desenhos/TapeteSVG';
+import toast, { Toaster } from 'react-hot-toast';
 
 // Definição dos tipos
 interface Cor {
@@ -111,6 +112,13 @@ export const Desenhos = () => {
     };
 
     const copiarPrint = async () => {
+        toast.success('Print ok', {
+            position: 'bottom-right',
+            style: {
+                background: '#838383ff',
+                color: '#fff',
+            },
+        });
         const el = divRef.current;
         if (!el) return;
 
@@ -215,6 +223,8 @@ export const Desenhos = () => {
                 isPaintingMode ? 'painting-active' : ''
             }`}
         >
+            <Toaster />
+
             <h1>Escolha uma cor e clique na imagem para aplicar</h1>
 
             <div className="botoesCoresDesenho">

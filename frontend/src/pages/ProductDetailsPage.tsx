@@ -6,6 +6,7 @@ import { type Product } from '../types/products';
 import { FaCartPlus, FaArrowLeft } from 'react-icons/fa';
 import './ProductDetailsPage.css';
 import { CiShoppingCart } from 'react-icons/ci';
+import toast, { Toaster } from 'react-hot-toast';
 
 const ProductDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -73,8 +74,21 @@ const ProductDetailsPage = () => {
         });
     };
 
+    const handleAddToCart = (product: any) => {
+        addItem(product);
+        toast.success(`${product.name} adicionado ao carrinho!`, {
+            position: 'bottom-right',
+            style: {
+                background: '#838383ff',
+                color: '#fff',
+            },
+        });
+    };
+
     return (
         <div className="product-details-container">
+            <Toaster />
+
             <Link to="/products" className="back-link">
                 <FaArrowLeft /> Voltar para o catálogo
             </Link>
@@ -168,7 +182,7 @@ const ProductDetailsPage = () => {
 
                     <button
                         className="add-to-cart-btn-large"
-                        onClick={() => addItem(product)}
+                        onClick={() => handleAddToCart(product)}
                         disabled={!product.isAvailable || product.stock <= 0}
                     >
                         <FaCartPlus />{' '}

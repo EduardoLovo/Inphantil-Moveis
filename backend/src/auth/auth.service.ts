@@ -38,17 +38,6 @@ export class AuthService {
                 this.httpService.post(verifyUrl),
             );
 
-            // LOG PARA DEBUG (Veja quanto o Google está te dando de nota no terminal)
-            console.log(
-                '🔍 ReCAPTCHA v3 Score:',
-                data.score,
-                '| Action:',
-                data.action,
-            );
-
-            // Verificação do v3:
-            // 1. success deve ser true
-            // 2. score deve ser maior que o limite (ex: 0.5)
             if (!data.success || data.score < 0.5) {
                 throw new ForbiddenException(
                     'Atividade suspeita detectada (Bot). Tente novamente.',
