@@ -143,7 +143,12 @@
 }
 
 @media (max-width: 768px) {
+    .contact-page-container {
+        padding: 15px;
+    }
+
     .contact-wrapper {
         flex-direction: column;
+        align-items: center;
     }
 }

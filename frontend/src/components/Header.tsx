@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fa';
 import { CiShoppingCart } from 'react-icons/ci';
 import './Header.css';
+import { BsFillInfoCircleFill } from 'react-icons/bs';
 
 const LOGO_IMAGE = '/logo.svg';
 
@@ -106,60 +107,82 @@ const Header = () => {
                                 Catálogos ▼
                             </Link>
                             <div className="dropdown-menu">
-                                <span className="dropdown-section-title">
-                                    Composições
-                                </span>
-                                <Link
-                                    to="/composicao-lencol"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
+                                <h3>Catálogos</h3>
+                                <Link to="/products">
+                                    <FaListUl /> Todos Produtos
+                                </Link>
+                                <Link to="/sinteticos">
+                                    <FaSwatchbook /> Cores Para Cama
+                                </Link>
+                                <Link to="/sinteticos">
+                                    <FaSwatchbook /> Cores Para Tapetes
+                                </Link>
+                                <Link to="/apliques">
+                                    <FaPuzzlePiece /> Apliques
+                                </Link>
+                                <Link to="/tecidos-lencol">
+                                    <FaCut /> Tecidos Para Lençol
+                                </Link>
+                                <Link to="/pos-venda">
+                                    <BsFillInfoCircleFill /> Informações pós
+                                    venda
+                                </Link>
+
+                                <hr />
+                                <h3>Ferramentas</h3>
+                                <Link to="/composicao-sintetico">
+                                    <FaLayerGroup /> Simulador Composições Camas
+                                </Link>
+                                {isLoggedIn && canAccessAdmin && (
+                                    <Link to="/composicao/protetores">
+                                        <FaLayerGroup /> Simulador Composições
+                                        Protetores
+                                    </Link>
+                                )}
+                                <Link to="/composicao-lencol">
+                                    <FaLayerGroup /> Simulador Composições
                                     Lençois
                                 </Link>
-                                <Link
-                                    to="/composicao-sintetico"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Camas
+
+                                <hr />
+                                <h3>Perfil</h3>
+                                <Link to="/cart">
+                                    <CiShoppingCart size={20} /> Carrinho (
+                                    {cartCount})
                                 </Link>
-                                <span className="dropdown-section-title">
-                                    Catálogos
-                                </span>
-                                <Link
-                                    to="/apliques"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Apliques para Lençol
-                                </Link>
-                                <Link
-                                    to="/tecidos-lencol"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Tecidos para Lençol
-                                </Link>
-                                <Link
-                                    to="/sinteticos/tapetes"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Cores para Tapete
-                                </Link>
-                                <Link
-                                    to="/sinteticos"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Cores para Cama
-                                </Link>
-                                <Link
-                                    to="/showroom"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Quartos
-                                </Link>
-                                <Link
-                                    to="/products"
-                                    onClick={() => setIsCatalogOpen(false)}
-                                >
-                                    Loja
-                                </Link>
+
+                                {isLoggedIn && canAccessAdmin ? (
+                                    <>
+                                        <Link
+                                            to="/admin"
+                                            className="admin-link"
+                                        >
+                                            <FaCog /> Admin
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <Link
+                                        to={
+                                            isLoggedIn ? '/dashboard' : '/login'
+                                        }
+                                        className="drawer-link"
+                                    >
+                                        <FaUser size={24} />
+                                        <span>Perfil</span>
+                                    </Link>
+                                )}
+
+                                {isLoggedIn && (
+                                    <>
+                                        <hr />
+                                        <button
+                                            onClick={handleLogout}
+                                            className="drawer-link logout-link"
+                                        >
+                                            <FaSignOutAlt /> Sair
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -260,35 +283,46 @@ const Header = () => {
                         <FaListUl /> Todos Produtos
                     </Link>
                     <Link to="/sinteticos" className="drawer-link">
-                        <FaSwatchbook /> Cores
+                        <FaSwatchbook /> Cores Para Cama
+                    </Link>
+                    <Link to="/sinteticos" className="drawer-link">
+                        <FaSwatchbook /> Cores Para Tapetes
                     </Link>
                     <Link to="/apliques" className="drawer-link">
                         <FaPuzzlePiece /> Apliques
                     </Link>
                     <Link to="/tecidos-lencol" className="drawer-link">
-                        <FaCut /> Tecidos
+                        <FaCut /> Tecidos Para Lençol
                     </Link>
                     <Link to="/pos-venda" className="drawer-link">
-                        <FaCut /> Informações pós venda
+                        <BsFillInfoCircleFill /> Informações pós venda
                     </Link>
 
                     <hr />
                     <h3>Ferramentas</h3>
                     <Link to="/composicao-sintetico" className="drawer-link">
-                        <FaLayerGroup /> Simulador
+                        <FaLayerGroup /> Simulador Composições Camas
                     </Link>
-                    <Link to="/calculadora-colchao" className="drawer-link">
-                        <FaCalculator /> Calculadora
+                    {isLoggedIn && canAccessAdmin && (
+                        <Link
+                            to="/composicao/protetores"
+                            className="drawer-link"
+                        >
+                            <FaLayerGroup /> Simulador Composições Protetores
+                        </Link>
+                    )}
+                    <Link to="/composicao-lencol" className="drawer-link">
+                        <FaLayerGroup /> Simulador Composições Lençois
                     </Link>
 
-                    {/* Link Carrinho no Menu também */}
+                    <hr />
+                    <h3>Perfil</h3>
                     <Link to="/cart" className="drawer-link">
                         <CiShoppingCart size={20} /> Carrinho ({cartCount})
                     </Link>
 
-                    {isLoggedIn && canAccessAdmin && (
+                    {isLoggedIn && canAccessAdmin ? (
                         <>
-                            <hr />
                             <Link
                                 to="/admin"
                                 className="drawer-link admin-link"
@@ -296,6 +330,14 @@ const Header = () => {
                                 <FaCog /> Admin
                             </Link>
                         </>
+                    ) : (
+                        <Link
+                            to={isLoggedIn ? '/dashboard' : '/login'}
+                            className="drawer-link"
+                        >
+                            <FaUser size={24} />
+                            <span>Perfil</span>
+                        </Link>
                     )}
 
                     {isLoggedIn && (

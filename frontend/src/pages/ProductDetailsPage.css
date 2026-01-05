@@ -258,9 +258,94 @@
     margin: 0;
 }
 
+/* =========================================================
+   VERSÃO MOBILE (Adicione ao final do seu arquivo CSS)
+   ========================================================= */
+
 @media (max-width: 768px) {
+    /* Ajuste do Container Principal */
+    .product-details-container {
+        padding: 80px 1rem 2rem 1rem; /* Reduz o padding lateral e topo */
+        min-height: auto; /* Remove altura mínima fixa */
+    }
+
+    /* Transforma o Grid de 2 colunas em 1 coluna empilhada */
     .product-details-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+        grid-template-columns: 1fr; /* Uma coluna única */
+        gap: 2rem; /* Diminui o espaço entre a foto e o texto */
+        padding: 1.5rem; /* Menos padding interno no card */
+        box-shadow: none; /* Opcional: remove sombra para visual mais limpo no mobile */
+        border: 1px solid #eee; /* Opcional: troca sombra por borda leve */
+    }
+
+    /* Galeria de Imagens */
+    .main-image-container {
+        aspect-ratio: 1 / 1; /* Mantém quadrado ou ajuste para 4/3 se preferir */
+    }
+
+    .thumbnails {
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        justify-content: flex-start; /* Garante alinhamento à esquerda ao rolar */
+    }
+
+    .thumbnail {
+        width: 60px; /* Thumbnails menores para caber mais na tela */
+        height: 60px;
+        flex-shrink: 0; /* Impede que esmaguem */
+    }
+
+    /* Tipografia e Textos */
+    .product-title-detail {
+        font-size: 1.8rem; /* Diminui o título */
+        line-height: 1.2;
+    }
+
+    .product-price-detail {
+        font-size: 1.6rem; /* Diminui o preço */
+        margin-bottom: 1.5rem;
+    }
+
+    .product-description-box {
+        padding: 1rem 0;
+        font-size: 0.95rem; /* Texto levemente menor para leitura */
+    }
+
+    /* Botão de Comprar */
+    .add-to-cart-btn-large {
+        padding: 1rem; /* Botão um pouco mais compacto */
+        font-size: 1rem;
+        position: sticky; /* Opcional: Faz o botão grudar no fundo da tela */
+        bottom: 1rem;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Produtos Relacionados */
+    .related-products-section {
+        margin-top: 3rem;
+    }
+
+    .related-title {
+        font-size: 1.4rem;
+        text-align: center; /* Centraliza título da seção */
+    }
+
+    .related-grid {
+        /* Muda o grid para permitir 2 colunas em celulares (ex: 150px mínimo) */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem; /* Espaço menor entre cards */
+    }
+
+    .related-info {
+        padding: 0.75rem;
+    }
+
+    .related-name {
+        font-size: 0.9rem;
+    }
+
+    .related-price {
+        font-size: 1rem;
     }
 }

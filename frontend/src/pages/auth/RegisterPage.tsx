@@ -124,7 +124,9 @@ const RegisterPage: React.FC = () => {
                     </div>
 
                     <div className="form-group-register">
-                        <label htmlFor="password">Senha:</label>
+                        <label htmlFor="password">
+                            Senha (Minimo de 6 caracteres):
+                        </label>
                         <div className="password-input-container">
                             <input
                                 name="password"
@@ -145,7 +147,9 @@ const RegisterPage: React.FC = () => {
                         </div>
                     </div>
                     <div className="form-group-register">
-                        <label htmlFor="password">Confirmar Senha:</label>
+                        <label htmlFor="password">
+                            Confirmar Senha (Minimo de 6 caracteres):
+                        </label>
                         <div className="password-input-container">
                             <input
                                 name="confirmPassword"

@@ -161,6 +161,8 @@ export const Desenhos = () => {
                 return <EncaixeSVG {...commonProps} lado="direito" />;
             case 'cama':
                 return <CamaSVG {...commonProps} lado="direito" />;
+            case 'cama-lado-esquerdo':
+                return <CamaSVG {...commonProps} lado="esquerdo" />;
             case 'tapete':
                 return <TapeteSVG {...commonProps} lado="direito" />;
             default:
@@ -367,6 +369,16 @@ export const Desenhos = () => {
                         name="desenho"
                         value="cama"
                         checked={tipoDoDesenho === 'cama'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Cama
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="cama-lado-esquerdo"
+                        checked={tipoDoDesenho === 'cama-lado-esquerdo'}
                         onChange={(e) => setTipoDoDesenho(e.target.value)}
                     />
                     Cama

@@ -22,7 +22,7 @@
     padding-bottom: 50px;
     min-height: 100vh;
     background-color: var(--color-background-light);
-
+    min-width: 90vw;
     display: flex;
     justify-content: center;
     /* Alinha ao topo (para evitar flutuar no meio da tela) */
@@ -31,11 +31,11 @@
 
 .profile-card {
     width: 90%;
-    max-width: 650px;
+    max-width: 950px;
     padding: 40px;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 10px 25px var(--color-accent-soft); /* Sombra suave */
+    box-shadow: 0 10px 25px var(--color-accent-soft);
     border: 1px solid var(--color-neutral-accent);
     color: var(--color-text-primary);
 }
@@ -334,7 +334,17 @@
 }
 
 /* --- RESPONSIVIDADE (Mobile) --- */
-@media (max-width: 480px) {
+@media (max-width: 760px) {
+    .dashboard-container {
+        padding: 0px;
+        width: 100vw;
+    }
+
+    .profile-card {
+        width: 100%;
+        padding: 20px;
+        border-radius: 0;
+    }
     .order-item {
         padding: 15px;
     }

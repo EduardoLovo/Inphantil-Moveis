@@ -22,7 +22,8 @@
 }
 
 .checkbox-group label {
-    margin-bottom: 0;
+    height: 100%;
+    padding-top: 8px;
     cursor: pointer;
 }
 

@@ -72,3 +72,18 @@ button.selected {
 .area-desenho svg {
     cursor: url('/images/cursor.png') 0 0, crosshair;
 }
+
+@media (max-width: 750px) {
+    .contentDesenhos {
+        margin-top: 25px;
+        text-align: center;
+    }
+    .opcoesRadio {
+        font-size: 10px;
+        gap: 5px;
+    }
+
+    .opcoesRadio label {
+        margin-right: 0px;
+    }
+}

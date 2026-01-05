@@ -33,6 +33,11 @@ body {
     color: var(--primary-color);
 }
 
+.home-page {
+    box-shadow: 0 2px 25px var(--color-accent-soft);
+    position: relative;
+}
+
 .main-content {
     padding-bottom: 20px;
 }
@@ -74,8 +79,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.137);
-    color: white;
+    background-color: rgba(0, 0, 0, 0.233);
+    color: rgb(236, 236, 236);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -383,6 +388,11 @@ body {
 /* Adicione cursor pointer nas imagens da galeria para indicar clique */
 .gallery-item-img {
     cursor: zoom-in;
+}
+
+.teste {
+    margin-left: 505px;
+    /* padding: 5px; */
 }
 /* ========================================================== */
 /* RESPONSIVIDADE MOBILE (Media Queries) */

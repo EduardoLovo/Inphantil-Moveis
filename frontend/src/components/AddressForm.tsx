@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // Adicionado useRef
 import { api } from '../services/api';
 import axios from 'axios';
-import { FaSearch, FaSpinner } from 'react-icons/fa';
-import './AddressForm.css'; // Vamos criar a seguir
+import { FaSpinner } from 'react-icons/fa';
+import './AddressForm.css';
 
 interface AddressFormProps {
-    onSuccess: () => void; // Função para chamar quando o cadastro der certo
+    onSuccess: () => void;
     onCancel: () => void;
 }
 
@@ -13,6 +13,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [cepLoading, setCepLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Referência para o container do modal
+    const overlayRef = useRef<HTMLDivElement>(null);
 
     // Estados do Formulário
     const [zipCode, setZipCode] = useState('');
@@ -24,7 +27,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
     const [state, setState] = useState('');
     const [recipientName, setRecipientName] = useState('');
 
-    // Função para buscar o CEP (ViaCEP)
+    // Função para fechar ao clicar fora
+    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        // Se o clique foi exatamente no overlay (fundo) e não nos seus filhos (formulário)
+        if (e.target === overlayRef.current) {
+            onCancel();
+        }
+    };
+
     const handleBlurCep = async () => {
         const cep = zipCode.replace(/\D/g, '');
         if (cep.length !== 8) return;
@@ -56,7 +66,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
         setError('');
 
         try {
-            // Envia para o SEU backend
             await api.post('/addresses', {
                 recipientName,
                 zipCode,
@@ -66,10 +75,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
                 neighborhood,
                 city,
                 state,
-                isDefault: false, // O backend já trata isso (se for o primeiro, vira padrão)
+                isDefault: false,
             });
-
-            onSuccess(); // Fecha o modal e recarrega a lista
+            onSuccess();
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erro ao salvar endereço.');
         } finally {
@@ -77,132 +85,158 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
         }
     };
 
+    // Função para formatar o CEP enquanto o usuário digita
+    const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+
+        // 1. Remove tudo que não é número
+        value = value.replace(/\D/g, '');
+
+        // 2. Limita a 8 dígitos numéricos
+        if (value.length > 8) {
+            value = value.slice(0, 8);
+        }
+
+        // 3. Adiciona o hífen depois do 5º dígito
+        // A regex captura os primeiros 5 números ($1) e o restante ($2), colocando o hífen no meio
+        value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+
+        setZipCode(value);
+    };
+
     return (
-        <div className="address-form-container">
-            <h3>Novo Endereço de Entrega</h3>
+        <div
+            className="addr-modal-overlay"
+            ref={overlayRef}
+            onClick={handleOverlayClick}
+        >
+            <div className="addr-modal-container">
+                <h3>Novo Endereço de Entrega</h3>
 
-            <form onSubmit={handleSubmit} className="address-form">
-                {/* Linha 1: Nome do Destinatário */}
-                <div className="form-group">
-                    <label>Quem vai receber?</label>
-                    <input
-                        type="text"
-                        value={recipientName}
-                        onChange={(e) => setRecipientName(e.target.value)}
-                        placeholder="Ex: Maria Silva"
-                        required
-                        className="form-input"
-                    />
-                </div>
-
-                {/* Linha 2: CEP */}
-                <div className="form-group">
-                    <label>CEP:</label>
-                    <div className="cep-input-wrapper">
+                <form onSubmit={handleSubmit} className="addr-modal-form">
+                    <div className="addr-modal-group">
+                        <label>Quem vai receber?</label>
                         <input
                             type="text"
-                            value={zipCode}
-                            onChange={(e) => setZipCode(e.target.value)}
-                            onBlur={handleBlurCep} // Busca ao sair do campo
-                            placeholder="00000-000"
-                            maxLength={9}
+                            value={recipientName}
+                            onChange={(e) => setRecipientName(e.target.value)}
+                            placeholder="Ex: Maria Silva"
                             required
-                            className="form-input"
+                            className="addr-modal-input"
                         />
-                        {cepLoading && (
-                            <FaSpinner className="spin cep-spinner" />
-                        )}
                     </div>
-                </div>
 
-                {/* Linha 3: Rua e Número */}
-                <div className="form-row">
-                    <div className="form-group flex-2">
-                        <label>Rua/Logradouro:</label>
-                        <input
-                            type="text"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                            required
-                            className="form-input"
-                        />
+                    <div className="addr-modal-group">
+                        <label>CEP:</label>
+                        <div className="addr-modal-cep-wrapper">
+                            <input
+                                type="text"
+                                value={zipCode}
+                                onChange={handleZipCodeChange} // Usando a nova função aqui                                onBlur={handleBlurCep}
+                                placeholder="00000-000"
+                                maxLength={9}
+                                required
+                                className="addr-modal-input"
+                            />
+                            {cepLoading && (
+                                <FaSpinner className="addr-modal-spinner" />
+                            )}
+                        </div>
                     </div>
-                    <div className="form-group flex-1">
-                        <label>Número:</label>
-                        <input
-                            type="text"
-                            value={number}
-                            onChange={(e) => setNumber(e.target.value)}
-                            required
-                            className="form-input"
-                        />
-                    </div>
-                </div>
 
-                {/* Linha 4: Complemento e Bairro */}
-                <div className="form-row">
-                    <div className="form-group flex-1">
-                        <label>Complemento:</label>
-                        <input
-                            type="text"
-                            value={complement}
-                            onChange={(e) => setComplement(e.target.value)}
-                            placeholder="Apto, Bloco..."
-                            className="form-input"
-                        />
+                    <div className="addr-modal-row">
+                        <div className="addr-modal-group addr-modal-flex-2">
+                            <label>Rua/Logradouro:</label>
+                            <input
+                                type="text"
+                                value={street}
+                                onChange={(e) => setStreet(e.target.value)}
+                                required
+                                className="addr-modal-input"
+                            />
+                        </div>
+                        <div className="addr-modal-group addr-modal-flex-1">
+                            <label>Número:</label>
+                            <input
+                                type="text"
+                                value={number}
+                                onChange={(e) => setNumber(e.target.value)}
+                                required
+                                className="addr-modal-input"
+                            />
+                        </div>
                     </div>
-                    <div className="form-group flex-1">
-                        <label>Bairro:</label>
-                        <input
-                            type="text"
-                            value={neighborhood}
-                            onChange={(e) => setNeighborhood(e.target.value)}
-                            required
-                            className="form-input"
-                        />
-                    </div>
-                </div>
 
-                {/* Linha 5: Cidade e Estado */}
-                <div className="form-row">
-                    <div className="form-group flex-2">
-                        <label>Cidade:</label>
-                        <input
-                            type="text"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            required
-                            className="form-input"
-                        />
+                    <div className="addr-modal-row">
+                        <div className="addr-modal-group addr-modal-flex-1">
+                            <label>Complemento:</label>
+                            <input
+                                type="text"
+                                value={complement}
+                                onChange={(e) => setComplement(e.target.value)}
+                                placeholder="Apto, Bloco..."
+                                className="addr-modal-input"
+                            />
+                        </div>
+                        <div className="addr-modal-group addr-modal-flex-1">
+                            <label>Bairro:</label>
+                            <input
+                                type="text"
+                                value={neighborhood}
+                                onChange={(e) =>
+                                    setNeighborhood(e.target.value)
+                                }
+                                required
+                                className="addr-modal-input"
+                            />
+                        </div>
                     </div>
-                    <div className="form-group flex-1">
-                        <label>UF:</label>
-                        <input
-                            type="text"
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                            maxLength={2}
-                            required
-                            className="form-input"
-                        />
+
+                    <div className="addr-modal-row">
+                        <div className="addr-modal-group addr-modal-flex-2">
+                            <label>Cidade:</label>
+                            <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                required
+                                className="addr-modal-input"
+                            />
+                        </div>
+                        <div className="addr-modal-group addr-modal-flex-1">
+                            <label>UF:</label>
+                            <input
+                                type="text"
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
+                                maxLength={2}
+                                required
+                                className="addr-modal-input"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {error && <p className="error-message">{error}</p>}
+                    {error && <p className="addr-modal-error">{error}</p>}
 
-                <div className="form-actions">
-                    <button type="button" onClick={onCancel} disabled={loading}>
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        className="save-btn"
-                        disabled={loading}
-                    >
-                        {loading ? 'Salvando...' : 'Salvar Endereço'}
-                    </button>
-                </div>
-            </form>
+                    <div className="addr-modal-actions">
+                        <button
+                            type="button"
+                            className="addr-modal-btn-cancel"
+                            onClick={onCancel}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            className="addr-modal-btn-save"
+                            disabled={loading}
+                        >
+                            {loading ? 'Salvando...' : 'Salvar Endereço'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

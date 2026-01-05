@@ -123,7 +123,7 @@ const HomePage = () => {
         visible: {
             opacity: 1,
             x: 0,
-            transition: { duration: 0.8, ease: 'easeOut' },
+            transition: { duration: 1, ease: 'easeOut' },
         },
     };
 
@@ -160,7 +160,7 @@ const HomePage = () => {
                     <div className="header-spacer"></div>
 
                     <motion.img
-                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1765916535/aa2efe72-e873-42a7-9b39-26e6aef54a50_ajizym.jpg"
+                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1765914289/WhatsApp_Image_2025-12-16_at_14.54.29_1_mvkikm.jpg"
                         alt="Camas Montessorianas"
                         className="hero-image"
                         // Pequeno efeito de zoom na imagem ao carregar
@@ -420,6 +420,37 @@ const HomePage = () => {
                     onClose={() => setSelectedGallery(null)}
                 />
             )}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '20px',
+                    paddingBottom: '40px',
+                }}
+            >
+                <iframe
+                    width="260"
+                    height="460"
+                    src="https://res.cloudinary.com/dtghitaah/video/upload/v1765914375/WhatsApp_Video_2025-12-11_at_08.10.34_wu55ow.mp4"
+                    title="Alinhamento de Cama Phant"
+                    frameBorder="0"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    // className="teste"
+                ></iframe>
+                <iframe
+                    width="260"
+                    height="460"
+                    src="https://res.cloudinary.com/dtghitaah/video/upload/v1765914375/WhatsApp_Video_2025-12-11_at_08.10.34_wu55ow.mp4"
+                    title="Alinhamento de Cama Phant"
+                    frameBorder="0"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    // className="teste"
+                ></iframe>
+            </div>
         </div>
     );
 };

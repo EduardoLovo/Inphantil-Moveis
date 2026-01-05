@@ -6,7 +6,7 @@
 
 .products-page-container {
     max-width: 100%;
-    padding: 100px 50px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
+    padding: 25px 50px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
     min-height: 80vh; /* Garante que a página tenha alguma altura */
     /* padding-top: 50px; */
 }
@@ -29,8 +29,9 @@
 .products-grid {
     /* Baseado em style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginTop: '30px' }} */
     display: flex;
+    justify-content: center;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 40px;
     margin-top: 30px;
     flex-wrap: wrap;
 }

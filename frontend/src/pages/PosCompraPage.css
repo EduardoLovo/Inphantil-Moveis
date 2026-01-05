@@ -2,7 +2,7 @@
 /* LAYOUT GERAL */
 /* ========================================================== */
 .pos-compra-container {
-    max-width: 1200px;
+    max-width: 90vw;
     margin: 0 auto;
     padding: 0 20px;
     padding-top: calc(var(--header-height, 70px) + 40px);
@@ -207,35 +207,120 @@ details[open] summary::after {
 }
 
 /* ========================================================== */
-/* RESPONSIVIDADE */
+/* RESPONSIVIDADE (MOBILE) */
 /* ========================================================== */
 @media (max-width: 768px) {
+    /* Ajuste do Container Principal */
+    .pos-compra-container {
+        padding: 15px;
+        min-height: auto;
+    }
+
+    .pos-compra-header h1 {
+        font-size: 1.8rem; /* Título um pouco menor */
+    }
+
+    /* Muda a direção do layout para coluna (Sidebar em cima, Conteúdo embaixo) */
     .pos-compra-layout {
         flex-direction: column;
+        gap: 20px;
+        align-items: stretch; /* Garante que ocupem a largura total */
     }
 
+    /* ========================= */
+    /* Ajustes da Sidebar Mobile */
+    /* ========================= */
     .pc-sidebar {
-        width: 100%;
-        position: static; /* Remove o sticky no mobile */
+        flex: none; /* Remove a largura fixa de 280px */
+        width: 100%; /* Ocupa a largura total */
+        position: static; /* Remove o sticky no mobile para não ocupar a tela toda */
+        top: 0;
+        padding: 15px;
         display: flex;
         flex-direction: column;
     }
 
-    /* Transforma o menu em botões horizontais roláveis ou grade */
-    .pc-sidebar nav {
-        display: flex;
-        overflow-x: auto;
+    /* Opcional: Se quiser que os botões fiquem lado a lado em 2 colunas no mobile */
+    /* Descomente as linhas abaixo se preferir grid de botões */
+    /* .pc-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
-        padding-bottom: 10px;
     }
+    .pc-contact-box {
+        grid-column: span 2;
+    }
+    */
 
     .pc-menu-btn {
-        white-space: nowrap; /* Não quebra linha */
-        width: auto;
-        border: 1px solid #eee;
+        padding: 12px;
+        font-size: 0.95rem;
+        text-align: center; /* Centraliza texto no mobile */
+        justify-content: center; /* Centraliza ícone e texto */
     }
 
+    .pc-icon {
+        margin-right: 8px;
+    }
+
+    .pc-contact-box {
+        margin-top: 20px;
+        padding-top: 15px;
+    }
+
+    /* ========================= */
+    /* Ajustes do Conteúdo Mobile*/
+    /* ========================= */
     .pc-content-area {
-        padding: 20px;
+        padding: 20px 15px; /* Reduz padding interno para ganhar espaço */
+        min-height: auto; /* Remove altura mínima */
+    }
+
+    .pc-content-area h2 {
+        font-size: 1.4rem;
+        text-align: center; /* Título centralizado fica melhor no mobile */
+    }
+
+    .pc-content-area h3 {
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    .pc-content-area ul {
+        padding-left: 15px; /* Reduz recuo da lista */
+    }
+
+    .info-card-highlight {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Botões de ação dentro do conteúdo ocupam largura total */
+    .action-btn-outline {
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+
+    .video-responsive {
+        width: 100%;
+        max-width: 800px; /* Limita para não ficar gigante em telas grandes */
+        margin: 20px auto; /* Centraliza e dá espaço */
+        border-radius: 8px; /* Opcional: bordas arredondadas */
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Opcional: sombra */
+    }
+
+    .video-responsive iframe {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9; /* A MÁGICA: Mantém a proporção correta sempre */
+        display: block;
+    }
+
+    /* Ajuste para o FAQ (Details/Summary) */
+    summary {
+        font-size: 0.95rem;
+        padding: 5px 0;
     }
 }

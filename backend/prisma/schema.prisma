@@ -97,7 +97,7 @@ model Product {
   price Decimal @db.Decimal(10, 2)
   stock Int     @default(0)
 
-  size  String? @db.VarChar(50)
+  size  ItemSize? 
   color String? @db.VarChar(50)
 
   isAvailable Boolean @default(true)
@@ -189,7 +189,7 @@ enum ItemSize {
   BERÇO
   JUNIOR
   SOLTEIRO
-  SOLTEIRÃO
+  SOLTEIRAO
   VIUVA
   CASAL
   QUEEN

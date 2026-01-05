@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     FaTools,
     FaShieldAlt,
@@ -199,16 +199,18 @@ const SECTIONS = [
                         os passos nele descritos, não alterando a ordem de
                         montagem!
                     </p>
-                    <iframe
-                        width="753"
-                        height="480"
-                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                        title="Montagem da Cama Montessoriana Phant"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    <div className="video-responsive">
+                        <iframe
+                            width="753"
+                            height="480"
+                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                            title="Montagem da Cama Montessoriana Phant"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
                 <hr />
                 <div>
@@ -218,16 +220,18 @@ const SECTIONS = [
                         importante seguir os passos nele descritos, não
                         alterando a ordem de montagem!
                     </p>
-                    <iframe
-                        width="753"
-                        height="480"
-                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                        title="Montagem da Cama Montessoriana Phant"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    <div className="video-responsive">
+                        <iframe
+                            width="753"
+                            height="480"
+                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                            title="Montagem da Cama Montessoriana Phant"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
                 <hr />
                 <div>
@@ -237,16 +241,18 @@ const SECTIONS = [
                         importante seguir os passos nele descritos, não
                         alterando a ordem de montagem!
                     </p>
-                    <iframe
-                        width="753"
-                        height="480"
-                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                        title="Montagem da Cama Montessoriana Phant"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    <div className="video-responsive">
+                        <iframe
+                            width="753"
+                            height="480"
+                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                            title="Montagem da Cama Montessoriana Phant"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
                 <hr />
                 <div>
@@ -256,16 +262,18 @@ const SECTIONS = [
                         importante seguir os passos nele descritos, não
                         alterando a ordem de montagem!
                     </p>
-                    <iframe
-                        width="753"
-                        height="480"
-                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                        title="Montagem da Cama Montessoriana Phant"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    <div className="video-responsive">
+                        <iframe
+                            width="753"
+                            height="480"
+                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                            title="Montagem da Cama Montessoriana Phant"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
                 <hr />
                 <div>
@@ -275,26 +283,19 @@ const SECTIONS = [
                         importante seguir os passos nele descritos, não
                         alterando a ordem de montagem!
                     </p>
-                    <iframe
-                        width="753"
-                        height="480"
-                        src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                        title="Montagem da Cama Montessoriana Phant"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    <div className="video-responsive">
+                        <iframe
+                            width="753"
+                            height="480"
+                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
+                            title="Montagem da Cama Montessoriana Phant"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
-
-                {/* <h3>Vídeos Tutoriais</h3>
-                <p>
-                    Acesse nosso canal no YouTube para ver o passo a passo
-                    detalhado:
-                </p>
-                <button className="action-btn-outline">
-                    Ver Canal no YouTube
-                </button> */}
             </div>
         ),
     },
@@ -310,16 +311,18 @@ const SECTIONS = [
                     importante que seja feito de tempos em tempos, pois irá
                     conservar sua cama sempre alinhada.
                 </p>
-                <iframe
-                    width="873"
-                    height="480"
-                    src="https://www.youtube.com/embed/EI-uWTHEtZA"
-                    title="Alinhamento de Cama Phant"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                ></iframe>
+                <div className="video-responsive">
+                    <iframe
+                        width="873"
+                        height="480"
+                        src="https://www.youtube.com/embed/EI-uWTHEtZA"
+                        title="Alinhamento de Cama Phant"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
             </div>
         ),
     },
@@ -468,10 +471,21 @@ const SECTIONS = [
 
 const PosCompraPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState(SECTIONS[0].id);
-
+    const contentRef = useRef<HTMLDivElement>(null);
     // Encontra o objeto da seção ativa
     const activeSection = SECTIONS.find((s) => s.id === activeTab);
+    const handleTabChange = (sectionId: string) => {
+        setActiveTab(sectionId);
 
+        // 3. Função para rolar a página
+        // O timeout de 0 ou 100ms garante que o React já renderizou o novo conteúdo
+        setTimeout(() => {
+            contentRef.current?.scrollIntoView({
+                behavior: 'smooth', // Rolagem suave
+                block: 'start', // Alinha o topo do elemento no topo da tela
+            });
+        }, 100);
+    };
     return (
         <div className="pos-compra-container">
             <div className="pos-compra-header">
@@ -491,7 +505,7 @@ const PosCompraPage: React.FC = () => {
                                 className={`pc-menu-btn ${
                                     activeTab === section.id ? 'active' : ''
                                 }`}
-                                onClick={() => setActiveTab(section.id)}
+                                onClick={() => handleTabChange(section.id)}
                             >
                                 {/* <section.Icon className="pc-icon" /> */}
                                 {section.title}
@@ -514,7 +528,7 @@ const PosCompraPage: React.FC = () => {
                 </aside>
 
                 {/* ÁREA DE CONTEÚDO */}
-                <main className="pc-content-area">
+                <main className="pc-content-area" ref={contentRef}>
                     <div className="fade-in-content" key={activeTab}>
                         {activeSection?.content}
                     </div>
