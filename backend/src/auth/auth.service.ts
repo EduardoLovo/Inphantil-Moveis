@@ -15,11 +15,13 @@ import { randomBytes } from 'crypto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HttpService } from '@nestjs/axios'; // 1. IMPORT NOVO
 import { firstValueFrom } from 'rxjs'; // 2. IMPORT NOVO
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
+        private mailerService: MailerService,
         private jwtService: JwtService,
         private readonly httpService: HttpService, // 3. INJEÇÃO NOVO
     ) {}
@@ -244,13 +246,34 @@ export class AuthService {
             },
         });
 
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         const resetLink = `http://localhost:5173/reset-password?token=${token}`;
-        console.log(
-            `\n📧 [SIMULAÇÃO DE EMAIL] Link de recuperação para ${email}: ${resetLink}\n`,
-        );
+        try {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'Recuperação de Senha - Inphantil Móveis',
+                html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Olá, ${user.name || 'Cliente'}!</h2>
+                    <p>Recebemos uma solicitação para redefinir sua senha.</p>
+                    <p>Para continuar, clique no botão abaixo:</p>
+                    <a href="${resetLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Redefinir Senha</a>
+                    <p style="margin-top: 20px; font-size: 12px; color: #666;">Se você não solicitou isso, ignore este e-mail.</p>
+                    <p style="font-size: 12px; color: #666;">O link expira em 1 hora.</p>
+                </div>
+            `,
+            });
+
+            // Log para debug (opcional)
+            console.log(`E-mail de recuperação enviado para: ${email}`);
+        } catch (error) {
+            console.error('Erro ao enviar e-mail:', error);
+            // Opcional: lançar erro ou retornar mensagem genérica
+            // throw new InternalServerErrorException('Erro ao enviar e-mail');
+        }
 
         return {
-            message: 'Link de recuperação enviado para o e-mail (ver console).',
+            message: 'Se o e-mail existir, você receberá um link.',
         };
     }
 

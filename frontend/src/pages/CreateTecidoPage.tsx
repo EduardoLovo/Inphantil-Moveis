@@ -10,10 +10,8 @@ type VisualItemType = VisualItem['type'];
 
 // Interface de Dados para o Payload
 interface CreateTecidoData {
-    name: string;
     code: string;
     imageUrl: string;
-    color: string;
     quantity: number | null;
     inStock: boolean;
     type: VisualItemType; // Tipo derivado
@@ -21,10 +19,8 @@ interface CreateTecidoData {
 
 const CreateTecidoPage: React.FC = () => {
     // Estados do Formulário
-    const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [imageUrl, setImageUrl] = useState('');
-    const [color, setColor] = useState('');
     const [quantity, setQuantity] = useState<number | null>(null);
     const [inStock, setInStock] = useState(true);
 
@@ -42,9 +38,7 @@ const CreateTecidoPage: React.FC = () => {
 
         // Monta o payload com o tipo fixo 'TECIDO'
         const payload: CreateTecidoData = {
-            name: name.trim(),
             code: code.trim(),
-            color: color.trim(),
             imageUrl: imageUrl.trim(),
             quantity: quantity !== null ? quantity : 0,
             inStock: inStock,
@@ -70,10 +64,8 @@ const CreateTecidoPage: React.FC = () => {
             });
 
             // Limpa o formulário
-            setName('');
             setCode('');
             setImageUrl('');
-            setColor('');
             setQuantity(null);
             setInStock(true);
         } catch (error) {
@@ -115,20 +107,6 @@ const CreateTecidoPage: React.FC = () => {
                             </label>
                             <input
                                 type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                disabled={loading}
-                                className="form-input"
-                                placeholder="Ex: Algodão 200 Fios Bege"
-                            />
-                        </div>
-                        <div className="form-group flex-1">
-                            <label>
-                                <FaCode /> Código / Nome do Tecido:
-                            </label>
-                            <input
-                                type="text"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                                 required
@@ -150,19 +128,6 @@ const CreateTecidoPage: React.FC = () => {
                                 className="form-input"
                             />
                         </div>
-                    </div>
-
-                    {/* Linha 2: Descrição */}
-                    <div className="form-group">
-                        <label>Cor:</label>
-                        <textarea
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                            rows={3}
-                            disabled={loading}
-                            className="form-input"
-                            placeholder="Ex: Tecido 100% algodão, toque macio..."
-                        />
                     </div>
 
                     {/* Linha 3: Quantidade, Sequência e Estoque */}

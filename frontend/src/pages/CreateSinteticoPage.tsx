@@ -192,7 +192,7 @@ const CreateSinteticoPage: React.FC = () => {
                         </div>
 
                         <div className="form-group checkbox-group">
-                            <label>Fornecedor Externo:</label>
+                            <label>Faz Externo:</label>
                             <input
                                 type="checkbox"
                                 checked={isExternal}

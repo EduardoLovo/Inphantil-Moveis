@@ -160,7 +160,7 @@ const HomePage = () => {
                     <div className="header-spacer"></div>
 
                     <motion.img
-                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1765914289/WhatsApp_Image_2025-12-16_at_14.54.29_1_mvkikm.jpg"
+                        src="https://res.cloudinary.com/dtghitaah/image/upload/v1767724978/IMG_8118_pdtufd.jpg"
                         alt="Camas Montessorianas"
                         className="hero-image"
                         // Pequeno efeito de zoom na imagem ao carregar

@@ -1,0 +1,116 @@
+/* frontend/src/pages/UnderConstructionPage.css */
+.construction-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh; /* Ocupa quase a tela toda, mas deixa espaço pro Header/Footer */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    background-color: #f9fbfd; /* Um azulzinho gelo bem claro de fundo */
+}
+
+.construction-content {
+    z-index: 10;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.construction-icon {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+    color: #555; /* Cor base para o SVG se ele usar currentColor */
+}
+
+.construction-title {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.construction-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #2c3e50; /* Ajuste para a cor primária do seu projeto */
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background-color: #34495e;
+}
+
+/* Animação das Nuvens de Fundo */
+.bg-cloud {
+    position: absolute;
+    opacity: 0.15;
+    color: #89c4f4;
+    z-index: 1;
+}
+
+.cloud-1 {
+    top: 10%;
+    left: 5%;
+    width: 150px;
+    animation: float 6s ease-in-out infinite;
+}
+.cloud-2 {
+    top: 20%;
+    right: 10%;
+    width: 100px;
+    animation: float 8s ease-in-out infinite reverse;
+}
+.cloud-3 {
+    bottom: 15%;
+    left: 15%;
+    width: 120px;
+    animation: float 7s ease-in-out infinite 1s;
+}
+.cloud-4 {
+    bottom: 25%;
+    right: 5%;
+    width: 180px;
+    animation: float 9s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@media (max-width: 768px) {
+    .construction-title {
+        font-size: 2rem;
+    }
+    .construction-content {
+        padding: 2rem;
+    }
+}

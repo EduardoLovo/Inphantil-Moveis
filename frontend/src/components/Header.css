@@ -300,6 +300,13 @@
     background: none;
     border: 1px solid #eee;
     justify-content: center;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.drawer-link.logout-link:hover {
+    background-color: rgba(170, 170, 170, 0.425);
+    color: #b13131;
 }
 
 .welcome-message {

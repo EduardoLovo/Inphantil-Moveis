@@ -6,7 +6,7 @@
 
 .products-page-container {
     max-width: 100%;
-    padding: 25px 50px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
+    padding: 85px 50px; /* Adiciona padding para evitar que o conteúdo encoste nas bordas em mobile */
     min-height: 80vh; /* Garante que a página tenha alguma altura */
     /* padding-top: 50px; */
 }

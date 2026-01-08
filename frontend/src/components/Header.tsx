@@ -83,9 +83,9 @@ const Header = () => {
                             className="header-logo"
                         />
                         <h1 className="logo-title">Inphantil</h1>
-                        <span className="welcome-message">
+                        {/* <span className="welcome-message">
                             Olá, {user?.name || 'Visitante'}!
-                        </span>
+                        </span> */}
                     </Link>
 
                     {/* --- NAVEGAÇÃO DESKTOP --- */}
@@ -114,7 +114,7 @@ const Header = () => {
                                 <Link to="/sinteticos">
                                     <FaSwatchbook /> Cores Para Cama
                                 </Link>
-                                <Link to="/sinteticos">
+                                <Link to="/sinteticos/tapetes">
                                     <FaSwatchbook /> Cores Para Tapetes
                                 </Link>
                                 <Link to="/apliques">

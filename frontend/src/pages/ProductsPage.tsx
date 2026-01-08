@@ -64,13 +64,9 @@ const ProductsPage = () => {
                 </p>
             )}
 
-            {/* 3. Grid de Produtos */}
             <div className="products-grid">
                 {products.map((product) => (
-                    <div
-                        key={product.id}
-                        className="product-card" // Classe do Card
-                    >
+                    <div key={product.id} className="product-card">
                         <h3>{product.name}</h3>
 
                         <Link
@@ -103,11 +99,10 @@ const ProductsPage = () => {
                             <FaCartPlus /> Adicionar
                         </button>
 
-                        {/* Botão de Edição Visível Apenas para quem pode editar */}
                         {canEdit && (
                             <Link
                                 to={`/admin/products/edit/${product.id}`}
-                                className="product-edit-link" // Classe do Link
+                                className="product-edit-link"
                             >
                                 Editar Produto
                             </Link>

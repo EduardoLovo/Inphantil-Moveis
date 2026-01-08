@@ -178,9 +178,22 @@
     .comp-container {
         padding-top: 10px;
     }
+
     .comp-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .comp-card {
+        height: 175px;
+        width: 15px;
+        width: 130px;
+    }
+
+    .comp-card img {
+        height: 130px;
+        width: 130px;
+    }
+
     .comp-preview-box {
         width: 260px;
         height: 260px;

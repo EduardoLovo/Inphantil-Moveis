@@ -63,11 +63,10 @@ const TecidosPage: React.FC = () => {
                     >
                         <img
                             src={item.imageUrl}
-                            alt={item.name}
+                            alt={item.code}
                             className="tecido-image"
                         />
-                        <h3 className="tecido-title">{item.name}</h3>
-                        <p className="tecido-description">{item.description}</p>
+                        <h3 className="tecido-title">{item.code}</h3>
                     </div>
                 ))}
             </div>

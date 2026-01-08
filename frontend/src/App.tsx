@@ -44,6 +44,7 @@ import SinteticosPage from './pages/SinteticosPage';
 import CreateEnvironmentPage from './pages/CreateEnvironmentPage';
 import EnvironmentPage from './pages/EnvironmentPage';
 import EditEnvironmentPage from './pages/EditEnvironmentPage';
+import UnderConstructionPage from './pages/UnderConstructionPage';
 
 function App() {
     return (
@@ -55,7 +56,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/products" element={<UnderConstructionPage />} />
                 <Route path="/catalogo/apliques" element={<ApliquesPage />} />
                 <Route path="/apliques" element={<ApliquesPage />} />
                 <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -131,7 +132,7 @@ function App() {
                         path="/composicao/protetores"
                         element={<Desenhos />}
                     />{' '}
-                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/cart" element={<UnderConstructionPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route
                         path="/admin/products"

@@ -326,7 +326,6 @@ const SECTIONS = [
             </div>
         ),
     },
-
     {
         id: 'cuidados',
         title: 'Limpeza e Cuidados',
@@ -372,17 +371,18 @@ const SECTIONS = [
                         apenas este cuidado com o colchão!
                     </li>
                 </ul>
-
-                <iframe
-                    width="853"
-                    height="480"
-                    src="https://www.youtube.com/embed/DEH1n_AANnA"
-                    title="Inphantil Limpeza dos Produtos"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                ></iframe>
+                <div className="video-responsive">
+                    <iframe
+                        width="853"
+                        height="480"
+                        src="https://www.youtube.com/embed/DEH1n_AANnA"
+                        title="Inphantil Limpeza dos Produtos"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                </div>
             </div>
         ),
     },
@@ -446,8 +446,8 @@ const SECTIONS = [
                 <details>
                     <summary>As camas suportam quantos quilos?</summary>
                     <p>
-                        Nossas camas de solteiro suportam até 100kg
-                        distribuídos. As de casal/queen suportam até 220kg.
+                        Nossas camas de solteiro suportam até 110kg por ponto de
+                        pressão.
                     </p>
                 </details>
                 <details>
@@ -455,13 +455,6 @@ const SECTIONS = [
                     <p>
                         Sim! Temos opções personalizadas. Entre em contato pelo
                         WhatsApp para um orçamento.
-                    </p>
-                </details>
-                <details>
-                    <summary>Onde vejo o status do meu pedido?</summary>
-                    <p>
-                        Acesse a área "Dashboard" no topo do site e faça login
-                        para ver o status em tempo real.
                     </p>
                 </details>
             </div>

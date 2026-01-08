@@ -18,6 +18,7 @@ import { LogCleanupModule } from './log-cleanup/log-cleanup.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; // ⬅️ Importe seu guarda
 import { ContactModule } from './contact/contact.module';
 import { EnvironmentModule } from './environment/environment.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
     imports: [
@@ -25,6 +26,21 @@ import { EnvironmentModule } from './environment/environment.module';
         ConfigModule.forRoot({
             // Adicione esta linha
             isGlobal: true, // Torna as configs globais
+        }),
+        MailerModule.forRoot({
+            transport: {
+                host: process.env.MAIL_HOST,
+                port: Number(process.env.MAIL_PORT),
+                secure: false, // true para 465, false para outras portas
+                auth: {
+                    user: process.env.MAIL_USER,
+                    pass: process.env.MAIL_PASS,
+                },
+            },
+            defaults: {
+                from:
+                    process.env.MAIL_FROM || '"No Reply" <noreply@example.com>',
+            },
         }),
         PrismaModule,
         AuthModule,
