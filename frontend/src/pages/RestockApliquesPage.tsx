@@ -55,11 +55,9 @@ const EditModal: React.FC<{
     const [code, setCode] = useState(item.code || '');
     // Se for null, considera 0 para facilitar a edição
     const [quantity, setQuantity] = useState<number | null>(item.quantity || 0);
-    const [imagem, setImagem] = useState(item.imageUrl || '');
+    const imagem = item.imageUrl || '';
     const [inStock, setInStock] = useState(item.inStock); // Vem como false
-    const [sequence, setSequence] = useState<number | null>(
-        item.sequence || null
-    );
+    const sequence = item.sequence ?? null;
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
