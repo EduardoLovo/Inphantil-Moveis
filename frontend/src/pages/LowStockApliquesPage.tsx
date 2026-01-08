@@ -3,13 +3,7 @@ import { useApliqueStore } from '../store/ApliqueStore';
 import './ApliquesPage.css'; // Reutiliza o CSS existente
 import { useAuthStore } from '../store/AuthStore';
 import type { VisualItem } from '../types/visual-item';
-import {
-    FaCube,
-    FaEdit,
-    FaSortNumericUp,
-    FaTimes,
-    FaExclamationTriangle,
-} from 'react-icons/fa';
+import { FaCube, FaEdit, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
 
 // =========================================================
 // MODAIS (Reutilizados para manter funcionalidade)
@@ -53,11 +47,9 @@ const EditModal: React.FC<{
     const [quantity, setQuantity] = useState<number | null>(
         item.quantity || null
     );
-    const [imagem, setImagem] = useState(item.imageUrl || '');
+    const imagem = item.imageUrl || '';
     const [inStock, setInStock] = useState(item.inStock);
-    const [sequence, setSequence] = useState<number | null>(
-        item.sequence || null
-    );
+    const sequence = item.sequence ?? null;
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {

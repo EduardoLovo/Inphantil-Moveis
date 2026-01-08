@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '../services/api';
-import { FaSearch, FaUndo, FaLayerGroup, FaSwatchbook } from 'react-icons/fa';
+import { FaSearch, FaUndo, FaSwatchbook } from 'react-icons/fa';
 import type { VisualItem } from '../types/visual-item';
 import './ComposicaoSinteticoPage.css'; // Reutiliza o CSS da outra composição
 
