@@ -22,7 +22,7 @@ interface ApliqueState {
     updateAplique: (payload: ApliqueUpdatePayload) => Promise<void>; // ⬅️ NOVO: Função de atualização
 }
 
-export const useApliqueStore = create<ApliqueState>((set, get) => ({
+export const useApliqueStore = create<ApliqueState>((set, _) => ({
     apllyIcons: [],
     isLoading: false,
     error: null,

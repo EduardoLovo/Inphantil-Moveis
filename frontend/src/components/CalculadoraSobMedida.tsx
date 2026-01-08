@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import './CalculadoraSobMedida.css'; // Importa o CSS
-import { FaBed, FaCalculator } from 'react-icons/fa'; // Ícone para o título (opcional)
+import { FaBed } from 'react-icons/fa'; // Ícone para o título (opcional)
 
 // 1. Interface para os dados calculados (Melhor do que guardar JSX no estado)
 interface MedidasCalculadas {
@@ -33,7 +33,7 @@ const CalculadoraSobMedida: React.FC = () => {
     const formatarMedida = (valor: string): string => {
         // Remove tudo que não for dígito (0-9)
         const rawValue = valor.replace(/\D/g, '');
-        
+
         if (rawValue === '') return '';
 
         // Sempre divide por 100 para criar o efeito de centavos/decimais

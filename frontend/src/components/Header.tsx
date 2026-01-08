@@ -13,7 +13,6 @@ import {
     FaSwatchbook,
     FaPuzzlePiece,
     FaCut,
-    FaCalculator,
     FaLayerGroup,
 } from 'react-icons/fa';
 import { CiShoppingCart } from 'react-icons/ci';

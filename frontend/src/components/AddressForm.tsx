@@ -132,7 +132,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSuccess, onCancel }) => {
                             <input
                                 type="text"
                                 value={zipCode}
-                                onChange={handleZipCodeChange} // Usando a nova função aqui                                onBlur={handleBlurCep}
+                                onChange={handleZipCodeChange} // Usando a nova função aqui
+                                onBlur={handleBlurCep}
                                 placeholder="00000-000"
                                 maxLength={9}
                                 required
