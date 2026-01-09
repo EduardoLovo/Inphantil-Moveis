@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// 1. Cria a instância base do Axios
-// O Vite proxy redirecionará todas as chamadas de '/api' para 'http://localhost:3000'
+const baseURL = import.meta.env.VITE_API_URL || '/api';
+
 export const api = axios.create({
-    baseURL: '/api',
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
     },

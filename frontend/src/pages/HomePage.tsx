@@ -170,7 +170,7 @@ const HomePage = () => {
                     />
                     <motion.div
                         className="hero-text-overlay"
-                        // Texto sobe um pouquinho
+                        // Texto sobe um pouquinhol
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.8 }}

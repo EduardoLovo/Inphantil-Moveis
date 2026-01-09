@@ -32,6 +32,10 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
 
     await app.listen(process.env.PORT ?? 3000);
-    console.log(`Server running on http://localhost:3000`);
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('Api em produção');
+    } else {
+        console.log(`Server running on http://localhost:3000`);
+    }
 }
 bootstrap();
