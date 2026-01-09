@@ -5,6 +5,7 @@ import { PrismaService } from './prisma/prisma.service';
 export class AppService {
     constructor(private prisma: PrismaService) {}
     getHello(): string {
-        return 'Inphantil Api!';
+        // Mude o texto aqui para o que você quiser
+        return 'Bem-vindo a API da Inphantil Móveis! 🚀';
     }
 }
