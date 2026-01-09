@@ -61,7 +61,7 @@ body {
 }
 .scroll-down-arrow {
     position: absolute;
-    bottom: 40px; /* Distância do rodapé da imagem */
+    bottom: 0px; /* Distância do rodapé da imagem */
     left: 50%;
     transform: translateX(-50%); /* Centraliza perfeitamente */
     cursor: pointer;
