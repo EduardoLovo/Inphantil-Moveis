@@ -90,7 +90,7 @@ const Header = () => {
                     {/* --- NAVEGAÇÃO DESKTOP --- */}
                     <nav className="main-nav desktop-only">
                         <Link to="/">Início</Link>
-                        <Link to="/pos-compra">Informações pós venda</Link>
+                        <Link to="/pos-compra">Informações pós compra</Link>
                         <Link to="/contact">Contato</Link>
                         <div
                             className={`nav-dropdown ${
