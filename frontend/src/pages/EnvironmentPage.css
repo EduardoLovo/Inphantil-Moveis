@@ -20,6 +20,7 @@
     flex-direction: column;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
     z-index: 10;
+    padding-top: 50px;
 }
 
 .env-sidebar-header {
@@ -116,7 +117,7 @@
 
 /* Hero Header (Imagem de Capa) */
 .env-hero {
-    height: 400px;
+    height: 300px;
     background-size: cover;
     background-position: center;
     position: relative;

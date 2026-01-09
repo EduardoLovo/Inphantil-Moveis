@@ -177,7 +177,7 @@ const EnvironmentPage: React.FC = () => {
                         </div>
 
                         <div className="env-gallery-section">
-                            <h3>Galeria de Detalhes</h3>
+                            <h3>Galeria</h3>
                             {selectedEnv.images &&
                             selectedEnv.images.length > 0 ? (
                                 <div className="env-grid">
