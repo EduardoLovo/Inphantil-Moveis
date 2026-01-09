@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom';
 import './HomePage.css'; // 1. Importe o CSS
-import { FaCamera, FaInstagram, FaTimes, FaWhatsapp } from 'react-icons/fa';
+import {
+    FaCamera,
+    FaChevronDown,
+    FaInstagram,
+    FaTimes,
+    FaWhatsapp,
+} from 'react-icons/fa';
 import { motion, type Variants } from 'framer-motion';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -18,6 +24,8 @@ interface Environment {
     cover: string;
     images: { id: number; url: string }[];
 }
+
+const LOGO_IMAGE = '/logo.svg';
 
 // 3. COMPONENTE DO MODAL DE GALERIA
 const GalleryModal: React.FC<{
@@ -148,6 +156,13 @@ const HomePage = () => {
         },
     };
 
+    const handleScrollDown = () => {
+        window.scrollTo({
+            top: window.innerHeight, // Rola 1 tela para baixo
+            behavior: 'smooth',
+        });
+    };
+
     return (
         <div className="home-page">
             <main className="main-content">
@@ -180,6 +195,30 @@ const HomePage = () => {
                             O melhor lugar para decorar o quartinho do seu bebê
                             com carinho e segurança.
                         </p>
+                        <img
+                            src={LOGO_IMAGE}
+                            alt="Inphantil Logo"
+                            className="logo-home"
+                        />
+                    </motion.div>
+
+                    {/* 3. ADICIONE AQUI A SETA ANIMADA 👇 */}
+                    <motion.div
+                        className="scroll-down-arrow"
+                        onClick={handleScrollDown}
+                        initial={{ opacity: 0 }}
+                        animate={{
+                            opacity: 1,
+                            y: [0, 10, 0], // Faz o movimento de quicar (sobe e desce)
+                        }}
+                        transition={{
+                            delay: 2, // Espera um pouco para aparecer
+                            duration: 1.5,
+                            repeat: Infinity, // Repete para sempre
+                            ease: 'easeInOut',
+                        }}
+                    >
+                        <FaChevronDown size={40} color="#ffffbc" />
                     </motion.div>
                 </motion.section>
 
@@ -428,17 +467,6 @@ const HomePage = () => {
                     paddingBottom: '40px',
                 }}
             >
-                <iframe
-                    width="260"
-                    height="460"
-                    src="https://res.cloudinary.com/dtghitaah/video/upload/v1765914375/WhatsApp_Video_2025-12-11_at_08.10.34_wu55ow.mp4"
-                    title="Alinhamento de Cama Phant"
-                    frameBorder="0"
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                    // className="teste"
-                ></iframe>
                 <iframe
                     width="260"
                     height="460"
