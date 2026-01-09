@@ -122,9 +122,9 @@ const Header = () => {
                                 <Link to="/tecidos-lencol">
                                     <FaCut /> Tecidos Para Lençol
                                 </Link>
-                                <Link to="/pos-venda">
+                                <Link to="/pos-compra">
                                     <BsFillInfoCircleFill /> Informações pós
-                                    venda
+                                    compra
                                 </Link>
 
                                 <hr />
