@@ -76,7 +76,6 @@ function App() {
                 />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
-                <Route path="/pos-venda" element={<PosCompraPage />} />
                 <Route path="/showroom" element={<EnvironmentPage />} />
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
