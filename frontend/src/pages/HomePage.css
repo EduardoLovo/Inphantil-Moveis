@@ -60,9 +60,9 @@ body {
     justify-content: center;
 }
 .scroll-down-arrow {
-    position: absolute;
-    bottom: 0px; /* Distância do rodapé da imagem */
-    left: 50%;
+    /* position: absolute;
+    bottom: 0px; 
+    left: 50%; */
     transform: translateX(-50%); /* Centraliza perfeitamente */
     cursor: pointer;
     z-index: 10;
@@ -478,6 +478,10 @@ body {
     .gallery-modal-content h2 {
         font-size: 1.2rem;
         padding-right: 30px; /* Espaço para o botão X não cobrir texto */
+    }
+    .scroll-down-arrow {
+        position: absolute;
+        top: 595px;
     }
 }
 

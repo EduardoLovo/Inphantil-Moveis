@@ -18,6 +18,7 @@ import {
 import { CiShoppingCart } from 'react-icons/ci';
 import './Header.css';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
+import { GrContact } from 'react-icons/gr';
 
 const LOGO_IMAGE = '/logo.svg';
 
@@ -277,6 +278,12 @@ const Header = () => {
             {/* --- MENU GAVETA MOBILE --- */}
             <div className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="drawer-content">
+                    <Link to="/pos-venda" className="drawer-link">
+                        <BsFillInfoCircleFill /> Informações pós venda
+                    </Link>
+                    <Link to="/pos-venda" className="drawer-link">
+                        <GrContact /> Contato
+                    </Link>
                     <h3>Catálogos</h3>
                     <Link to="/products" className="drawer-link">
                         <FaListUl /> Todos Produtos
@@ -292,9 +299,6 @@ const Header = () => {
                     </Link>
                     <Link to="/tecidos-lencol" className="drawer-link">
                         <FaCut /> Tecidos Para Lençol
-                    </Link>
-                    <Link to="/pos-venda" className="drawer-link">
-                        <BsFillInfoCircleFill /> Informações pós venda
                     </Link>
 
                     <hr />

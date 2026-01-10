@@ -200,26 +200,26 @@ const HomePage = () => {
                             alt="Inphantil Logo"
                             className="logo-home"
                         />
+                        <motion.div
+                            className="scroll-down-arrow"
+                            onClick={handleScrollDown}
+                            initial={{ opacity: 0 }}
+                            animate={{
+                                opacity: 1,
+                                y: [0, 10, 0], // Faz o movimento de quicar (sobe e desce)
+                            }}
+                            transition={{
+                                delay: 2, // Espera um pouco para aparecer
+                                duration: 1.5,
+                                repeat: Infinity, // Repete para sempre
+                                ease: 'easeInOut',
+                            }}
+                        >
+                            <FaChevronDown size={40} color="#ffffbc" />
+                        </motion.div>
                     </motion.div>
 
                     {/* 3. ADICIONE AQUI A SETA ANIMADA 👇 */}
-                    <motion.div
-                        className="scroll-down-arrow"
-                        onClick={handleScrollDown}
-                        initial={{ opacity: 0 }}
-                        animate={{
-                            opacity: 1,
-                            y: [0, 10, 0], // Faz o movimento de quicar (sobe e desce)
-                        }}
-                        transition={{
-                            delay: 2, // Espera um pouco para aparecer
-                            duration: 1.5,
-                            repeat: Infinity, // Repete para sempre
-                            ease: 'easeInOut',
-                        }}
-                    >
-                        <FaChevronDown size={40} color="#ffffbc" />
-                    </motion.div>
                 </motion.section>
 
                 {/* Futuro Conteúdo Abaixo da Imagem */}
