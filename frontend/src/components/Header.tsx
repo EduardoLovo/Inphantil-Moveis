@@ -278,8 +278,8 @@ const Header = () => {
             {/* --- MENU GAVETA MOBILE --- */}
             <div className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="drawer-content">
-                    <Link to="/pos-venda" className="drawer-link">
-                        <BsFillInfoCircleFill /> Informações pós venda
+                    <Link to="/pos-compra" className="drawer-link">
+                        <BsFillInfoCircleFill /> Informações pós compra
                     </Link>
                     <Link to="/pos-venda" className="drawer-link">
                         <GrContact /> Contato

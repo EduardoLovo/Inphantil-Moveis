@@ -398,12 +398,7 @@ const SECTIONS = [
                     especializadas em móveis.
                 </p>
                 <p>
-                    O prazo informado no carrinho conta a partir da{' '}
-                    <strong>confirmação do pagamento</strong> + o tempo de
-                    produção (se for sob encomenda).
-                </p>
-                <p>
-                    Você receberá o código de rastreio por e-mail assim que o
+                    Você receberá o código de rastreio no whatsapp assim que o
                     produto for despachado.
                 </p>
             </div>
