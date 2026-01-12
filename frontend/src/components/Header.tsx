@@ -291,7 +291,7 @@ const Header = () => {
                     <Link to="/products" className="drawer-link">
                         <FaListUl /> Todos Produtos
                     </Link>
-                    <Link to="/showroom">
+                    <Link to="/showroom" className="drawer-link">
                         <FaSwatchbook /> Ambientes
                     </Link>
                     <Link to="/sinteticos" className="drawer-link">
