@@ -129,8 +129,6 @@ const CALCULADORAS_CARDS: AdminCard[] = [
 
 const AdminPage = () => {
     const { user } = useAuthStore();
-    const [accessStats, setAccessStats] = useState({ total: 0, today: 0 });
-    // Agora o estado guarda mais coisas
     const [stats, setStats] = useState({
         total: 0,
         today: 0,
