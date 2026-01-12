@@ -111,6 +111,9 @@ const Header = () => {
                                 <Link to="/products">
                                     <FaListUl /> Todos Produtos
                                 </Link>
+                                <Link to="/showroom">
+                                    <FaSwatchbook /> Ambientes
+                                </Link>
                                 <Link to="/sinteticos">
                                     <FaSwatchbook /> Cores Para Cama
                                 </Link>
@@ -287,6 +290,9 @@ const Header = () => {
                     <h3>Catálogos</h3>
                     <Link to="/products" className="drawer-link">
                         <FaListUl /> Todos Produtos
+                    </Link>
+                    <Link to="/showroom">
+                        <FaSwatchbook /> Ambientes
                     </Link>
                     <Link to="/sinteticos" className="drawer-link">
                         <FaSwatchbook /> Cores Para Cama
