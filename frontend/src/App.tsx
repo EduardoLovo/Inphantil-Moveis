@@ -43,10 +43,12 @@ import CreateEnvironmentPage from './pages/CreateEnvironmentPage';
 import EnvironmentPage from './pages/EnvironmentPage';
 import EditEnvironmentPage from './pages/EditEnvironmentPage';
 import UnderConstructionPage from './pages/UnderConstructionPage';
+import InternalAnalytics from './components/InternalAnalytics';
 
 function App() {
     return (
         <>
+            <InternalAnalytics />
             <GoogleAnalytics />
             <ScrollToTop />
             <Header />

@@ -12,6 +12,19 @@ import { SlLogin } from 'react-icons/sl';
 import { FaHelmetSafety } from 'react-icons/fa6';
 import { GiRolledCloth } from 'react-icons/gi';
 import { RiScissorsCutLine } from 'react-icons/ri';
+import { useEffect, useState } from 'react';
+import { api } from '../services/api';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+} from 'recharts';
 // Define as rotas administrativas e as permissões necessárias
 interface AdminCard {
     title: string;
@@ -116,8 +129,29 @@ const CALCULADORAS_CARDS: AdminCard[] = [
 
 const AdminPage = () => {
     const { user } = useAuthStore();
+    const [accessStats, setAccessStats] = useState({ total: 0, today: 0 });
+    // Agora o estado guarda mais coisas
+    const [stats, setStats] = useState({
+        total: 0,
+        today: 0,
+        dailyData: [],
+        monthlyData: [],
+    });
 
     const currentUserRole = user?.role;
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const response = await api.get('/analytics/stats');
+            setStats(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar stats', error);
+        }
+    };
 
     // Garante que o usuário logado possui a role MINIMA para acessar esta página
     const canAccessPage =
@@ -186,6 +220,97 @@ const AdminPage = () => {
                         </div>
                     </Link>
                 ))}
+            </div>
+            {/* Adicione um Card de Estatísticas */}
+            <hr className="admin-divider" />
+            <h2>Acessos</h2>
+            <div
+                className="stats-cards-container"
+                style={{
+                    display: 'flex',
+                    gap: '20px',
+                    marginBottom: '30px',
+                }}
+            >
+                <div className="card stat-card">
+                    <h3>Acessos Totais</h3>
+                    <p className="stat-number">{stats.total}</p>
+                </div>
+                <div className="card stat-card">
+                    <h3>Hoje</h3>
+                    <p className="stat-number_green">{stats.today}</p>
+                </div>
+            </div>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '20px',
+                    marginBottom: '40px',
+                }}
+            >
+                {/* Gráfico 1: Últimos 5 Dias (Barras) */}
+                <div className="card-grafic">
+                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
+                        Acessos Recentes (5 Dias)
+                    </h3>
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <BarChart data={stats.dailyData}>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                />
+                                <XAxis dataKey="name" />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    }}
+                                />
+                                <Bar
+                                    dataKey="acessos"
+                                    fill="#8884d8"
+                                    radius={[4, 4, 0, 0]}
+                                    barSize={40}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Gráfico 2: Mensal (Área/Linha) */}
+                <div className="card-grafic">
+                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
+                        Acessos por Mês ({new Date().getFullYear()})
+                    </h3>
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <AreaChart data={stats.monthlyData}>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                />
+                                <XAxis
+                                    dataKey="name"
+                                    interval={0}
+                                    fontSize={12}
+                                />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip />
+                                <Area
+                                    type="monotone"
+                                    dataKey="acessos"
+                                    stroke="#82ca9d"
+                                    fill="#82ca9d"
+                                    fillOpacity={0.3}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
             </div>
             {accessibleCards.length === 0 && (
                 <p>Nenhuma ferramenta disponível para o seu perfil.</p>

@@ -249,3 +249,10 @@ model EnvironmentImage {
   environmentId Int
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
 }
+
+model SiteAccess {
+  id        Int      @id @default(autoincrement())
+  path      String   @db.VarChar(200) // Qual página foi acessada
+  ip        String?  // IP do visitante (opcional, para contar únicos)
+  createdAt DateTime @default(now())
+}

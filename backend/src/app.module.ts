@@ -19,6 +19,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; // ⬅️ Importe s
 import { ContactModule } from './contact/contact.module';
 import { EnvironmentModule } from './environment/environment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
     imports: [
@@ -55,6 +56,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         LogCleanupModule,
         ContactModule,
         EnvironmentModule,
+        AnalyticsModule,
     ],
     controllers: [AppController],
     providers: [
