@@ -465,13 +465,23 @@ const PosCompraPage: React.FC = () => {
     const handleTabChange = (sectionId: string) => {
         setActiveTab(sectionId);
 
-        // 3. Função para rolar a página
-        // O timeout de 0 ou 100ms garante que o React já renderizou o novo conteúdo
         setTimeout(() => {
-            contentRef.current?.scrollIntoView({
-                behavior: 'smooth', // Rolagem suave
-                block: 'start', // Alinha o topo do elemento no topo da tela
-            });
+            if (contentRef.current) {
+                // 1. Descobre a posição do elemento na página
+                const elementPosition =
+                    contentRef.current.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset;
+
+                // 2. Define o ajuste (Quanto mais alto o número, mais "para cima" ele vai)
+                // 130px costuma ser ideal (Altura do Header ~100px + 30px de respiro)
+                const headerOffset = 100;
+
+                // 3. Rola suavemente para a posição ajustada
+                window.scrollTo({
+                    top: offsetPosition - headerOffset,
+                    behavior: 'smooth',
+                });
+            }
         }, 100);
     };
     return (
