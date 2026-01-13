@@ -21,18 +21,18 @@ export class AnalyticsService {
             where: { createdAt: { gte: todayStart } },
         });
 
-        // 2. Dados dos Últimos 5 dias
-        const dailyMap = new Map<string, number>();
+        // ====================================================
+        // 2. DADOS DIÁRIOS (Últimos 5 dias)
+        // ====================================================
+        const dailyMap = new Map<string, { total: number; ips: Set<string> }>();
 
-        // Inicializa os ultimos 5 dias (incluindo hoje)
         for (let i = 4; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
-            // Formata manualmente DD/MM para evitar erro de locale
             const day = d.getDate().toString().padStart(2, '0');
             const month = (d.getMonth() + 1).toString().padStart(2, '0');
             const key = `${day}/${month}`;
-            dailyMap.set(key, 0);
+            dailyMap.set(key, { total: 0, ips: new Set() });
         }
 
         const fiveDaysAgo = new Date();
@@ -41,7 +41,7 @@ export class AnalyticsService {
 
         const lastDaysRaw = await this.prisma.siteAccess.findMany({
             where: { createdAt: { gte: fiveDaysAgo } },
-            select: { createdAt: true },
+            select: { createdAt: true, ip: true },
         });
 
         lastDaysRaw.forEach((access) => {
@@ -51,17 +51,27 @@ export class AnalyticsService {
             const key = `${day}/${month}`;
 
             if (dailyMap.has(key)) {
-                dailyMap.set(key, dailyMap.get(key)! + 1);
+                const entry = dailyMap.get(key)!;
+                entry.total += 1;
+                if (access.ip) entry.ips.add(access.ip);
             }
         });
 
         const dailyData = Array.from(dailyMap.entries()).map(
-            ([name, value]) => ({ name, acessos: value }),
+            ([name, data]) => ({
+                name,
+                acessos: data.total,
+                unicos: data.ips.size,
+            }),
         );
-        // Não precisa dar reverse() pois inserimos na ordem certa no loop for
 
-        // 3. Dados Mensais
-        const monthlyMap = new Map<string, number>();
+        // ====================================================
+        // 3. DADOS MENSAIS (Ano Atual) - AGORA COM VISTANTES ÚNICOS
+        // ====================================================
+        const monthlyMap = new Map<
+            string,
+            { total: number; ips: Set<string> }
+        >();
         const months = [
             'Jan',
             'Fev',
@@ -76,24 +86,33 @@ export class AnalyticsService {
             'Nov',
             'Dez',
         ];
-        months.forEach((m) => monthlyMap.set(m, 0));
+
+        // Inicializa todos os meses do ano
+        months.forEach((m) => monthlyMap.set(m, { total: 0, ips: new Set() }));
 
         const startOfYear = new Date(new Date().getFullYear(), 0, 1);
         const yearRaw = await this.prisma.siteAccess.findMany({
             where: { createdAt: { gte: startOfYear } },
-            select: { createdAt: true },
+            select: { createdAt: true, ip: true }, // Importante: trazer o IP
         });
 
         yearRaw.forEach((access) => {
             const monthIndex = new Date(access.createdAt).getMonth();
             const key = months[monthIndex];
+
             if (monthlyMap.has(key)) {
-                monthlyMap.set(key, monthlyMap.get(key)! + 1);
+                const entry = monthlyMap.get(key)!;
+                entry.total += 1;
+                if (access.ip) entry.ips.add(access.ip);
             }
         });
 
         const monthlyData = Array.from(monthlyMap.entries()).map(
-            ([name, value]) => ({ name, acessos: value }),
+            ([name, data]) => ({
+                name,
+                acessos: data.total,
+                unicos: data.ips.size,
+            }),
         );
 
         return {

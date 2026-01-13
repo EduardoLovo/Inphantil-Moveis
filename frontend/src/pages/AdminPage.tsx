@@ -24,6 +24,7 @@ import {
     ResponsiveContainer,
     AreaChart,
     Area,
+    Legend,
 } from 'recharts';
 // Define as rotas administrativas e as permissões necessárias
 interface AdminCard {
@@ -222,23 +223,157 @@ const AdminPage = () => {
             {/* Adicione um Card de Estatísticas */}
             <hr className="admin-divider" />
             <h2>Acessos</h2>
-            <div
-                className="stats-cards-container"
-                style={{
-                    display: 'flex',
-                    gap: '20px',
-                    marginBottom: '30px',
-                }}
-            >
-                <div className="card stat-card">
-                    <h3>Acessos Totais</h3>
-                    <p className="stat-number">{stats.total}</p>
-                </div>
-                <div className="card stat-card">
-                    <h3>Hoje</h3>
-                    <p className="stat-number_green">{stats.today}</p>
+            <div className="card-grafic">
+                <h3 style={{ marginBottom: '20px', color: '#555' }}>
+                    Engajamento Recente (5 Dias)
+                </h3>
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <BarChart
+                            data={stats.dailyData}
+                            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                        >
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                vertical={false}
+                            />
+                            <XAxis dataKey="name" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip
+                                contentStyle={{
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                }}
+                                cursor={{ fill: 'transparent' }}
+                            />
+                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+
+                            {/* BARRA 1: TOTAL DE PÁGINAS VISTAS (AZUL) */}
+                            <Bar
+                                name="Páginas Vistas"
+                                dataKey="acessos"
+                                fill="#8884d8"
+                                radius={[4, 4, 0, 0]}
+                                barSize={30}
+                            />
+
+                            {/* BARRA 2: VISITANTES ÚNICOS (VERDE) */}
+                            <Bar
+                                name="Visitantes Únicos"
+                                dataKey="unicos"
+                                fill="#82ca9d"
+                                radius={[4, 4, 0, 0]}
+                                barSize={30}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
+            <h3>Visitantes</h3>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                    gap: '20px',
+                    marginBottom: '40px',
+                }}
+            >
+                {/* GRÁFICO 1: DIÁRIO (5 Dias) */}
+                <div className="card-grafic">
+                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
+                        Engajamento Recente (5 Dias)
+                    </h3>
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <BarChart
+                                data={stats.dailyData}
+                                margin={{
+                                    top: 20,
+                                    right: 30,
+                                    left: 0,
+                                    bottom: 0,
+                                }}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                />
+                                <XAxis dataKey="name" />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    }}
+                                    cursor={{ fill: 'transparent' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
+
+                                <Bar
+                                    name="Visitantes Únicos"
+                                    dataKey="unicos"
+                                    fill="#82ca9d"
+                                    radius={[4, 4, 0, 0]}
+                                    barSize={20}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* GRÁFICO 2: MENSAL (Ano Atual) */}
+                <div className="card-grafic">
+                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
+                        Desempenho no Ano ({new Date().getFullYear()})
+                    </h3>
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <AreaChart
+                                data={stats.monthlyData}
+                                margin={{
+                                    top: 20,
+                                    right: 10,
+                                    left: -20,
+                                    bottom: 0,
+                                }}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                />
+                                <XAxis
+                                    dataKey="name"
+                                    interval={0}
+                                    fontSize={12}
+                                    tick={{ dy: 5 }}
+                                />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    }}
+                                    cursor={{ fill: 'transparent' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
+
+                                <Area
+                                    name="Visitantes Únicos"
+                                    type="monotone"
+                                    dataKey="unicos"
+                                    stroke="#82ca9d"
+                                    fill="#82ca9d"
+                                    fillOpacity={0.3}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+            <h3>Paginas Vistas</h3>
             <div
                 style={{
                     display: 'grid',
