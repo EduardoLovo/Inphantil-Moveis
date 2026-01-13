@@ -470,8 +470,8 @@ const AdminPage = () => {
                                 <Area
                                     type="monotone"
                                     dataKey="acessos"
-                                    stroke="#82ca9d"
-                                    fill="#82ca9d"
+                                    stroke="#8884d8"
+                                    fill="#8884d8"
                                     fillOpacity={0.3}
                                 />
                             </AreaChart>
