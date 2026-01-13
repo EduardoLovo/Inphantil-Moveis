@@ -44,6 +44,8 @@ import EnvironmentPage from './pages/EnvironmentPage';
 import EditEnvironmentPage from './pages/EditEnvironmentPage';
 import UnderConstructionPage from './pages/UnderConstructionPage';
 import InternalAnalytics from './components/InternalAnalytics';
+import AdminUserDetailsPage from './pages/AdminUserDetailsPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 
 function App() {
     return (
@@ -161,6 +163,11 @@ function App() {
                     <Route
                         path="/admin/ambientes/edit/:id"
                         element={<EditEnvironmentPage />}
+                    />
+                    <Route path="/admin/users" element={<AdminUsersPage />} />
+                    <Route
+                        path="/admin/users/:id"
+                        element={<AdminUserDetailsPage />}
                     />
                 </Route>
                 <Route path="/profile/edit" element={<EditProfilePage />} />

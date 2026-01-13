@@ -58,14 +58,7 @@ const ADMIN_CARDS: AdminCard[] = [
         link: '/admin/categories',
         requiredRoles: ['DEV', 'ADMIN'],
     },
-    {
-        title: 'Gerenciar Pedidos',
-        description:
-            'Visualizar todos os pedidos do sistema e alterar status (Produção, Envio, Pago).',
-        IconComponent: FaChartBar,
-        link: '/admin/orders',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
+
     {
         title: 'Logs de Login',
         description: 'Visualizar logs de acesso (sucesso e falha) do sistema.',
@@ -128,6 +121,24 @@ const CALCULADORAS_CARDS: AdminCard[] = [
     },
 ];
 
+const USUARIOS_PEDIDOS_CARDS: AdminCard[] = [
+    {
+        title: 'Usuarios',
+        description: 'Lista de Usuarios',
+        IconComponent: FaCalculator,
+        link: '/admin/users',
+        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+    },
+    {
+        title: 'Gerenciar Pedidos',
+        description:
+            'Visualizar todos os pedidos do sistema e alterar status (Produção, Envio, Pago).',
+        IconComponent: FaChartBar,
+        link: '/admin/orders',
+        requiredRoles: ['DEV', 'ADMIN'],
+    },
+];
+
 const AdminPage = () => {
     const { user } = useAuthStore();
     const [stats, setStats] = useState({
@@ -173,6 +184,10 @@ const AdminPage = () => {
         card.requiredRoles.includes(currentUserRole)
     );
 
+    const accessibleUsuariosPedidosCards = USUARIOS_PEDIDOS_CARDS.filter(
+        (card) => card.requiredRoles.includes(currentUserRole)
+    );
+
     return (
         <div className="admin-page-container">
             {' '}
@@ -182,6 +197,25 @@ const AdminPage = () => {
             <hr className="admin-divider" />
             <h2>Ferramentas de Gestão</h2>
             {/* GRID DE CARDS */}
+            <div className="admin-cards-grid">
+                {accessibleUsuariosPedidosCards.map((card) => (
+                    <Link
+                        to={card.link}
+                        key={card.title}
+                        className="admin-card-link"
+                    >
+                        <div className="admin-card">
+                            <card.IconComponent className="card-icon" />
+
+                            <h3 className="card-title">{card.title}</h3>
+                            <p className="card-description">
+                                {card.description}
+                            </p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+            <h2>Ferramentas de Gestão</h2>
             <div className="admin-cards-grid">
                 {accessibleCards.map((card) => (
                     <Link

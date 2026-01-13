@@ -20,6 +20,7 @@ import { ContactModule } from './contact/contact.module';
 import { EnvironmentModule } from './environment/environment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
     imports: [
@@ -57,6 +58,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
         ContactModule,
         EnvironmentModule,
         AnalyticsModule,
+        UsersModule,
     ],
     controllers: [AppController],
     providers: [
