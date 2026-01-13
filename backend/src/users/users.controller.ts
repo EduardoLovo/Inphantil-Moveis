@@ -16,13 +16,13 @@ import { Role } from '@prisma/client';
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    @Roles(Role.ADMIN, Role.DEV, Role.SELLER) // Só Admin pode ver a lista
+    @Roles(Role.ADMIN, Role.DEV) // Só Admin pode ver a lista
     @Get()
     findAll() {
         return this.usersService.findAll();
     }
 
-    @Roles(Role.ADMIN, Role.DEV, Role.SELLER) // Só Admin pode ver detalhes de qualquer um
+    @Roles(Role.ADMIN, Role.DEV) // Só Admin pode ver detalhes de qualquer um
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.findOne(id);

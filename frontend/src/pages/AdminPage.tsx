@@ -127,7 +127,7 @@ const USUARIOS_PEDIDOS_CARDS: AdminCard[] = [
         description: 'Lista de Usuarios',
         IconComponent: FaCalculator,
         link: '/admin/users',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
+        requiredRoles: ['DEV', 'ADMIN'],
     },
     {
         title: 'Gerenciar Pedidos',
