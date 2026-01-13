@@ -8,7 +8,7 @@ export class UsersService {
     // Listar todos os usuários (apenas dados básicos)
     async findAll() {
         return this.prisma.user.findMany({
-            orderBy: { createdAt: 'desc' },
+            orderBy: { name: 'asc' },
             select: {
                 id: true,
                 name: true,
@@ -30,7 +30,6 @@ export class UsersService {
             include: {
                 addresses: true, // Inclui endereços
                 orders: {
-                    // Inclui pedidos
                     orderBy: { createdAt: 'desc' },
                     include: {
                         items: {
