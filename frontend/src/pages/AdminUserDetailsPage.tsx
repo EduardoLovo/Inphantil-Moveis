@@ -65,7 +65,11 @@ const AdminUserDetailsPage = () => {
         <div className="admin-container">
             <div
                 className="admin-content"
-                style={{ maxWidth: '1000px', margin: '0 auto' }}
+                style={{
+                    maxWidth: '1000px',
+                    margin: '0 auto',
+                    padding: '100px 0px',
+                }}
             >
                 <button
                     onClick={() => navigate('/admin/users')}

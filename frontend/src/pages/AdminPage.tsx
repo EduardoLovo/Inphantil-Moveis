@@ -195,7 +195,7 @@ const AdminPage = () => {
             <h1>Painel Administrativo</h1>
             <p>Bem-vindo(a), **{user.name}**.</p>
             <hr className="admin-divider" />
-            <h2>Ferramentas de Gestão</h2>
+            {/* <h2>Usuarios e Pedidos</h2> */}
             {/* GRID DE CARDS */}
             <div className="admin-cards-grid">
                 {accessibleUsuariosPedidosCards.map((card) => (

@@ -88,11 +88,19 @@ const AdminUsersPage = () => {
                                             <td>#{user.id}</td>
                                             <td>
                                                 <strong>{user.name}</strong>
-                                                {user.role === 'ADMIN' && (
+                                                {user.role === 'ADMIN' ? (
                                                     <span className="aup-badge-admin">
                                                         ADMIN
                                                     </span>
-                                                )}
+                                                ) : user.role === 'SELLER' ? (
+                                                    <span className="aup-badge-admin">
+                                                        SELLER
+                                                    </span>
+                                                ) : user.role === 'DEV' ? (
+                                                    <span className="aup-badge-admin">
+                                                        DEV
+                                                    </span>
+                                                ) : null}
                                             </td>
                                             <td>{user.email}</td>
                                             <td>{user.fone || '-'}</td>
