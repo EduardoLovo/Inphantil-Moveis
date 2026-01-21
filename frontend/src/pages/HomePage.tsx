@@ -445,10 +445,9 @@ const HomePage = () => {
                 >
                     <h2>Instagram</h2>
                     <p>
-                        Siga-nos no Instagram para mais inspirações! @inphantil
+                        Siga-nos no Instagram para mais inspirações! @inphantil{' '}
+                        <FaInstagram />
                     </p>
-                    seçao de feed
-                    <FaInstagram />
                 </motion.section>
             </main>
             {/* 5. RENDERIZAÇÃO DO MODAL SE HOUVER SELEÇÃO */}

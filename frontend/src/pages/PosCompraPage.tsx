@@ -224,8 +224,8 @@ const SECTIONS = [
                         <iframe
                             width="753"
                             height="480"
-                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                            title="Montagem da Cama Montessoriana Phant"
+                            src="https://www.youtube.com/embed/Ws2AjL6swaM"
+                            title="Montagem do Protetor de Parede"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             referrerPolicy="strict-origin-when-cross-origin"
@@ -245,8 +245,8 @@ const SECTIONS = [
                         <iframe
                             width="753"
                             height="480"
-                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                            title="Montagem da Cama Montessoriana Phant"
+                            src="https://www.youtube.com/embed/u6YRKuakPcg"
+                            title="Montagem da Cabana Mosquiteiro"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             referrerPolicy="strict-origin-when-cross-origin"
@@ -266,8 +266,8 @@ const SECTIONS = [
                         <iframe
                             width="753"
                             height="480"
-                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                            title="Montagem da Cama Montessoriana Phant"
+                            src="https://www.youtube.com/embed/yB_NiRUSdts"
+                            title="Cabana de Brincar"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             referrerPolicy="strict-origin-when-cross-origin"
@@ -287,8 +287,8 @@ const SECTIONS = [
                         <iframe
                             width="753"
                             height="480"
-                            src="https://www.youtube.com/embed/9qnu3gMKYkc"
-                            title="Montagem da Cama Montessoriana Phant"
+                            src="https://www.youtube.com/embed/dQ3UifiW1C0"
+                            title="Montagem da Árvore de Natal Interativa"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             referrerPolicy="strict-origin-when-cross-origin"
@@ -313,7 +313,7 @@ const SECTIONS = [
                 </p>
                 <div className="video-responsive">
                     <iframe
-                        width="873"
+                        width="753"
                         height="480"
                         src="https://www.youtube.com/embed/EI-uWTHEtZA"
                         title="Alinhamento de Cama Phant"
@@ -373,7 +373,7 @@ const SECTIONS = [
                 </ul>
                 <div className="video-responsive">
                     <iframe
-                        width="853"
+                        width="753"
                         height="480"
                         src="https://www.youtube.com/embed/DEH1n_AANnA"
                         title="Inphantil Limpeza dos Produtos"

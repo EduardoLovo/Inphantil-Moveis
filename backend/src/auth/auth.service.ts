@@ -134,7 +134,9 @@ export class AuthService {
             role: user.role,
         };
 
-        const accessToken = await this.jwtService.signAsync(payload);
+        const accessToken = await this.jwtService.signAsync(payload, {
+            expiresIn: '7d',
+        });
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...userWithoutPassword } = user;
@@ -186,7 +188,9 @@ export class AuthService {
             role: user.role as Role,
         };
 
-        const accessToken = await this.jwtService.signAsync(payload);
+        const accessToken = await this.jwtService.signAsync(payload, {
+            expiresIn: '7d',
+        });
 
         await this.createLog(
             user.email,

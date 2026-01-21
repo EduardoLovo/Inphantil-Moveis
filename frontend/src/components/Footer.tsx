@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                             <Link to="/contact">Contato</Link>
                         </li>
                         <li>
-                            <Link to="/pos-venda">Informações pós venda</Link>
+                            <Link to="/pos-compra">Informações pós compra</Link>
                         </li>
                     </ul>
                 </div>
