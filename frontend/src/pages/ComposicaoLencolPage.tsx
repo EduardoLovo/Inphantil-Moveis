@@ -11,10 +11,10 @@ const ComposicaoPage: React.FC = () => {
 
     // Estados de Seleção
     const [tecidoSelecionado, setTecidoSelecionado] = useState<string | null>(
-        null
+        null,
     );
     const [apliqueSelecionado, setApliqueSelecionado] = useState<string | null>(
-        null
+        null,
     );
 
     // Estados de Controle
@@ -53,7 +53,7 @@ const ComposicaoPage: React.FC = () => {
         const filtrados = apliques.filter(
             (item) =>
                 item.code.toLowerCase().includes(busca.toLowerCase()) ||
-                item.name.toLowerCase().includes(busca.toLowerCase())
+                item.name.toLowerCase().includes(busca.toLowerCase()),
         );
         // Ordena por código
         return filtrados.sort((a, b) => a.code.localeCompare(b.code));
@@ -61,8 +61,8 @@ const ComposicaoPage: React.FC = () => {
 
     // Ordena tecidos por nome/cor
     const tecidosOrdenados = useMemo(() => {
-        return [...tecidos].sort((a, b) => a.name.localeCompare(b.name));
-    }, [tecidos]);
+        return [...tecidos].sort((a, b) => a.code.localeCompare(b.code));
+    }, [tecidos, busca]);
 
     // 3. Handlers de Seleção
     const handleSelectTecido = (url: string) => {
