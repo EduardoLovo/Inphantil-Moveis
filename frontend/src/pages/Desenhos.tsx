@@ -10,6 +10,8 @@ import { EncaixeSVG } from '../components/Desenhos/EncaixeSVG';
 import { CamaSVG } from '../components/Desenhos/CamaSVG';
 import { TapeteSVG } from '../components/Desenhos/TapeteSVG';
 import toast, { Toaster } from 'react-hot-toast';
+import { MontanhaUmaParedeSVG } from '../components/Desenhos/MontanhaUmaParedeSVG';
+import { NuvemUmaParedeSVG } from '../components/Desenhos/NuvemUmaParedeSVG';
 
 // Definição dos tipos
 interface Cor {
@@ -145,10 +147,16 @@ export const Desenhos = () => {
                 return <NuvemSVG {...commonProps} lado="direito" />;
             case 'nuvem-lado-esquerdo':
                 return <NuvemSVG {...commonProps} lado="esquerdo" />;
+            case 'nuvem-uma-parede':
+                return <NuvemUmaParedeSVG {...commonProps} lado="esquerdo" />;
             case 'montanha':
                 return <MontanhaSVG {...commonProps} lado="direito" />;
             case 'montanha-lado-esquerdo':
                 return <MontanhaSVG {...commonProps} lado="esquerdo" />;
+            case 'montanha-uma-parede':
+                return (
+                    <MontanhaUmaParedeSVG {...commonProps} lado="esquerdo" />
+                );
             case 'onda':
                 return <OndaSVG {...commonProps} lado="direito" />;
             case 'onda-lado-esquerdo':
@@ -178,8 +186,10 @@ export const Desenhos = () => {
         const mapDesenhoCores: Record<string, string[]> = {
             nuvem: ['cor1', 'cor2'],
             'nuvem-lado-esquerdo': ['cor1', 'cor2'],
+            'nuvem-uma-parede': ['cor1', 'cor2'],
             montanha: ['cor1', 'cor2', 'cor3'],
             'montanha-lado-esquerdo': ['cor1', 'cor2', 'cor3'],
+            'montanha-uma-parede': ['cor1', 'cor2', 'cor3'],
             onda: ['cor1', 'cor2'],
             'onda-lado-esquerdo': ['cor1', 'cor2'],
             pico: ['cor1', 'cor2', 'cor3'],
@@ -291,6 +301,16 @@ export const Desenhos = () => {
                     />
                     Nuvem (Lado esquerdo)
                 </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="nuvem-uma-parede"
+                        checked={tipoDoDesenho === 'nuvem-uma-parede'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Nuvem Uma Parede
+                </label>
 
                 <label>
                     <input
@@ -312,6 +332,16 @@ export const Desenhos = () => {
                         onChange={(e) => setTipoDoDesenho(e.target.value)}
                     />
                     Montanha (Lado esquerdo)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="desenho"
+                        value="montanha-uma-parede"
+                        checked={tipoDoDesenho === 'montanha-uma-parede'}
+                        onChange={(e) => setTipoDoDesenho(e.target.value)}
+                    />
+                    Montanha Uma Parede
                 </label>
                 <label>
                     <input
