@@ -5,14 +5,15 @@ import {
     HttpCode,
     HttpStatus,
     UseGuards,
-    Request, // Importado de @nestjs/common
+    Request,
     Get,
     Patch,
+    Req,
+    Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-// 1. Importe os decorators do Swagger
 import {
     ApiTags,
     ApiOperation,
@@ -25,21 +26,23 @@ import { GetUser } from './decorators/get-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
+import { Response } from 'express'; // <--- CORREÇÃO 1: Importe isso!
 
-@ApiTags('auth') // 2. Agrupa os endpoints sob a tag 'auth' (que definimos no main.ts)
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
 
+    // --- MANTENHA OS MÉTODOS EXISTENTES ---
+
     @Public()
     @Post('register')
-    @ApiOperation({ summary: 'Registrar um novo usuário (Retorna Token)' }) // 3. Descreve o endpoint
+    @ApiOperation({ summary: 'Registrar um novo usuário (Retorna Token)' })
     @ApiResponse({
         status: 201,
         description: 'Usuário registrado e logado com sucesso',
     })
     @ApiResponse({ status: 409, description: 'Email já existe' })
-    // CORRIGIDO: Injeta o Request e passa para o service
     register(@Body() registerDto: RegisterDto, @Request() req: any) {
         return this.authService.register(registerDto, req);
     }
@@ -47,21 +50,45 @@ export class AuthController {
     @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Realizar login e obter token JWT' }) // 4. Descreve
+    @ApiOperation({ summary: 'Realizar login e obter token JWT' })
     @ApiResponse({
         status: 200,
         description: 'Login bem-sucedido, retorna token de acesso',
     })
     @ApiResponse({ status: 401, description: 'Email ou senha inválidos' })
-    // CORRIGIDO: Injeta o Request e passa para o service
     login(@Body() loginDto: LoginDto, @Request() req: any) {
         return this.authService.login(loginDto, req);
     }
 
-    // Vamos documentar também a rota de perfil que usamos como exemplo
+    // --- MÉTODOS DO GOOGLE (CORRIGIDOS) ---
+
+    @Public() // Adicione @Public() para evitar bloqueio se tiver Guard Global
+    @Get('google')
+    @UseGuards(AuthGuard('google'))
+    async googleAuth(@Req() req: any) {
+        // O Guard inicia o fluxo e redireciona.
+    }
+
+    @Public() // Adicione @Public() aqui também
+    @Get('google/callback')
+    @UseGuards(AuthGuard('google'))
+    // CORREÇÃO 2: res: Response (do express)
+    async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
+        const { accessToken } = await this.authService.validateGoogleUser(
+            req.user,
+        );
+
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        return res.redirect(
+            `${frontendUrl}/auth/callback?token=${accessToken}`,
+        );
+    }
+
+    // --- DEMAIS MÉTODOS ---
+
     @UseGuards(AuthGuard('jwt'))
     @Get('profile')
-    @ApiBearerAuth() // 5. Indica que esta rota precisa de um token "Bearer"
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Obter dados do perfil do usuário logado' })
     @ApiResponse({ status: 200, description: 'Dados do perfil' })
     @ApiResponse({
@@ -80,15 +107,13 @@ export class AuthController {
         return this.authService.updateProfile(req.user.id, dto);
     }
 
-    // ROTA: Esqueci a Senha (Público)
-    @Public() // Se estiver usando seu decorator Public
+    @Public()
     @Post('forgot-password')
     @ApiOperation({ summary: 'Solicitar recuperação de senha' })
     forgotPassword(@Body() dto: ForgotPasswordDto) {
         return this.authService.forgotPassword(dto.email);
     }
 
-    // ROTA: Redefinir Senha (Público, com token)
     @Public()
     @Post('reset-password')
     @ApiOperation({ summary: 'Redefinir senha usando o token' })

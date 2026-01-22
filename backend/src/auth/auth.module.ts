@@ -8,27 +8,28 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // 4. Importe Conf
 import { JwtStrategy } from './jwt.strategy';
 import { RecaptchaModule } from 'src/recaptcha/recaptcha.module';
 import { HttpModule } from '@nestjs/axios';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
     imports: [
         HttpModule,
-        PrismaModule, // Para o AuthService poder usar o PrismaClient
+        PrismaModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
-            imports: [ConfigModule], // Importe o ConfigModule aqui
-            inject: [ConfigService], // Injete o ConfigService
+            imports: [ConfigModule],
+            inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'), // Use o ConfigService para ler a variável
+                secret: configService.get<string>('JWT_SECRET'),
                 signOptions: {
-                    expiresIn: '1d', // Token expira em 1 dia
+                    expiresIn: '7d',
                 },
             }),
         }),
         ConfigModule,
-        RecaptchaModule, // Garante que o ConfigService está disponível
+        RecaptchaModule,
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
-    exports: [PassportModule], // (Mais tarde adicionaremos a JwtStrategy aqui)
+    providers: [AuthService, JwtStrategy, GoogleStrategy],
+    exports: [PassportModule],
 })
 export class AuthModule {}

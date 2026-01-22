@@ -10,6 +10,7 @@ interface AuthState {
     accessToken: string | null;
     isLoggedIn: boolean;
     isInitialized: boolean;
+    setToken: (token: string) => Promise<void>; // <--- ADICIONE ISSO NA INTERFACE
 
     // Ações
     login: (credentials: LoginDto) => Promise<void>;
@@ -61,7 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             if (axios.isAxiosError(error) && error.response) {
                 // Lança o erro de validação (ex: Email já existe)
                 throw new Error(
-                    error.response.data.message || 'Erro ao tentar registrar.'
+                    error.response.data.message || 'Erro ao tentar registrar.',
                 );
             }
             throw new Error('Ocorreu um erro inesperado no registro.');
@@ -89,7 +90,8 @@ export const useAuthStore = create<AuthState>((set) => ({
             // Exemplo de tratamento de erro básico
             if (axios.isAxiosError(error) && error.response) {
                 throw new Error(
-                    error.response.data.message || 'Erro ao tentar fazer login.'
+                    error.response.data.message ||
+                        'Erro ao tentar fazer login.',
                 );
             }
             throw new Error('Ocorreu um erro inesperado.');
@@ -106,5 +108,18 @@ export const useAuthStore = create<AuthState>((set) => ({
             isLoggedIn: false,
             isInitialized: true,
         });
+    },
+
+    setToken: async (token: string) => {
+        localStorage.setItem('accessToken', token);
+        set({ accessToken: token, isLoggedIn: true });
+
+        // Busca os dados do usuário imediatamente
+        try {
+            const userResponse = await api.get('/auth/profile');
+            set({ user: userResponse.data });
+        } catch (error) {
+            console.error('Erro ao buscar perfil:', error);
+        }
     },
 }));

@@ -46,6 +46,7 @@ import UnderConstructionPage from './pages/UnderConstructionPage';
 import InternalAnalytics from './components/InternalAnalytics';
 import AdminUserDetailsPage from './pages/AdminUserDetailsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
+import AuthCallbackPage from './pages/auth/AuthCallbackPage'; // <--- Importe aqui
 
 function App() {
     return (
@@ -81,6 +82,7 @@ function App() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
                 <Route path="/showroom" element={<EnvironmentPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/admin" element={<AdminPage />} />

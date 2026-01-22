@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HttpService } from '@nestjs/axios'; // 1. IMPORT NOVO
@@ -26,7 +26,6 @@ export class AuthService {
         private readonly httpService: HttpService, // 3. INJEÇÃO NOVO
     ) {}
 
-    // --- VALIDAÇÃO DO RECAPTCHA (NOVO MÉTODO) ---
     private async validateRecaptcha(token: string) {
         if (!token) {
             throw new BadRequestException('Captcha token é obrigatório.');
@@ -52,7 +51,6 @@ export class AuthService {
         }
     }
 
-    // ... (método createLog permanece igual) ...
     private async createLog(
         email: string,
         success: boolean,
@@ -76,21 +74,35 @@ export class AuthService {
         });
     }
 
-    /**
-     * Registra um novo usuário no sistema
-     */
+    private async generateToken(user: User) {
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+        };
+
+        return {
+            accessToken: await this.jwtService.signAsync(payload),
+            user: {
+                // Opcional: retornar dados do user se quiser usar no front
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar, // Se tiver adicionado ao schema
+            },
+        };
+    }
+
     async register(dto: RegisterDto, req?: any) {
-        // 4. CHAMADA DA VALIDAÇÃO DO CAPTCHA
-        // Se estiver em ambiente de desenvolvimento e quiser pular, pode colocar um if aqui.
-        // Mas para produção, isso é essencial:
+        // 1. Validação do Captcha
         if (dto.gRecaptchaResponse) {
             await this.validateRecaptcha(dto.gRecaptchaResponse);
         } else {
-            // Se quiser obrigar o captcha, descomente a linha abaixo:
-            throw new BadRequestException('Validação anti-robô obrigatória.');
+            // throw new BadRequestException('Validação anti-robô obrigatória.');
         }
 
-        // 1. Verificar se o usuário já existe
+        // 2. Verificar se email existe
         const existingUser = await this.prisma.user.findUnique({
             where: { email: dto.email },
         });
@@ -105,11 +117,11 @@ export class AuthService {
             throw new ConflictException('Um usuário com este email já existe');
         }
 
-        // 2. Hashear a senha
+        // 3. Hashear a senha
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
-        // 3. Criar o usuário no banco
+        // 4. Criar o usuário
         const user = await this.prisma.user.create({
             data: {
                 name: dto.name,
@@ -119,7 +131,7 @@ export class AuthService {
             },
         });
 
-        // ✅ LOG DE SUCESSO
+        // 5. Log de Sucesso
         await this.createLog(
             user.email,
             true,
@@ -128,34 +140,11 @@ export class AuthService {
             user.id,
         );
 
-        const payload = {
-            sub: user.id,
-            email: user.email,
-            role: user.role,
-        };
-
-        const accessToken = await this.jwtService.signAsync(payload, {
-            expiresIn: '7d',
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...userWithoutPassword } = user;
-
-        return {
-            accessToken,
-            user: userWithoutPassword,
-        };
+        // ✅ FINAL PADRONIZADO: Chama a função auxiliar
+        return this.generateToken(user);
     }
 
-    // ... (métodos login, updateProfile, forgotPassword, resetPassword permanecem iguais) ...
-    async login(dto: LoginDto, req?: any): Promise<{ accessToken: string }> {
-        if (dto.gRecaptchaResponse) {
-            await this.validateRecaptcha(dto.gRecaptchaResponse);
-        } else {
-            // Se quiser obrigar o captcha, descomente a linha abaixo:
-            throw new BadRequestException('Validação anti-robô obrigatória.');
-        }
-
+    async login(dto: LoginDto, req?: any) {
         const user = await this.prisma.user.findUnique({
             where: { email: dto.email },
         });
@@ -170,6 +159,17 @@ export class AuthService {
             throw new UnauthorizedException('Email ou senha inválidos');
         }
 
+        // Bloqueia login com senha vazia (usuários Google)
+        if (!user.password) {
+            await this.createLog(
+                dto.email,
+                false,
+                'Tentativa de login com senha em conta Google',
+                req,
+            );
+            throw new UnauthorizedException('Use o login com Google.');
+        }
+
         const isMatch = await bcrypt.compare(dto.password, user.password);
 
         if (!isMatch) {
@@ -182,16 +182,10 @@ export class AuthService {
             throw new UnauthorizedException('Email ou senha inválidos');
         }
 
-        const payload = {
-            sub: user.id,
-            email: user.email,
-            role: user.role as Role,
-        };
+        // ✅ AQUI MUDOU: Em vez de criar payload, chamamos a função auxiliar
+        const tokenResult = await this.generateToken(user);
 
-        const accessToken = await this.jwtService.signAsync(payload, {
-            expiresIn: '7d',
-        });
-
+        // Log de sucesso
         await this.createLog(
             user.email,
             true,
@@ -200,9 +194,7 @@ export class AuthService {
             user.id,
         );
 
-        return {
-            accessToken: accessToken,
-        };
+        return tokenResult;
     }
 
     async updateProfile(userId: number, dto: UpdateUserDto) {
@@ -306,5 +298,39 @@ export class AuthService {
         });
 
         return { message: 'Senha alterada com sucesso! Faça login.' };
+    }
+
+    // Adicione ao AuthService
+    async validateGoogleUser(googleUser: any) {
+        const { email, firstName, lastName, googleId, picture } = googleUser;
+
+        let user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (user) {
+            // Se o usuário existe mas não tem googleId, vincula a conta
+            if (!user.googleId) {
+                user = await this.prisma.user.update({
+                    where: { id: user.id },
+                    data: { googleId, avatar: picture },
+                });
+            }
+        } else {
+            // Cria novo usuário se não existir
+            // Nota: Defina uma senha aleatória ou deixe null se seu schema permitir
+            user = await this.prisma.user.create({
+                data: {
+                    email,
+                    name: `${firstName} ${lastName}`,
+                    googleId,
+                    avatar: picture,
+                    password: '', // ou gere um hash aleatório se password for obrigatório
+                    fone: '',
+                },
+            });
+        }
+
+        return this.generateToken(user);
     }
 }
