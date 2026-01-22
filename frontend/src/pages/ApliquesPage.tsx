@@ -9,6 +9,7 @@ import {
     FaSearch,
     FaSortNumericUp,
     FaTimes,
+    FaTrash,
 } from 'react-icons/fa';
 
 // =========================================================
@@ -62,15 +63,16 @@ const EditModal: React.FC<{
     item: VisualItem;
     onClose: () => void;
     onSave: (data: any) => void;
-}> = ({ item, onClose, onSave }) => {
+    onDelete: (id: number) => Promise<void>;
+}> = ({ item, onClose, onSave, onDelete }) => {
     const [code, setCode] = useState(item.code || '');
     const [quantity, setQuantity] = useState<number | null>(
-        item.quantity || null
+        item.quantity || null,
     );
     const [imagem, setImagem] = useState(item.imageUrl || '');
     const [inStock, setInStock] = useState(item.inStock);
     const [sequence, setSequence] = useState<number | null>(
-        item.sequence || null
+        item.sequence || null,
     );
     const [loading, setLoading] = useState(false);
 
@@ -89,8 +91,28 @@ const EditModal: React.FC<{
             onClose();
         } catch (error) {
             console.error('Erro ao salvar:', error);
+            alert('Erro ao salvar as alterações.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteClick = async () => {
+        if (
+            window.confirm(
+                `Tem certeza que deseja EXCLUIR o aplique "${item.code}"? Esta ação não pode ser desfeita.`,
+            )
+        ) {
+            setLoading(true);
+            try {
+                await onDelete(item.id);
+                onClose(); // Fecha o modal após deletar
+            } catch (error) {
+                console.error('Erro ao excluir:', error);
+                alert('Erro ao excluir o aplique.');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -133,7 +155,7 @@ const EditModal: React.FC<{
                                 setQuantity(
                                     e.target.value === ''
                                         ? null
-                                        : Number(e.target.value)
+                                        : Number(e.target.value),
                                 )
                             }
                             className="form-input"
@@ -159,13 +181,31 @@ const EditModal: React.FC<{
                                 setSequence(
                                     e.target.value === ''
                                         ? null
-                                        : Number(e.target.value)
+                                        : Number(e.target.value),
                                 )
                             }
                             className="form-input"
                         />
                     </div>
                     <div className="form-actions">
+                        <button
+                            type="button"
+                            onClick={handleDeleteClick}
+                            disabled={loading}
+                            style={{
+                                backgroundColor: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <FaTrash /> Excluir
+                        </button>
                         <button
                             type="button"
                             onClick={onClose}
@@ -187,8 +227,14 @@ const EditModal: React.FC<{
 // 3. COMPONENTE PRINCIPAL
 // =========================================================
 const ApliquesPage: React.FC = () => {
-    const { apllyIcons, isLoading, error, fetchApliques, updateAplique } =
-        useApliqueStore();
+    const {
+        apllyIcons,
+        isLoading,
+        error,
+        fetchApliques,
+        updateAplique,
+        deleteAplique,
+    } = useApliqueStore();
     const user = useAuthStore((state) => state.user);
 
     const [editingItem, setEditingItem] = useState<VisualItem | null>(null);
@@ -220,7 +266,7 @@ const ApliquesPage: React.FC = () => {
 
         // Ordenação por código
         return [...filtrados].sort((a, b) =>
-            (a.code || '').localeCompare(b.code || '')
+            (a.code || '').localeCompare(b.code || ''),
         );
     }, [apllyIcons, busca]);
 
@@ -234,6 +280,10 @@ const ApliquesPage: React.FC = () => {
 
     const handleSave = async (data: any) => {
         await updateAplique(data);
+    };
+
+    const handleDelete = async (id: number) => {
+        await deleteAplique(id);
     };
 
     const getCardClassName = (inStock: boolean): string => {
@@ -322,6 +372,7 @@ const ApliquesPage: React.FC = () => {
                     item={editingItem}
                     onClose={() => setEditingItem(null)}
                     onSave={handleSave}
+                    onDelete={handleDelete} // ⬅️ Passando a função
                 />
             )}
 

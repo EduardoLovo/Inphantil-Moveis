@@ -20,6 +20,7 @@ interface ApliqueState {
 
     fetchApliques: () => Promise<void>;
     updateAplique: (payload: ApliqueUpdatePayload) => Promise<void>; // ⬅️ NOVO: Função de atualização
+    deleteAplique: (id: number) => Promise<void>; // ⬅️ Adicionado: Função de deletar
 }
 
 export const useApliqueStore = create<ApliqueState>((set, _) => ({
@@ -97,7 +98,7 @@ export const useApliqueStore = create<ApliqueState>((set, _) => ({
         // Se o payload estiver vazio, não faz a requisição
         if (Object.keys(updateData).length === 0) {
             console.warn(
-                'Tentativa de atualização sem dados válidos para o backend.'
+                'Tentativa de atualização sem dados válidos para o backend.',
             );
             return;
         }
@@ -112,7 +113,7 @@ export const useApliqueStore = create<ApliqueState>((set, _) => ({
                 apllyIcons: state.apllyIcons.map((item) =>
                     item.id === updatedItem.id
                         ? { ...item, ...updatedItem }
-                        : item
+                        : item,
                 ),
             }));
         } catch (error) {
@@ -124,17 +125,31 @@ export const useApliqueStore = create<ApliqueState>((set, _) => ({
             ) {
                 console.error(
                     'Erro de Validação do Backend (400):',
-                    error.response.data
+                    error.response.data,
                 );
                 throw new Error(
                     `Erro de Validação: ${JSON.stringify(
-                        error.response.data.message
-                    )}`
+                        error.response.data.message,
+                    )}`,
                 );
             }
             throw new Error(
-                'Não foi possível salvar as alterações do aplique.'
+                'Não foi possível salvar as alterações do aplique.',
             );
+        }
+    },
+    // ⬇️ IMPLEMENTAÇÃO DO DELETE
+    deleteAplique: async (id: number) => {
+        try {
+            await api.delete(`/visual-items/${id}`);
+
+            // Remove o item da lista local imediatamente para atualizar a tela
+            set((state) => ({
+                apllyIcons: state.apllyIcons.filter((item) => item.id !== id),
+            }));
+        } catch (error) {
+            console.error('Erro ao deletar aplique:', error);
+            throw new Error('Não foi possível excluir o aplique.');
         }
     },
 }));
