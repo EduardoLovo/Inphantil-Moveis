@@ -65,7 +65,9 @@
     border-radius: 6px;
     font-size: 1rem;
     box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition:
+        border-color 0.3s,
+        box-shadow 0.3s;
 }
 
 .form-input:focus {
@@ -148,8 +150,15 @@
 
 @media screen and (max-width: 480px) {
     .register-container {
+        /* Muda de height fixa para min-height, permitindo crescer */
         min-height: 94vh;
-        padding: 0 0px;
+        height: auto; /* Deixa a altura automática baseada no conteúdo */
+        padding: 20px 0; /* Adiciona um respiro em cima e embaixo */
+
+        /* Garante que o container ocupe o fluxo normal */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Começa do topo */
     }
 
     .register-card {
@@ -160,7 +169,11 @@
         background-color: transparent;
         box-shadow: none;
         border: none;
-        position: absolute;
-        top: 0;
+
+        /* --- CORREÇÃO AQUI --- */
+        /* Removemos o absolute para ele voltar ao fluxo da página */
+        position: relative;
+        /* Removemos o top: 0 pois agora ele obedece o fluxo */
+        margin-bottom: 20px; /* Garante um espaço extra antes do footer */
     }
 }
