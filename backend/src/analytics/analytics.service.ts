@@ -6,8 +6,14 @@ export class AnalyticsService {
     constructor(private prisma: PrismaService) {}
 
     async logAccess(path: string, ip?: string) {
+        const safePath = path ? path.substring(0, 190) : '';
+        const safeIp = ip ? ip.substring(0, 45) : '';
+
         return this.prisma.siteAccess.create({
-            data: { path, ip },
+            data: {
+                path: safePath,
+                ip: safeIp,
+            },
         });
     }
 
