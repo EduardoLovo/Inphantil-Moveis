@@ -23,6 +23,9 @@ const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const register = useAuthStore((state) => state.register);
     const { executeRecaptcha } = useGoogleReCaptcha();
+
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
     // Manipula mudanças nos inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,7 +64,7 @@ const RegisterPage: React.FC = () => {
         } catch (err: any) {
             console.error(err);
             setError(
-                err.response?.data?.message || 'Erro ao realizar cadastro.'
+                err.response?.data?.message || 'Erro ao realizar cadastro.',
             );
         } finally {
             setLoading(false);
@@ -72,6 +75,45 @@ const RegisterPage: React.FC = () => {
         <div className="register-container">
             <div className="register-card">
                 <h2>Criar Conta</h2>
+
+                <button
+                    type="button"
+                    onClick={() =>
+                        (window.location.href = `${API_URL}/auth/google`)
+                    }
+                    className="google-login-button"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        width: '100%',
+                        padding: '10px',
+                        marginBottom: '15px',
+                        backgroundColor: '#fff',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        color: '#333',
+                    }}
+                >
+                    <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                        alt="Google Logo"
+                        style={{ width: '20px', height: '20px' }}
+                    />
+                    Entrar com Google
+                </button>
+                <div
+                    style={{
+                        textAlign: 'center',
+                        margin: '10px 0',
+                        color: '#666',
+                    }}
+                >
+                    ou entre com seu e-mail
+                </div>
 
                 {error && (
                     <div
