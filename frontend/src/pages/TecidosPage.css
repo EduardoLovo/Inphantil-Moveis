@@ -37,7 +37,9 @@
     border-radius: 8px;
     margin-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.541);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .tecido-title {
@@ -50,6 +52,14 @@
 .tecido-description {
     font-size: 0.9em;
     color: var(--color-neutral-accent);
+}
+
+.tecido-image {
+    width: 300px; 
+    height: 200px; 
+    object-fit: cover; 
+    border-radius: 4px; 
+    display: block; 
 }
 
 /* -------------------------------------- */
