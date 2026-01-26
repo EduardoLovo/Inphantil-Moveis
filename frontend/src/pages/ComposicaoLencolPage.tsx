@@ -7,7 +7,9 @@ import './ComposicaoLencolPage.css';
 const ComposicaoPage: React.FC = () => {
     // Estados de Dados
     const [apliques, setApliques] = useState<VisualItem[]>([]);
+    const [apliqueCode, setApliqueCode] = useState<string>('');
     const [tecidos, setTecidos] = useState<VisualItem[]>([]);
+    const [tecidoCode, setTecidoCode] = useState<string>('');
 
     // Estados de Seleção
     const [tecidoSelecionado, setTecidoSelecionado] = useState<string | null>(
@@ -65,14 +67,16 @@ const ComposicaoPage: React.FC = () => {
     }, [tecidos, busca]);
 
     // 3. Handlers de Seleção
-    const handleSelectTecido = (url: string) => {
+    const handleSelectTecido = (url: string, code: string) => {
         setTecidoSelecionado(url);
+        setTecidoCode(code);
         setEtapa('ESCOLHA_APLIQUE');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleSelectAplique = (url: string) => {
+    const handleSelectAplique = (url: string, code: string) => {
         setApliqueSelecionado(url);
+        setApliqueCode(code);
         setEtapa('RESULTADO');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -80,6 +84,8 @@ const ComposicaoPage: React.FC = () => {
     const resetar = () => {
         setTecidoSelecionado(null);
         setApliqueSelecionado(null);
+        setTecidoCode('');
+        setApliqueCode('');
         setEtapa('ESCOLHA_TECIDO');
         setBusca('');
     };
@@ -97,6 +103,8 @@ const ComposicaoPage: React.FC = () => {
                 <h1>{error}</h1>
             </div>
         );
+
+    console.log(tecidoSelecionado);
 
     return (
         <div className="simulador-container">
@@ -131,19 +139,24 @@ const ComposicaoPage: React.FC = () => {
                     <div className="simulador-result-wrapper">
                         <div className="simulador-images-row">
                             {/* Imagem do Tecido */}
-                            <img
-                                src={tecidoSelecionado}
-                                alt="Fundo"
-                                className="simulador-result-img"
-                                title="Tecido Selecionado"
-                            />
-                            {/* Imagem do Aplique */}
-                            <img
-                                src={apliqueSelecionado}
-                                alt="Aplique"
-                                className="simulador-result-img"
-                                title="Aplique Selecionado"
-                            />
+                            <div>
+                                <img
+                                    src={tecidoSelecionado}
+                                    alt="Fundo"
+                                    className="simulador-result-img"
+                                    title="Tecido Selecionado"
+                                />
+                                <p>{tecidoCode}</p>
+                            </div>
+                            <div>
+                                <img
+                                    src={apliqueSelecionado}
+                                    alt="Aplique"
+                                    className="simulador-result-img"
+                                    title="Aplique Selecionado"
+                                />
+                                <p>{apliqueCode}</p>
+                            </div>
                         </div>
 
                         <button
@@ -162,10 +175,12 @@ const ComposicaoPage: React.FC = () => {
                         <div
                             key={item.id}
                             className="simulador-item-card"
-                            onClick={() => handleSelectTecido(item.imageUrl)}
+                            onClick={() =>
+                                handleSelectTecido(item.imageUrl, item.code)
+                            }
                         >
                             <img src={item.imageUrl} alt={item.name} />
-                            <p>{item.name}</p>
+                            <p>{item.code}</p>
                         </div>
                     ))}
                 </div>
@@ -190,7 +205,10 @@ const ComposicaoPage: React.FC = () => {
                                 key={item.id}
                                 className="simulador-item-card"
                                 onClick={() =>
-                                    handleSelectAplique(item.imageUrl)
+                                    handleSelectAplique(
+                                        item.imageUrl,
+                                        item.code,
+                                    )
                                 }
                             >
                                 <img src={item.imageUrl} alt={item.code} />
