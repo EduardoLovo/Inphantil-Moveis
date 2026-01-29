@@ -30,8 +30,8 @@ export const OndaSVG: React.FC<Props> = ({ colors, onClick, lado }) => {
                 >
                     <g id="Camada_x0020_1">
                         <path
-                            id="cor1" // O ID é crucial para o handler funcionar
-                            fill={cor1}
+                            id="cor2" // O ID é crucial para o handler funcionar
+                            fill={cor2}
                             stroke="black"
                             strokeWidth="70.56"
                             onClick={onClick} // Passa o click
@@ -39,8 +39,8 @@ export const OndaSVG: React.FC<Props> = ({ colors, onClick, lado }) => {
                         />
                         <path
                             className="teste"
-                            id="cor2"
-                            fill={cor2}
+                            id="cor1"
+                            fill={cor1}
                             stroke="black"
                             strokeWidth="70.56"
                             onClick={onClick}

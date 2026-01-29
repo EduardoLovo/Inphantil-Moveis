@@ -14,7 +14,7 @@ import { Role, User } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HttpService } from '@nestjs/axios'; // 1. IMPORT NOVO
-import { firstValueFrom } from 'rxjs'; // 2. IMPORT NOVO
+import { firstValueFrom } from 'rxjs'; // 2. IMPORT NOVO 
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
