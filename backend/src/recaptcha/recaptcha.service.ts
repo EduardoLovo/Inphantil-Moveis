@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -6,6 +6,7 @@ import { URLSearchParams } from 'url';
 
 @Injectable()
 export class RecaptchaService {
+    private readonly logger = new Logger(RecaptchaService.name);
     private readonly secretKey: string;
     private readonly verificationUrl =
         'https://www.google.com/recaptcha/api/siteverify';
@@ -54,6 +55,7 @@ export class RecaptchaService {
             if (error instanceof BadRequestException) {
                 throw error;
             }
+            this.logger.error('Erro na validação do reCAPTCHA', error);
             throw new BadRequestException(
                 'Erro de comunicação com o serviço reCAPTCHA.',
             );
