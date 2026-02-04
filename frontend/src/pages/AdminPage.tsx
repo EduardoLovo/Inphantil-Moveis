@@ -1,6 +1,4 @@
 import { useAuthStore } from "../store/AuthStore";
-import { Link } from "react-router-dom";
-import { FaBox, FaChartBar, FaShoppingCart, FaUsers } from "react-icons/fa";
 import {
   BarChart,
   Bar,
