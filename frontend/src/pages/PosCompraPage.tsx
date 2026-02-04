@@ -146,7 +146,7 @@ const SECTIONS = [
     content: (
       <div className="space-y-8 text-[#313b2f]">
         <div>
-          <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-4">
+          <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-4">
             Como montar sua Cama Montessoriana
           </h2>
           <p className="mb-4">
@@ -212,7 +212,7 @@ const SECTIONS = [
     icon: FaShippingFast,
     content: (
       <div className="text-[#313b2f]">
-        <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-4">
+        <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-4">
           Alinhamento da Cama Phant
         </h2>
         <p className="leading-relaxed mb-6">
@@ -239,7 +239,7 @@ const SECTIONS = [
     icon: FaHandSparkles,
     content: (
       <div className="text-[#313b2f]">
-        <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-6">
+        <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-6">
           Como cuidar do seu móvel
         </h2>
 
@@ -286,7 +286,7 @@ const SECTIONS = [
     icon: FaShippingFast,
     content: (
       <div className="text-[#313b2f]">
-        <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-4">
+        <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-4">
           Sobre sua Entrega
         </h2>
         <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
@@ -308,7 +308,7 @@ const SECTIONS = [
     icon: FaRecycle,
     content: (
       <div className="text-[#313b2f]">
-        <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-4">
+        <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-4">
           Política de Trocas
         </h2>
         <p className="mb-4">
@@ -331,8 +331,18 @@ const SECTIONS = [
           </div>
         </div>
         <p className="bg-gray-100 p-3 rounded text-center">
-          Para iniciar um processo, envie um e-mail para{" "}
-          <strong>sac@inphantil.com.br</strong>.
+          <strong>
+            {" "}
+            <a
+              href="https://wa.me/5561982388828"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-3 bg-[#25D366] text-white font-bold rounded-full hover:bg-[#20bd5a] hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+            >
+              <FaWhatsapp className="text-xl" /> Whatsapp
+            </a>
+          </strong>
+          .
         </p>
       </div>
     ),
@@ -343,7 +353,7 @@ const SECTIONS = [
     icon: FaQuestionCircle,
     content: (
       <div className="text-[#313b2f]">
-        <h2 className="text-2xl font-bold font-[Poppins] border-b-2 border-[#cbcfd1] pb-2 mb-6">
+        <h2 className="text-2xl font-bold  border-b-2 border-[#cbcfd1] pb-2 mb-6">
           Perguntas Comuns
         </h2>
         <div className="space-y-4">
@@ -402,10 +412,10 @@ const PosCompraPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[90vw] mx-auto px-4 pt-32 pb-20 min-h-[80vh] text-[#313b2f]">
+    <div className="w-full max-w-[90vw] mx-auto px-4 md:pt-32 pt-8 pb-20 min-h-[80vh] text-[#313b2f]">
       {/* Header da Página */}
       <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold font-[Poppins] text-[#313b2f] mb-3">
+        <h1 className="text-3xl md:text-4xl font-bold  text-[#313b2f] mb-3">
           Central de Ajuda e Pós-Compra
         </h1>
         <p className="text-gray-600 text-lg">
