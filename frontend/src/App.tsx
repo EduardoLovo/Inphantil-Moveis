@@ -48,10 +48,12 @@ import AdminUserDetailsPage from "./pages/AdminUserDetailsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
 import AdminLayout from "./components/layouts/AdminLayout";
+import VersionCheck from "./components/VersionCheck";
 
 function App() {
   return (
     <>
+      <VersionCheck />
       <InternalAnalytics />
       <GoogleAnalytics />
       <ScrollToTop />
