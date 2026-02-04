@@ -393,6 +393,24 @@ const Header = () => {
               <FaSwatchbook /> Ambientes
             </Link>
             <Link
+              to="/sinteticos"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+            >
+              <FaSwatchbook /> Cores Para Cama
+            </Link>
+            <Link
+              to="/sinteticos/tapetes"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+            >
+              <FaSwatchbook /> Cores Para Tapetes
+            </Link>
+            <Link
+              to="/showroom"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+            >
+              <FaSwatchbook /> Ambientes
+            </Link>
+            <Link
               to="/apliques"
               className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
             >
