@@ -10,8 +10,10 @@ import {
   FaEnvelope,
   FaHome,
   FaSignOutAlt,
+  FaUserAlt,
 } from "react-icons/fa";
 import { SlLogin } from "react-icons/sl";
+import Footer from "../Footer";
 
 // Definição dos itens do menu lateral
 const SIDEBAR_ITEMS = [
@@ -41,7 +43,6 @@ const SIDEBAR_ITEMS = [
     icon: FaBox,
     roles: ["DEV", "ADMIN"],
   },
-
   {
     title: "Criar Item",
     path: "/admin/create/item",
@@ -55,12 +56,17 @@ const SIDEBAR_ITEMS = [
     roles: ["DEV", "ADMIN"],
   },
   {
+    title: "Usuarios",
+    path: "/admin/users",
+    icon: FaUserAlt,
+    roles: ["DEV", "ADMIN", "SELLER"],
+  },
+  {
     title: "Mensagens",
     path: "/admin/contacts",
     icon: FaEnvelope,
     roles: ["DEV", "ADMIN", "SELLER"],
   },
-
   { title: "Logs", path: "/admin/logs", icon: SlLogin, roles: ["DEV"] },
 ];
 
@@ -90,7 +96,6 @@ const AdminLayout: React.FC = () => {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  // Filtra itens baseados na role do usuário
   const filterItems = (items: typeof SIDEBAR_ITEMS) =>
     items.filter((item) => item.roles.includes(user.role as any));
 
@@ -98,16 +103,16 @@ const AdminLayout: React.FC = () => {
   const calcItems = filterItems(CALCULADORAS);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 ">
-      {/* --- SIDEBAR LATERAL ESQUERDA --- */}
-      <aside className="w-64 bg-white border-r border-gray-200 fixed h-full overflow-y-auto hidden md:flex flex-col z-20">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-center">
+    <div className="flex min-h-screen pt-20 bg-gray-100">
+      <aside className="w-64  bg-white pt-20 border-r border-gray-200 fixed inset-y-0 left-0 h-screen hidden md:flex flex-col z-20">
+        {/* Cabeçalho do Menu (Fixo) */}
+        <div className="p-6 border-b border-gray-100 flex items-center justify-center shrink-0">
           <h2 className="text-xl font-bold text-gray-800">
             Admin<span className="text-blue-600">Panel</span>
           </h2>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Geral
           </p>
@@ -124,7 +129,7 @@ const AdminLayout: React.FC = () => {
                 }`
               }
             >
-              <item.icon className="text-lg" />
+              <item.icon className="text-lg shrink-0" />
               <span>{item.title}</span>
             </NavLink>
           ))}
@@ -145,16 +150,17 @@ const AdminLayout: React.FC = () => {
                   }`
                 }
               >
-                <item.icon className="text-lg" />
+                <item.icon className="text-lg shrink-0" />
                 <span>{item.title}</span>
               </NavLink>
             ))}
           </div>
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        {/* Rodapé do Menu (Perfil/Sair) - Agora ficará sempre fixo no fundo */}
+        <div className="p-4 border-t border-gray-200 bg-white shrink-0">
           <div className="flex items-center gap-3 mb-4 px-3">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -174,9 +180,11 @@ const AdminLayout: React.FC = () => {
       </aside>
 
       {/* --- CONTEÚDO PRINCIPAL (DIREITA) --- */}
-      <main className="flex-1 md:ml-64 p-6 md:p-8 overflow-x-hidden w-full">
-        {/* O Outlet renderiza a página filha (AdminPage, ProductsPage, etc.) aqui dentro */}
-        <Outlet />
+      <main className="flex-1 md:ml-64 overflow-x-hidden w-full flex flex-col min-h-screen">
+        {/* Wrapper do conteúdo com padding e crescimento para empurrar o footer */}
+        <div className="flex-1 p-6 md:p-8 pt-20">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

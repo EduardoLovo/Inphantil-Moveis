@@ -1,32 +1,32 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
-import AdminPage from "./pages/AdminPage";
-import AdminLogsPage from "./pages/AdminLogsPage";
-import CalculadoraPagamento6040 from "./components/Calculadora6040";
-import CalculadoraSobMedida from "./components/CalculadoraSobMedida";
-import CalculadoraSobMedidaColchao from "./components/CalculadoraSobMedidaColchao";
+import AdminPage from "./pages/pagesAdmin/AdminPage";
+import AdminLogsPage from "./pages/pagesAdmin/AdminLogsPage";
+import CalculadoraPagamento6040 from "./pages/pagesAdmin/AdminCalculadora6040";
+import CalculadoraSobMedida from "./pages/pagesAdmin/AdminCalculadoraSobMedidaCama";
+import CalculadoraSobMedidaColchao from "./pages/pagesAdmin/AdminCalculadoraSobMedidaColchao";
 import ApliquesPage from "./pages/ApliquesPage";
 import Footer from "./components/Footer";
 import TecidosPage from "./pages/TecidosPage";
 import CreateApliquePage from "./pages/CreateApliquePage";
-import AdminCategoryPage from "./pages/AdminCategoryPage";
+import AdminCategoryPage from "./pages/pagesAdmin/AdminCategoryPage";
 import CreateTecidoPage from "./pages/CreateTecidoPage";
 import CreateSinteticoPage from "./pages/CreateSinteticoPage";
 import SinteticosPageTapetes from "./pages/SinteticosPageTapetes";
-import PageCreateItem from "./pages/PageCreateItem";
+import AdminCreateItemPage from "./pages/pagesAdmin/AdminCreateItemPage";
 import PosCompraPage from "./pages/PosCompraPage";
 import ContactPage from "./pages/ContactPage";
-import AdminContactPage from "./pages/AdminContactPage";
+import AdminContactPage from "./pages/pagesAdmin/AdminContactPage";
 import ComposicaoPage from "./pages/ComposicaoLencolPage";
 import ComposicaoSinteticoPage from "./pages/ComposicaoSinteticoPage";
-import { Desenhos } from "./pages/Desenhos";
-import AdminOrdersPage from "./pages/AdminOrdersPage";
-import AdminProductsPage from "./pages/AdminProductsPage";
+import { AdminProtetoresDeParedePage } from "./pages/pagesAdmin/AdminProtetoresDeParede";
+import AdminOrdersPage from "./pages/pagesAdmin/AdminOrdersPage";
+import AdminProductsPage from "./pages/pagesAdmin/AdminProductsPage";
 import EditProductPage from "./pages/EditProductPage";
 import CreateProductPage from "./pages/CreateProductPage";
 import ScrollToTop from "./components/ScrollToTop";
@@ -42,8 +42,15 @@ import InternalAnalytics from "./components/InternalAnalytics";
 import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
 import AdminLayout from "./components/layouts/AdminLayout";
 import VersionCheck from "./components/VersionCheck";
+import AdminUsersPage from "./pages/pagesAdmin/AdminUsersPage";
+import AdminUserDetailsPage from "./pages/pagesAdmin/AdminUserDetailsPage";
 
 function App() {
+  const location = useLocation();
+  // Verifica se a rota atual começa com "/admin" ou "/calculadora"
+  const isAdminRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/calculadora");
   return (
     <>
       <VersionCheck />
@@ -94,7 +101,12 @@ function App() {
             />
 
             <Route path="/admin/categories" element={<AdminCategoryPage />} />
-            <Route path="/admin/create/item" element={<PageCreateItem />} />
+            <Route
+              path="/admin/create/item"
+              element={<AdminCreateItemPage />}
+            />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/users/:id" element={<AdminUserDetailsPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/logs" element={<AdminLogsPage />} />
             <Route
@@ -109,7 +121,10 @@ function App() {
               path="/admin/sinteticos/new"
               element={<CreateSinteticoPage />}
             />
-            <Route path="/composicao/protetores" element={<Desenhos />} />
+            <Route
+              path="/composicao/protetores"
+              element={<AdminProtetoresDeParedePage />}
+            />
 
             {/* Calculadoras dentro do Admin */}
             <Route
@@ -128,7 +143,7 @@ function App() {
         </Route>
         <Route path="/profile/edit" element={<EditProfilePage />} />
       </Routes>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </>
   );
 }

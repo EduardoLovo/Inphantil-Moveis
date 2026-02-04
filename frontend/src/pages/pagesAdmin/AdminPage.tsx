@@ -1,4 +1,4 @@
-import { useAuthStore } from "../store/AuthStore";
+import { useAuthStore } from "../../store/AuthStore";
 import {
   BarChart,
   Bar,
@@ -42,7 +42,7 @@ const AdminPage = () => {
   const stats = MOCK_STATS; // Usando os dados mockados
 
   return (
-    <div className="space-y-8 pb-10 ">
+    <div className="space-y-8 pb-16 ">
       <header>
         <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
         <p className="text-gray-500">

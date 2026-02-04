@@ -3,16 +3,17 @@ import html2canvas from "html2canvas";
 import toast, { Toaster } from "react-hot-toast";
 
 // Importação dos Componentes SVG
-import { NuvemSVG } from "../components/Desenhos/NuvemSVG";
-import { MontanhaSVG } from "../components/Desenhos/MontanhaSVG";
-import { OndaSVG } from "../components/Desenhos/OndaSVG";
-import { PicoSVG } from "../components/Desenhos/PicoSVG";
-import { EncaixeSVG } from "../components/Desenhos/EncaixeSVG";
-import { CamaSVG } from "../components/Desenhos/CamaSVG";
-import { TapeteSVG } from "../components/Desenhos/TapeteSVG";
-import { MontanhaUmaParedeSVG } from "../components/Desenhos/MontanhaUmaParedeSVG";
-import { NuvemUmaParedeSVG } from "../components/Desenhos/NuvemUmaParedeSVG";
-import { OndaUmaParedeSVG } from "../components/Desenhos/OndaUmaParede";
+import { NuvemSVG } from "../../components/ProtetoresDePadereSVG/NuvemSVG";
+import { MontanhaSVG } from "../../components/ProtetoresDePadereSVG/MontanhaSVG";
+import { OndaSVG } from "../../components/ProtetoresDePadereSVG/OndaSVG";
+import { PicoSVG } from "../../components/ProtetoresDePadereSVG/PicoSVG";
+import { EncaixeSVG } from "../../components/ProtetoresDePadereSVG/EncaixeSVG";
+import { CamaSVG } from "../../components/ProtetoresDePadereSVG/CamaSVG";
+import { TapeteSVG } from "../../components/ProtetoresDePadereSVG/TapeteSVG";
+import { MontanhaUmaParedeSVG } from "../../components/ProtetoresDePadereSVG/MontanhaUmaParedeSVG";
+import { NuvemUmaParedeSVG } from "../../components/ProtetoresDePadereSVG/NuvemUmaParedeSVG";
+import { OndaUmaParedeSVG } from "../../components/ProtetoresDePadereSVG/OndaUmaParede";
+import { FaPalette } from "react-icons/fa";
 
 // Definição dos tipos
 interface Cor {
@@ -104,7 +105,7 @@ const DESENHO_OPTIONS = [
   { value: "tapete", label: "Tapete" },
 ];
 
-export const Desenhos = () => {
+export const AdminProtetoresDeParedePage = () => {
   const [selectedColor, setSelectedColor] = useState("#ccc");
   const [svgColors, setSvgColors] = useState<Record<string, string>>({});
   const [tipoDoDesenho, setTipoDoDesenho] = useState("");
@@ -233,8 +234,19 @@ export const Desenhos = () => {
   };
 
   return (
-    <div className="mt-6 md:mt-[60px] text-black text-center md:text-left min-h-screen px-4 pb-20">
+    <div className=" text-black text-center md:text-left min-h-screen px-4 pb-20">
       <Toaster />
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
+        <div>
+          <h1 className="flex items-center gap-3 text-3xl font-bold text-[#313b2f]">
+            <FaPalette className="text-[#ffd639]" /> Composição de Protetores de
+            Parede
+          </h1>
+          <p className="text-gray-500 mt-1 ml-1">
+            Faça simulações de cores para os protetores de parede
+          </p>
+        </div>
+      </header>
 
       <h1 className="py-4 px-2 text-xl md:text-2xl font-bold text-center text-gray-800">
         Escolha uma cor e clique na imagem para aplicar
