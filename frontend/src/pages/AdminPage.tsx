@@ -1,489 +1,327 @@
-import { useAuthStore } from '../store/AuthStore';
-import { Link, Navigate } from 'react-router-dom';
-import './AdminPage.css';
+import { useAuthStore } from "../store/AuthStore";
+import { Link } from "react-router-dom";
+import { FaBox, FaChartBar, FaShoppingCart, FaUsers } from "react-icons/fa";
 import {
-    FaBox,
-    FaListAlt,
-    FaChartBar,
-    FaCalculator,
-    FaEnvelope,
-} from 'react-icons/fa';
-import { SlLogin } from 'react-icons/sl';
-import { FaHelmetSafety } from 'react-icons/fa6';
-import { GiRolledCloth } from 'react-icons/gi';
-import { RiScissorsCutLine } from 'react-icons/ri';
-import { useEffect, useState } from 'react';
-import { api } from '../services/api';
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area,
-    Legend,
-} from 'recharts';
-// Define as rotas administrativas e as permissões necessárias
-interface AdminCard {
-    title: string;
-    description: string;
-    IconComponent: React.ElementType;
-    link: string;
-    requiredRoles: ('DEV' | 'ADMIN' | 'SELLER')[];
-}
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 
-// 1. DADOS DOS CARDS (O MAPA DE FERRAMENTAS)
-const ADMIN_CARDS: AdminCard[] = [
-    {
-        title: 'Gerenciar Catálogos',
-        description: 'Criar, editar e visualizar todos os catálogos.',
-        IconComponent: FaBox, // Substitua por seu link Cloudinary
-        link: '/admin/create/item',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
-    {
-        title: 'Gerenciar Produtos',
-        description: 'Criar, editar e visualizar todos os produtos de venda.',
-        IconComponent: FaBox, // Substitua por seu link Cloudinary
-        link: '/admin/products',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
-    {
-        title: 'Gerenciar Categorias',
-        description: 'Adicionar e atualizar categorias do catálogo.',
-        IconComponent: FaListAlt,
-        link: '/admin/categories',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
-
-    {
-        title: 'Logs de Login',
-        description: 'Visualizar logs de acesso (sucesso e falha) do sistema.',
-        IconComponent: SlLogin,
-        link: '/admin/logs',
-        requiredRoles: ['DEV'], // Apenas Dev (como no backend)
-    },
-
-    {
-        title: 'Mensagens de Contato',
-        description: 'Visualizar e-mails e dúvidas enviadas pelos clientes.',
-        IconComponent: FaEnvelope,
-        link: '/admin/contacts',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-    {
-        title: 'Protetores de Parede',
-        description: 'Composições de Protetores.',
-        IconComponent: FaHelmetSafety,
-        link: '/composicao/protetores',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-    {
-        title: 'Apliques para cortar',
-        description: 'Composições de Protetores.',
-        IconComponent: RiScissorsCutLine,
-        link: '/admin/apliques/low-stock',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-    {
-        title: 'Apliques para comprar',
-        description: 'Composições de Protetores.',
-        IconComponent: GiRolledCloth,
-        link: '/admin/apliques/restock',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-];
-
-const CALCULADORAS_CARDS: AdminCard[] = [
-    {
-        title: 'Calculadora Cama Sob Medida',
-        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
-        link: '/calculadora-cama-sob-medida',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-    {
-        title: 'Calculadora Colchão do Cliente',
-        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
-        link: '/calculadora-medida-do-colchao',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-    {
-        title: 'Calculadora 6040',
-        description: 'Calculadora para produtos sob medida, Calculadora 60/40 ',
-        IconComponent: FaCalculator,
-        link: '/calculadora-6040',
-        requiredRoles: ['DEV', 'ADMIN', 'SELLER'],
-    },
-];
-
-const USUARIOS_PEDIDOS_CARDS: AdminCard[] = [
-    {
-        title: 'Usuarios',
-        description: 'Lista de Usuarios',
-        IconComponent: FaCalculator,
-        link: '/admin/users',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
-    {
-        title: 'Gerenciar Pedidos',
-        description:
-            'Visualizar todos os pedidos do sistema e alterar status (Produção, Envio, Pago).',
-        IconComponent: FaChartBar,
-        link: '/admin/orders',
-        requiredRoles: ['DEV', 'ADMIN'],
-    },
-];
+// --- DADOS FAKE PARA OS GRÁFICOS (Substitua depois por dados da API) ---
+const MOCK_STATS = {
+  dailyData: [
+    { name: "Seg", acessos: 400, unicos: 240 },
+    { name: "Ter", acessos: 300, unicos: 139 },
+    { name: "Qua", acessos: 200, unicos: 980 },
+    { name: "Qui", acessos: 278, unicos: 390 },
+    { name: "Sex", acessos: 189, unicos: 480 },
+  ],
+  monthlyData: [
+    { name: "Jan", acessos: 2400, unicos: 1400 },
+    { name: "Fev", acessos: 1398, unicos: 900 },
+    { name: "Mar", acessos: 9800, unicos: 6200 },
+    { name: "Abr", acessos: 3908, unicos: 2100 },
+    { name: "Mai", acessos: 4800, unicos: 2800 },
+    { name: "Jun", acessos: 3800, unicos: 2300 },
+    { name: "Jul", acessos: 4300, unicos: 2600 },
+    { name: "Ago", acessos: 5300, unicos: 3200 },
+    { name: "Set", acessos: 6100, unicos: 4100 },
+    { name: "Out", acessos: 7200, unicos: 4500 },
+    { name: "Nov", acessos: 6500, unicos: 4200 },
+    { name: "Dez", acessos: 8100, unicos: 5100 },
+  ],
+};
 
 const AdminPage = () => {
-    const { user } = useAuthStore();
-    const [stats, setStats] = useState({
-        total: 0,
-        today: 0,
-        dailyData: [],
-        monthlyData: [],
-    });
+  const { user } = useAuthStore();
+  const stats = MOCK_STATS; // Usando os dados mockados
 
-    const currentUserRole = user?.role;
+  return (
+    <div className="space-y-8 pb-10 ">
+      <header>
+        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <p className="text-gray-500">
+          Visão geral do sistema. Olá,{" "}
+          <span className="font-semibold text-blue-600">{user?.name}</span>.
+        </p>
+      </header>
 
-    useEffect(() => {
-        fetchStats();
-    }, []);
+      <hr className="border-gray-200" />
 
-    const fetchStats = async () => {
-        try {
-            const response = await api.get('/analytics/stats');
-            setStats(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar stats', error);
-        }
-    };
-
-    // Garante que o usuário logado possui a role MINIMA para acessar esta página
-    const canAccessPage =
-        currentUserRole &&
-        (currentUserRole === 'ADMIN' ||
-            currentUserRole === 'DEV' ||
-            currentUserRole === 'SELLER');
-
-    // Se o usuário não tiver a permissão correta, redireciona para o Dashboard
-    if (!canAccessPage) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
-    // 2. LÓGICA DE FILTRAGEM: Filtra os cards que o usuário tem permissão de ver
-    const accessibleCards = ADMIN_CARDS.filter((card) =>
-        card.requiredRoles.includes(currentUserRole)
-    );
-
-    const accessibleCalculadorasCards = CALCULADORAS_CARDS.filter((card) =>
-        card.requiredRoles.includes(currentUserRole)
-    );
-
-    const accessibleUsuariosPedidosCards = USUARIOS_PEDIDOS_CARDS.filter(
-        (card) => card.requiredRoles.includes(currentUserRole)
-    );
-
-    return (
-        <div className="admin-page-container">
-            {' '}
-            {/* Container principal */}
-            <h1>Painel Administrativo</h1>
-            <p>Bem-vindo(a), **{user.name}**.</p>
-            <hr className="admin-divider" />
-            {/* <h2>Usuarios e Pedidos</h2> */}
-            {/* GRID DE CARDS */}
-            <div className="admin-cards-grid">
-                {accessibleUsuariosPedidosCards.map((card) => (
-                    <Link
-                        to={card.link}
-                        key={card.title}
-                        className="admin-card-link"
-                    >
-                        <div className="admin-card">
-                            <card.IconComponent className="card-icon" />
-
-                            <h3 className="card-title">{card.title}</h3>
-                            <p className="card-description">
-                                {card.description}
-                            </p>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-            <h2>Ferramentas de Gestão</h2>
-            <div className="admin-cards-grid">
-                {accessibleCards.map((card) => (
-                    <Link
-                        to={card.link}
-                        key={card.title}
-                        className="admin-card-link"
-                    >
-                        <div className="admin-card">
-                            <card.IconComponent className="card-icon" />
-
-                            <h3 className="card-title">{card.title}</h3>
-                            <p className="card-description">
-                                {card.description}
-                            </p>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-            <hr className="admin-divider" />
-            <h2>Calculadoras</h2>
-            <div className="admin-cards-grid">
-                {accessibleCalculadorasCards.map((card) => (
-                    <Link
-                        to={card.link}
-                        key={card.title}
-                        className="admin-card-link"
-                    >
-                        <div className="admin-card">
-                            <card.IconComponent className="card-icon" />
-
-                            <h3 className="card-title">{card.title}</h3>
-                            <p className="card-description">
-                                {card.description}
-                            </p>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-            {/* Adicione um Card de Estatísticas */}
-            <hr className="admin-divider" />
-            <h2>Acessos</h2>
-            <div className="card-grafic">
-                <h3 style={{ marginBottom: '20px', color: '#555' }}>
-                    Engajamento Recente (5 Dias)
-                </h3>
-                <div style={{ width: '100%', height: 300 }}>
-                    <ResponsiveContainer>
-                        <BarChart
-                            data={stats.dailyData}
-                            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-                        >
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                vertical={false}
-                            />
-                            <XAxis dataKey="name" />
-                            <YAxis allowDecimals={false} />
-                            <Tooltip
-                                contentStyle={{
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                }}
-                                cursor={{ fill: 'transparent' }}
-                            />
-                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-
-                            {/* BARRA 1: TOTAL DE PÁGINAS VISTAS (AZUL) */}
-                            <Bar
-                                name="Páginas Vistas"
-                                dataKey="acessos"
-                                fill="#8884d8"
-                                radius={[4, 4, 0, 0]}
-                                barSize={30}
-                            />
-
-                            {/* BARRA 2: VISITANTES ÚNICOS (VERDE) */}
-                            <Bar
-                                name="Visitantes Únicos"
-                                dataKey="unicos"
-                                fill="#82ca9d"
-                                radius={[4, 4, 0, 0]}
-                                barSize={30}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-            <h3>Visitantes</h3>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-                    gap: '20px',
-                    marginBottom: '40px',
-                }}
-            >
-                {/* GRÁFICO 1: DIÁRIO (5 Dias) */}
-                <div className="card-grafic">
-                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
-                        Engajamento Recente (5 Dias)
-                    </h3>
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <BarChart
-                                data={stats.dailyData}
-                                margin={{
-                                    top: 20,
-                                    right: 30,
-                                    left: 0,
-                                    bottom: 0,
-                                }}
-                            >
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    vertical={false}
-                                />
-                                <XAxis dataKey="name" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                    }}
-                                    cursor={{ fill: 'transparent' }}
-                                />
-                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
-
-                                <Bar
-                                    name="Visitantes Únicos"
-                                    dataKey="unicos"
-                                    fill="#82ca9d"
-                                    radius={[4, 4, 0, 0]}
-                                    barSize={20}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* GRÁFICO 2: MENSAL (Ano Atual) */}
-                <div className="card-grafic">
-                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
-                        Desempenho no Ano ({new Date().getFullYear()})
-                    </h3>
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <AreaChart
-                                data={stats.monthlyData}
-                                margin={{
-                                    top: 20,
-                                    right: 10,
-                                    left: -20,
-                                    bottom: 0,
-                                }}
-                            >
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    vertical={false}
-                                />
-                                <XAxis
-                                    dataKey="name"
-                                    interval={0}
-                                    fontSize={12}
-                                    tick={{ dy: 5 }}
-                                />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                    }}
-                                    cursor={{ fill: 'transparent' }}
-                                />
-                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
-
-                                <Area
-                                    name="Visitantes Únicos"
-                                    type="monotone"
-                                    dataKey="unicos"
-                                    stroke="#82ca9d"
-                                    fill="#82ca9d"
-                                    fillOpacity={0.3}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-            <h3>Paginas Vistas</h3>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '20px',
-                    marginBottom: '40px',
-                }}
-            >
-                {/* Gráfico 1: Últimos 5 Dias (Barras) */}
-                <div className="card-grafic">
-                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
-                        Acessos Recentes (5 Dias)
-                    </h3>
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <BarChart data={stats.dailyData}>
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    vertical={false}
-                                />
-                                <XAxis dataKey="name" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                    }}
-                                />
-                                <Bar
-                                    dataKey="acessos"
-                                    fill="#8884d8"
-                                    radius={[4, 4, 0, 0]}
-                                    barSize={40}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Gráfico 2: Mensal (Área/Linha) */}
-                <div className="card-grafic">
-                    <h3 style={{ marginBottom: '20px', color: '#555' }}>
-                        Acessos por Mês ({new Date().getFullYear()})
-                    </h3>
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <AreaChart data={stats.monthlyData}>
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    vertical={false}
-                                />
-                                <XAxis
-                                    dataKey="name"
-                                    interval={0}
-                                    fontSize={12}
-                                />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip />
-                                <Area
-                                    type="monotone"
-                                    dataKey="acessos"
-                                    stroke="#8884d8"
-                                    fill="#8884d8"
-                                    fillOpacity={0.3}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-            {accessibleCards.length === 0 && (
-                <p>Nenhuma ferramenta disponível para o seu perfil.</p>
-            )}
+      {/* --- SEÇÃO 1: ACESSOS GERAIS --- */}
+      <section>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Acessos</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-600 mb-6">
+            Engajamento Recente (5 Dias)
+          </h3>
+          <div className="w-full h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={stats.dailyData}
+                margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#e5e7eb"
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "none",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  }}
+                  cursor={{ fill: "#f3f4f6" }}
+                />
+                <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                {/* BARRA 1: TOTAL DE PÁGINAS VISTAS (AZUL) */}
+                <Bar
+                  name="Páginas Vistas"
+                  dataKey="acessos"
+                  fill="#6366f1" // Indigo-500
+                  radius={[4, 4, 0, 0]}
+                  barSize={30}
+                />
+                {/* BARRA 2: VISITANTES ÚNICOS (VERDE) */}
+                <Bar
+                  name="Visitantes Únicos"
+                  dataKey="unicos"
+                  fill="#34d399" // Emerald-400
+                  radius={[4, 4, 0, 0]}
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-    );
+      </section>
+
+      {/* --- SEÇÃO 2: VISITANTES --- */}
+      <section>
+        <h3 className="text-xl font-bold text-gray-800 mb-4 mt-8">
+          Visitantes
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* GRÁFICO 1: DIÁRIO (5 Dias) */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-600 mb-6">
+              Engajamento Recente (5 Dias)
+            </h3>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={stats.dailyData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                    cursor={{ fill: "#f3f4f6" }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: "10px" }} />
+                  <Bar
+                    name="Visitantes Únicos"
+                    dataKey="unicos"
+                    fill="#34d399" // Emerald-400
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* GRÁFICO 2: MENSAL (Ano Atual) */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-600 mb-6">
+              Desempenho no Ano ({new Date().getFullYear()})
+            </h3>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={stats.monthlyData}
+                  margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    interval={0}
+                    fontSize={12}
+                    tick={{ dy: 5, fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: "10px" }} />
+                  <Area
+                    name="Visitantes Únicos"
+                    type="monotone"
+                    dataKey="unicos"
+                    stroke="#34d399"
+                    fill="#34d399"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SEÇÃO 3: PÁGINAS VISTAS --- */}
+      <section>
+        <h3 className="text-xl font-bold text-gray-800 mb-4 mt-8">
+          Páginas Vistas
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Gráfico 1: Últimos 5 Dias (Barras) */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-600 mb-6">
+              Acessos Recentes (5 Dias)
+            </h3>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.dailyData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Bar
+                    dataKey="acessos"
+                    fill="#6366f1" // Indigo-500
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Gráfico 2: Mensal (Área/Linha) */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-600 mb-6">
+              Acessos por Mês ({new Date().getFullYear()})
+            </h3>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.monthlyData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    interval={0}
+                    fontSize={12}
+                    tick={{ dy: 5, fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="acessos"
+                    stroke="#6366f1"
+                    fill="#6366f1"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 };
 
 export default AdminPage;

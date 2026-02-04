@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import html2canvas from "html2canvas";
-import "./Desenhos.css";
+import toast, { Toaster } from "react-hot-toast";
 
+// Importação dos Componentes SVG
 import { NuvemSVG } from "../components/Desenhos/NuvemSVG";
 import { MontanhaSVG } from "../components/Desenhos/MontanhaSVG";
 import { OndaSVG } from "../components/Desenhos/OndaSVG";
@@ -9,7 +10,6 @@ import { PicoSVG } from "../components/Desenhos/PicoSVG";
 import { EncaixeSVG } from "../components/Desenhos/EncaixeSVG";
 import { CamaSVG } from "../components/Desenhos/CamaSVG";
 import { TapeteSVG } from "../components/Desenhos/TapeteSVG";
-import toast, { Toaster } from "react-hot-toast";
 import { MontanhaUmaParedeSVG } from "../components/Desenhos/MontanhaUmaParedeSVG";
 import { NuvemUmaParedeSVG } from "../components/Desenhos/NuvemUmaParedeSVG";
 import { OndaUmaParedeSVG } from "../components/Desenhos/OndaUmaParede";
@@ -20,7 +20,7 @@ interface Cor {
   hex: string;
 }
 
-// Movemos a lista para fora do componente para não recriar a cada render
+// Lista de Cores
 const listaDeCores: Cor[] = [
   { codigo: "am1", hex: "#ffd653" },
   { codigo: "am14", hex: "#f4e0ad" },
@@ -85,19 +85,37 @@ const listaDeCores: Cor[] = [
   { codigo: "vm5", hex: "#cc333d" },
 ];
 
+// Configuração das Opções de Desenho para limpar o JSX
+const DESENHO_OPTIONS = [
+  { value: "nuvem", label: "Nuvem (Lado direito)" },
+  { value: "nuvem-lado-esquerdo", label: "Nuvem (Lado esquerdo)" },
+  { value: "nuvem-uma-parede", label: "Nuvem Uma Parede" },
+  { value: "montanha", label: "Montanha (Lado direito)" },
+  { value: "montanha-lado-esquerdo", label: "Montanha (Lado esquerdo)" },
+  { value: "montanha-uma-parede", label: "Montanha Uma Parede" },
+  { value: "onda", label: "Onda (Lado direito)" },
+  { value: "onda-lado-esquerdo", label: "Onda (Lado esquerdo)" },
+  { value: "onda-uma-parede", label: "Onda Uma Parede" },
+  { value: "pico", label: "Pico (Lado direito)" },
+  { value: "pico-lado-esquerdo", label: "Pico (Lado esquerdo)" },
+  { value: "encaixe", label: "Encaixe" },
+  { value: "cama", label: "Cama" },
+  { value: "cama-lado-esquerdo", label: "Cama (Lado esquerdo)" },
+  { value: "tapete", label: "Tapete" },
+];
+
 export const Desenhos = () => {
   const [selectedColor, setSelectedColor] = useState("#ccc");
-
-  // ESTADO ÚNICO: Guarda todas as cores aplicadas por ID (cor1, cor2, etc.)
   const [svgColors, setSvgColors] = useState<Record<string, string>>({});
-
   const [tipoDoDesenho, setTipoDoDesenho] = useState("");
   const divRef = useRef<HTMLDivElement>(null);
+
   const isPaintingMode = selectedColor !== "#ccc";
-  // Lógica simplificada: Pega o ID do elemento clicado e aplica a cor selecionada
+
   const handleSVGClick = (e: React.MouseEvent<SVGElement>) => {
     const target = e.target as SVGElement;
-    const id = target.id; // Ex: 'cor1', 'cor2'
+    // Tenta pegar o ID do target ou do pai mais próximo caso o clique seja em um path interno
+    const id = target.id || target.parentElement?.id;
 
     if (id && id.startsWith("cor")) {
       setSvgColors((prev) => ({
@@ -107,7 +125,6 @@ export const Desenhos = () => {
     }
   };
 
-  // Helper para pegar o nome da cor baseado no ID (para exibir no resultado)
   const getColorName = (colorId: string) => {
     const hex = svgColors[colorId] || "#ccc";
     const corEncontrada = listaDeCores.find((c) => c.hex === hex);
@@ -115,13 +132,6 @@ export const Desenhos = () => {
   };
 
   const copiarPrint = async () => {
-    toast.success("Print ok", {
-      position: "bottom-right",
-      style: {
-        background: "#838383ff",
-        color: "#fff",
-      },
-    });
     const el = divRef.current;
     if (!el) return;
 
@@ -132,14 +142,21 @@ export const Desenhos = () => {
           await navigator.clipboard.write([
             new ClipboardItem({ "image/png": blob }),
           ]);
+          toast.success("Print copiado para a área de transferência!", {
+            position: "bottom-right",
+            style: {
+              background: "#333",
+              color: "#fff",
+            },
+          });
         }
       });
     } catch (err) {
       console.error("Erro ao copiar:", err);
+      toast.error("Erro ao gerar print");
     }
   };
 
-  // Função auxiliar para renderizar o desenho selecionado
   const renderDesenho = () => {
     const commonProps = { onClick: handleSVGClick, colors: svgColors };
 
@@ -175,15 +192,17 @@ export const Desenhos = () => {
       case "tapete":
         return <TapeteSVG {...commonProps} lado="direito" />;
       default:
-        return null;
+        return (
+          <div className="h-64 flex items-center justify-center text-gray-400">
+            Selecione um desenho abaixo
+          </div>
+        );
     }
   };
 
-  // Função auxiliar para renderizar os nomes das cores
   const renderNomesCores = () => {
     if (!tipoDoDesenho) return null;
 
-    // Define quais IDs de cor cada desenho usa
     const mapDesenhoCores: Record<string, string[]> = {
       nuvem: ["cor1", "cor2"],
       "nuvem-lado-esquerdo": ["cor1", "cor2"],
@@ -198,31 +217,13 @@ export const Desenhos = () => {
       "pico-lado-esquerdo": ["cor1", "cor2", "cor3"],
       encaixe: ["cor1", "cor2"],
       cama: ["cor1", "cor2"],
-      tapete: [
-        "cor1",
-        "cor2",
-        "cor3",
-        "cor4",
-        "cor5",
-        "cor6",
-        "cor7",
-        "cor8",
-        "cor9",
-        "cor10",
-        "cor11",
-        "cor12",
-        "cor13",
-        "cor14",
-        "cor15",
-        "cor16",
-        "cor17",
-      ],
+      tapete: Array.from({ length: 17 }, (_, i) => `cor${i + 1}`),
     };
 
     const ids = mapDesenhoCores[tipoDoDesenho] || [];
 
     return (
-      <p>
+      <p className="pb-8 font-bold text-2xl text-center w-full">
         {ids
           .map((id) => getColorName(id))
           .filter(Boolean)
@@ -232,28 +233,30 @@ export const Desenhos = () => {
   };
 
   return (
-    <div
-      className={`contentDesenhos ${isPaintingMode ? "painting-active" : ""}`}
-    >
+    <div className="mt-6 md:mt-[60px] text-black text-center md:text-left min-h-screen px-4 pb-20">
       <Toaster />
 
-      <h1>Escolha uma cor e clique na imagem para aplicar</h1>
+      <h1 className="py-4 px-2 text-xl md:text-2xl font-bold text-center text-gray-800">
+        Escolha uma cor e clique na imagem para aplicar
+      </h1>
 
-      <div className="botoesCoresDesenho">
+      {/* Grid de Botões de Cores */}
+      <div className="flex flex-wrap justify-center gap-1.5 mb-8">
         {listaDeCores.map((cor) => (
           <button
             key={cor.codigo}
             type="button"
             onClick={() => setSelectedColor(cor.hex)}
             className={`
+                            w-[60px] md:w-[70px] py-2.5 rounded-lg cursor-pointer transition-all duration-300 border-none
+                            text-[#0c0c0c] text-xs font-bold
                             ${
                               selectedColor === cor.hex
-                                ? "selected"
-                                : cor.codigo
-                            } 
-                            cursor-pincel 
+                                ? "text-[#747474] shadow-none ring-2 ring-gray-400 scale-95"
+                                : "shadow-[0_0_10px_rgba(0,0,0,0.44)] hover:shadow-none hover:scale-105"
+                            }
                         `}
-            style={{ backgroundColor: cor.hex }} // Dica: já mostra a cor no botão
+            style={{ backgroundColor: cor.hex }}
             title={cor.codigo}
           >
             {cor.codigo.toUpperCase()}
@@ -261,174 +264,60 @@ export const Desenhos = () => {
         ))}
       </div>
 
+      {/* Área do Desenho */}
       <div
         ref={divRef}
-        className={`area-desenho ${isPaintingMode ? "cursor-pincel" : ""}`}
+        className={`
+                    w-full flex flex-col items-center justify-center p-4 bg-white rounded-xl mb-6
+                    ${isPaintingMode ? 'cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}
+                `}
       >
-        {renderDesenho()}
+        {/* Aplica o cursor também nos filhos SVG se necessário. 
+                   O Tailwind propaga classes, mas o CSS original mirava 'svg'.
+                   Aqui usamos o [&_svg]: para forçar nos SVGs internos.
+                */}
+        <div
+          className={`w-full max-w-4xl ${isPaintingMode ? '[&_svg]:cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}`}
+        >
+          {renderDesenho()}
+        </div>
 
-        <div className="resultadoNomeDasCores">{renderNomesCores()}</div>
+        <div className="w-full flex justify-center mt-4">
+          {renderNomesCores()}
+        </div>
       </div>
 
-      <button className="btnPrint" onClick={copiarPrint}>
-        📸 Tirar print e copiar
-      </button>
+      {/* Botão de Print */}
+      <div className="flex justify-center mb-10">
+        <button
+          className="px-6 py-3 bg-[#bbb8b8] text-gray-800 font-bold rounded-lg shadow-md hover:bg-[#a8a5a5] transition-colors flex items-center gap-2"
+          onClick={copiarPrint}
+        >
+          📸 Tirar print e copiar
+        </button>
+      </div>
 
-      <div className="opcoesRadio">
-        {/* Dica: Você pode gerar isso com um .map também para limpar o código */}
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="nuvem"
-            checked={tipoDoDesenho === "nuvem"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Nuvem (Lado direito)
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="nuvem-lado-esquerdo"
-            checked={tipoDoDesenho === "nuvem-lado-esquerdo"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Nuvem (Lado esquerdo)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="nuvem-uma-parede"
-            checked={tipoDoDesenho === "nuvem-uma-parede"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Nuvem Uma Parede
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="montanha"
-            checked={tipoDoDesenho === "montanha"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Montanha (Lado direito)
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="montanha-lado-esquerdo"
-            checked={tipoDoDesenho === "montanha-lado-esquerdo"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Montanha (Lado esquerdo)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="montanha-uma-parede"
-            checked={tipoDoDesenho === "montanha-uma-parede"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Montanha Uma Parede
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="onda"
-            checked={tipoDoDesenho === "onda"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Onda (Lado direito)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="onda-lado-esquerdo"
-            checked={tipoDoDesenho === "onda-lado-esquerdo"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Onda (Lado esquerdo)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="onda-uma-parede"
-            checked={tipoDoDesenho === "onda-uma-parede"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Onda Uma Parede
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="pico"
-            checked={tipoDoDesenho === "pico"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Pico (Lado direito)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="pico-lado-esquerdo"
-            checked={tipoDoDesenho === "pico-lado-esquerdo"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Pico (Lado esquerdo)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="encaixe"
-            checked={tipoDoDesenho === "encaixe"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Encaixe
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="cama"
-            checked={tipoDoDesenho === "cama"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Cama
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="cama-lado-esquerdo"
-            checked={tipoDoDesenho === "cama-lado-esquerdo"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Cama
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="desenho"
-            value="tapete"
-            checked={tipoDoDesenho === "tapete"}
-            onChange={(e) => setTipoDoDesenho(e.target.value)}
-          />
-          Tapete
-        </label>
+      {/* Opções de Desenhos (Radio Buttons) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 p-4 md:p-5 text-xs md:text-base bg-gray-50 rounded-xl border border-gray-200">
+        {DESENHO_OPTIONS.map((option) => (
+          <label
+            key={option.value}
+            className={`
+                            flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors
+                            ${tipoDoDesenho === option.value ? "bg-blue-100 text-blue-800 font-semibold" : "hover:bg-gray-200"}
+                        `}
+          >
+            <input
+              type="radio"
+              name="desenho"
+              value={option.value}
+              checked={tipoDoDesenho === option.value}
+              onChange={(e) => setTipoDoDesenho(e.target.value)}
+              className="accent-blue-600"
+            />
+            {option.label}
+          </label>
+        ))}
       </div>
     </div>
   );
