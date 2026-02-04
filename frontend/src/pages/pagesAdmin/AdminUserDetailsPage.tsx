@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import {
   FaArrowLeft,
-  FaUser,
   FaEnvelope,
   FaPhone,
   FaIdCard,

@@ -13,7 +13,6 @@ import {
   FaUserAlt,
 } from "react-icons/fa";
 import { SlLogin } from "react-icons/sl";
-import Footer from "../Footer";
 
 // Definição dos itens do menu lateral
 const SIDEBAR_ITEMS = [
