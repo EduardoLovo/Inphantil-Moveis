@@ -14,19 +14,22 @@ import GoogleAnalytics from "./components/GoogleAnalytics";
 import DashboardPage from "./pages/DashboardPage";
 import EditProfilePage from "./pages/auth/EditProfilePage";
 // ROTAS CATALOGOS
-import ApliquesPage from "./pages/ApliquesPage";
-import TecidosPage from "./pages/TecidosPage";
-import SinteticosPageTapetes from "./pages/SinteticosPageTapetes";
-import ComposicaoLencolPage from "./pages/ComposicaoLencolPage";
-import ComposicaoSinteticoPage from "./pages/ComposicaoSinteticoPage";
-import SinteticosPage from "./pages/SinteticosPage";
+import ApliquesPage from "./pages/catalogs/ApliquesPage";
+import TecidosPage from "./pages/catalogs/TecidosPage";
+import SinteticosPageTapetes from "./pages/catalogs/SinteticosPageTapetes";
+import ComposicaoLencolPage from "./pages/catalogs/ComposicaoLencolPage";
+import ComposicaoSinteticoPage from "./pages/catalogs/ComposicaoSinteticoPage";
+import SinteticosPage from "./pages/catalogs/SinteticosPage";
 import EnvironmentPage from "./pages/EnvironmentPage";
 // ROTAS PUBLICAS
 import ContactPage from "./pages/ContactPage";
 import PosCompraPage from "./pages/PosCompraPage";
+// ROTAS LOGADO
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import ProductsPage from "./pages/ProductsPage";
 // ROTAS LOJA
 import ProductDetailsPage from "./pages/ProductDetailsPage";
-import UnderConstructionPage from "./pages/UnderConstructionPage";
 import InternalAnalytics from "./components/InternalAnalytics";
 import VersionCheck from "./components/VersionCheck";
 // ROTAS ADMIN
@@ -48,8 +51,10 @@ import AdminProtetoresDeParedePage from "./pages/pagesAdmin/AdminProtetoresDePar
 import CalculadoraPagamento6040 from "./pages/pagesAdmin/AdminCalculadora6040";
 import CalculadoraSobMedida from "./pages/pagesAdmin/AdminCalculadoraSobMedidaCama";
 import CalculadoraSobMedidaColchao from "./pages/pagesAdmin/AdminCalculadoraSobMedidaColchao";
-import EditProductPage from "./pages/EditProductPage";
-import CreateProductPage from "./pages/CreateProductPage";
+import AdminCreateProductPage from "./pages/AdminCreateProductPage";
+import LowStockApliquesPage from "./pages/LowStockApliquesPage";
+import RestockApliquesPage from "./pages/RestockApliquesPage";
+import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
 
 function App() {
   const location = useLocation();
@@ -73,8 +78,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/products" element={<UnderConstructionPage />} />
-        <Route path="/cart" element={<UnderConstructionPage />} />
+        {/* <Route path="/products" element={<UnderConstructionPage />} /> */}
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -83,6 +90,7 @@ function App() {
         <Route path="/pos-compra" element={<PosCompraPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/composicao-lencol" element={<ComposicaoLencolPage />} />
+        <Route path="/teste" element={<AdminEditProductPage />} />
         <Route
           path="/composicao-sintetico"
           element={<ComposicaoSinteticoPage />}
@@ -94,19 +102,25 @@ function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route element={<AdminLayout />}>
             {/* A rota index é o /admin (Dashboard principal) */}
             <Route path="/admin" element={<AdminPage />} />
 
             {/* Sub-rotas */}
             <Route path="/admin/products" element={<AdminProductsPage />} />
-            <Route path="/admin/products/new" element={<CreateProductPage />} />
+            <Route
+              path="/admin/products/new"
+              element={<AdminCreateProductPage />}
+            />
             <Route
               path="/admin/products/edit/:id"
-              element={<EditProductPage />}
+              element={<AdminEditProductPage />}
             />
 
             <Route path="/admin/categories" element={<AdminCategoryPage />} />
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route
               path="/admin/create/item"
               element={<AdminCreateItemPage />}
@@ -120,6 +134,14 @@ function App() {
               element={<h1>Gerenciamento de Visuais</h1>}
             />
             <Route path="/admin/contacts" element={<AdminContactPage />} />
+            <Route
+              path="/admin/low-stock-apliques"
+              element={<LowStockApliquesPage />}
+            />
+            <Route
+              path="/admin/restock-apliques"
+              element={<RestockApliquesPage />}
+            />
 
             <Route
               path="/composicao/protetores"
@@ -157,7 +179,6 @@ function App() {
             />
           </Route>
         </Route>
-        <Route path="/profile/edit" element={<EditProfilePage />} />
       </Routes>
       {!isAdminRoute && <Footer />}
     </>

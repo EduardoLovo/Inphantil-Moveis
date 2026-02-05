@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useTecidoStore } from "../store/TecidoStore";
-import { useAuthStore } from "../store/AuthStore";
-import type { VisualItem } from "../types/visual-item";
+import { useTecidoStore } from "../../store/TecidoStore";
+import { useAuthStore } from "../../store/AuthStore";
+import type { VisualItem } from "../../types/visual-item";
 import {
   FaLayerGroup,
   FaEdit,

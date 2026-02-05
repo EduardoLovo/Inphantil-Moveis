@@ -1,123 +1,213 @@
-import { useEffect } from 'react';
-import { useProductStore } from '../store/ProductStore';
-import { useAuthStore } from '../store/AuthStore';
-import { Link } from 'react-router-dom';
-import './ProductsPage.css';
-import { FaCartPlus } from 'react-icons/fa';
-import { useCartStore } from '../store/CartStore';
-import toast, { Toaster } from 'react-hot-toast';
+import { useEffect } from "react";
+import { useProductStore } from "../store/ProductStore";
+import { useAuthStore } from "../store/AuthStore";
+import { useCartStore } from "../store/CartStore";
+import { Link } from "react-router-dom";
+import {
+  FaCartPlus,
+  FaBoxOpen,
+  FaSpinner,
+  FaEdit,
+  FaTag,
+  FaExclamationCircle,
+} from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
 
 const ProductsPage = () => {
-    // Pega os dados e o método de busca
-    const { products, isLoading, error, fetchProducts } = useProductStore();
-    // Pega os dados do usuário para mostrar o nome e verificar a permissão de edição
-    const user = useAuthStore((state) => state.user);
-    const addItem = useCartStore((state) => state.addItem); // 2. Pegue a função addItem
-    // Chama a API quando o componente é montado
-    useEffect(() => {
-        // Busca produtos apenas se a lista estiver vazia
-        if (products.length === 0) {
-            fetchProducts();
-        }
-    }, [fetchProducts, products.length]);
+  const { products, isLoading, error, fetchProducts } = useProductStore();
+  const user = useAuthStore((state) => state.user);
+  const addItem = useCartStore((state) => state.addItem);
 
-    // 2. Função para adicionar e avisar
-    const handleAddToCart = (product: any) => {
-        addItem(product);
-        toast.success(`${product.name} adicionado ao carrinho!`, {
-            position: 'bottom-right',
-            style: {
-                background: '#838383ff',
-                color: '#fff',
-            },
-        });
-    };
-
-    if (isLoading) {
-        return <h1>Carregando Catálogo...</h1>;
+  useEffect(() => {
+    if (products.length === 0) {
+      fetchProducts();
     }
+  }, [fetchProducts, products.length]);
 
-    if (error) {
-        return <h1>Erro ao carregar produtos: {error}</h1>;
-    }
+  const handleAddToCart = (product: any) => {
+    addItem(product);
+    toast.success(`${product.name} adicionado ao carrinho!`, {
+      position: "bottom-right",
+      style: {
+        background: "#313b2f",
+        color: "#fff",
+        border: "1px solid #ffd639",
+      },
+      iconTheme: {
+        primary: "#ffd639",
+        secondary: "#313b2f",
+      },
+    });
+  };
 
-    // Utilitário para formatar preço em BRL
-    const formatPrice = (price: number) => {
-        return price.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-        });
-    };
+  const formatPrice = (price: number) => {
+    return price.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
 
-    // Função de verificação de permissão
-    const canEdit = user && (user.role === 'ADMIN' || user.role === 'DEV');
-    // Obs: A rota GET /products é pública, mas o botão de editar só aparece para Admin/Dev logados
+  const canEdit = user && (user.role === "ADMIN" || user.role === "DEV");
 
+  // Loading State
+  if (isLoading) {
     return (
-        <div className="products-page-container">
-            <Toaster />
-            <h1 className="page-title">Catálogo de Produtos</h1>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500 animate-pulse">
+        <FaSpinner className="animate-spin text-4xl text-[#ffd639] mb-4" />
+        <h1 className="text-xl font-bold text-[#313b2f]">
+          Carregando Catálogo...
+        </h1>
+      </div>
+    );
+  }
 
-            {user && (
-                <p className="user-welcome-message">
-                    Olá, {user.name}. Seu nível de acesso é: {user.role}
-                </p>
-            )}
+  // Error State
+  if (error) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-8 mt-20 text-center">
+        <div className="p-6 bg-red-50 text-red-700 border border-red-200 rounded-xl inline-block shadow-sm">
+          <FaExclamationCircle className="text-3xl mb-2 mx-auto" />
+          <h1 className="text-lg font-bold">Erro ao carregar produtos</h1>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
-            <div className="products-grid">
-                {products.map((product) => (
-                    <div key={product.id} className="product-card">
-                        <h3>{product.name}</h3>
+  return (
+    <div className="w-full max-w-[1400px] mx-auto px-4 py-8 md:pt-32 pb-20">
+      <Toaster />
 
-                        <Link
-                            to={`/products/${product.id}`}
-                            className="product-image-link"
-                        >
-                            <img
-                                src={product.mainImage}
-                                alt={product.name}
-                                className="product-image"
-                            />
-                        </Link>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-end justify-between gap-4 mb-10 border-b border-gray-100 pb-6">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#313b2f] flex items-center gap-3">
+            <FaBoxOpen className="text-[#ffd639]" /> Catálogo de Produtos
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Explore nossa coleção exclusiva para o quarto do seu bebê.
+          </p>
+        </div>
 
-                        <p className="price-stock">
-                            Preço: <strong>{formatPrice(product.price)}</strong>
-                        </p>
-                        <p className="price-stock">Estoque: {product.stock}</p>
-                        <p className="product-category">
-                            {product.category?.name
-                                ? `Categoria: ${product.category.name}`
-                                : 'Sem Categoria'}
-                        </p>
-                        <button
-                            className="add-cart-button"
-                            onClick={() => handleAddToCart(product)}
-                            disabled={
-                                !product.isAvailable || product.stock <= 0
-                            }
-                        >
-                            <FaCartPlus /> Adicionar
-                        </button>
+        {user && (
+          <div className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600">
+            Olá, <span className="font-bold text-[#313b2f]">{user.name}</span>.
+            Acesso:{" "}
+            <span className="uppercase text-xs font-bold bg-gray-200 px-2 py-0.5 rounded ml-1">
+              {user.role}
+            </span>
+          </div>
+        )}
+      </div>
 
-                        {canEdit && (
-                            <Link
-                                to={`/admin/products/edit/${product.id}`}
-                                className="product-edit-link"
-                            >
-                                Editar Produto
-                            </Link>
-                        )}
-                    </div>
-                ))}
+      {/* Grid de Produtos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full"
+          >
+            {/* Imagem */}
+            <div className="relative aspect-square overflow-hidden bg-gray-50">
+              <Link
+                to={`/products/${product.id}`}
+                className="block w-full h-full"
+              >
+                {product.mainImage ? (
+                  <img
+                    src={product.mainImage}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300">
+                    <FaBoxOpen className="text-4xl" />
+                  </div>
+                )}
+              </Link>
+
+              {/* Badge de Esgotado */}
+              {(!product.isAvailable || product.stock <= 0) && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                  <span className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg transform -rotate-12">
+                    ESGOTADO
+                  </span>
+                </div>
+              )}
+
+              {/* Badge de Categoria */}
+              {product.category && (
+                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#313b2f] text-xs font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
+                  <FaTag className="text-[#ffd639]" /> {product.category.name}
+                </span>
+              )}
             </div>
 
-            {products.length === 0 && (
-                <p className="no-products-message">
-                    Nenhum produto cadastrado no momento.
-                </p>
-            )}
+            {/* Conteúdo */}
+            <div className="p-5 flex flex-col flex-1">
+              <div className="flex-1">
+                <Link
+                  to={`/products/${product.id}`}
+                  className="hover:text-[#ffd639] transition-colors"
+                >
+                  <h3 className="font-bold text-lg text-[#313b2f] mb-1 line-clamp-2">
+                    {product.name}
+                  </h3>
+                </Link>
+
+                <div className="flex justify-between items-center mt-3">
+                  <p className="text-2xl font-bold text-[#313b2f]">
+                    {formatPrice(product.price)}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Restam: {product.stock}
+                  </p>
+                </div>
+              </div>
+
+              {/* Ações */}
+              <div className="mt-5 space-y-3">
+                <button
+                  className="w-full py-3 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 shadow-md hover:shadow-lg hover:-translate-y-1"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={!product.isAvailable || product.stock <= 0}
+                >
+                  {!product.isAvailable || product.stock <= 0 ? (
+                    "Indisponível"
+                  ) : (
+                    <>
+                      <FaCartPlus /> Adicionar
+                    </>
+                  )}
+                </button>
+
+                {canEdit && (
+                  <Link
+                    to={`/admin/products/edit/${product.id}`}
+                    className="w-full py-2 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <FaEdit /> Editar Produto
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {products.length === 0 && (
+        <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 mt-8">
+          <FaBoxOpen className="text-6xl text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-500">
+            Nenhum produto cadastrado no momento.
+          </h3>
+          <p className="text-gray-400">Volte em breve para novidades!</p>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default ProductsPage;

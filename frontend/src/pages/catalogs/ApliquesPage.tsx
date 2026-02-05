@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useApliqueStore } from "../store/ApliqueStore";
-import { useAuthStore } from "../store/AuthStore";
-import type { VisualItem } from "../types/visual-item";
+import { useApliqueStore } from "../../store/ApliqueStore";
+import { useAuthStore } from "../../store/AuthStore";
+import type { VisualItem } from "../../types/visual-item";
 import {
   FaCube,
   FaEdit,

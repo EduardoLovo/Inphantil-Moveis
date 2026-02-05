@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 import {
   FaSearch,
   FaUndo,
@@ -9,7 +9,7 @@ import {
   FaCheckCircle,
   FaSpinner,
 } from "react-icons/fa";
-import type { VisualItem } from "../types/visual-item";
+import type { VisualItem } from "../../types/visual-item";
 
 const ComposicaoLencolPage: React.FC = () => {
   // Estados de Dados

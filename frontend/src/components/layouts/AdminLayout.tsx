@@ -11,8 +11,10 @@ import {
   FaHome,
   FaSignOutAlt,
   FaUserAlt,
+  FaMoneyBillAlt,
 } from "react-icons/fa";
 import { SlLogin } from "react-icons/sl";
+import { RiScissorsCutFill } from "react-icons/ri";
 
 // Definição dos itens do menu lateral
 const SIDEBAR_ITEMS = [
@@ -67,6 +69,18 @@ const SIDEBAR_ITEMS = [
     roles: ["DEV", "ADMIN", "SELLER"],
   },
   { title: "Logs", path: "/admin/logs", icon: SlLogin, roles: ["DEV"] },
+  {
+    title: "Apliques Para Cortar",
+    path: "/admin/low-stock-apliques",
+    icon: RiScissorsCutFill,
+    roles: ["DEV", "ADMIN"],
+  },
+  {
+    title: "Apliques Para Comprar",
+    path: "/admin/restock-apliques",
+    icon: FaMoneyBillAlt,
+    roles: ["DEV", "ADMIN"],
+  },
 ];
 
 const CALCULADORAS = [
