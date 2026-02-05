@@ -55,6 +55,7 @@ import AdminCreateProductPage from "./pages/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/LowStockApliquesPage";
 import RestockApliquesPage from "./pages/RestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
+import UnderConstructionPage from "./pages/UnderConstructionPage";
 
 function App() {
   const location = useLocation();
@@ -78,10 +79,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* <Route path="/products" element={<UnderConstructionPage />} /> */}
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
+        {/* <Route path="/products" element={<ProductsPage />} /> */}
+        <Route path="/products" element={<UnderConstructionPage />} />
+        {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
+        <Route path="/checkout" element={<UnderConstructionPage />} />
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -90,7 +91,6 @@ function App() {
         <Route path="/pos-compra" element={<PosCompraPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/composicao-lencol" element={<ComposicaoLencolPage />} />
-        <Route path="/teste" element={<AdminEditProductPage />} />
         <Route
           path="/composicao-sintetico"
           element={<ComposicaoSinteticoPage />}
@@ -102,12 +102,11 @@ function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/cart" element={<CartPage />} />
+          {/* <Route path="/cart" element={<CartPage />} /> */}
+          <Route path="/cart" element={<UnderConstructionPage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route element={<AdminLayout />}>
-            {/* A rota index é o /admin (Dashboard principal) */}
             <Route path="/admin" element={<AdminPage />} />
-
             {/* Sub-rotas */}
             <Route path="/admin/products" element={<AdminProductsPage />} />
             <Route
@@ -118,7 +117,6 @@ function App() {
               path="/admin/products/edit/:id"
               element={<AdminEditProductPage />}
             />
-
             <Route path="/admin/categories" element={<AdminCategoryPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route
