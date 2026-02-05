@@ -2,48 +2,54 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
+import AuthGuard from "./components/AuthGuard";
+import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ScrollToTop from "./components/ScrollToTop";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+// ROTAS USERS
+import DashboardPage from "./pages/DashboardPage";
+import EditProfilePage from "./pages/auth/EditProfilePage";
+// ROTAS CATALOGOS
+import ApliquesPage from "./pages/ApliquesPage";
+import TecidosPage from "./pages/TecidosPage";
+import SinteticosPageTapetes from "./pages/SinteticosPageTapetes";
+import ComposicaoLencolPage from "./pages/ComposicaoLencolPage";
+import ComposicaoSinteticoPage from "./pages/ComposicaoSinteticoPage";
+import SinteticosPage from "./pages/SinteticosPage";
+import EnvironmentPage from "./pages/EnvironmentPage";
+// ROTAS PUBLICAS
+import ContactPage from "./pages/ContactPage";
+import PosCompraPage from "./pages/PosCompraPage";
+// ROTAS LOJA
+import ProductDetailsPage from "./pages/ProductDetailsPage";
+import UnderConstructionPage from "./pages/UnderConstructionPage";
+import InternalAnalytics from "./components/InternalAnalytics";
+import VersionCheck from "./components/VersionCheck";
+// ROTAS ADMIN
+import AdminLayout from "./components/layouts/AdminLayout";
+import AdminOrdersPage from "./pages/pagesAdmin/AdminOrdersPage";
+import AdminProductsPage from "./pages/pagesAdmin/AdminProductsPage";
+import AdminUsersPage from "./pages/pagesAdmin/AdminUsersPage";
+import AdminUserDetailsPage from "./pages/pagesAdmin/AdminUserDetailsPage";
+import AdminCreateEnvironmentPage from "./pages/pagesAdmin/AdminCreateEnvironmentPage";
+import AdminCreateApliquePage from "./pages/pagesAdmin/AdminCreateApliquePage";
+import AdminCategoryPage from "./pages/pagesAdmin/AdminCategoryPage";
+import AdminCreateTecidoPage from "./pages/pagesAdmin/AdminCreateTecidoPage";
+import AdminCreateSinteticoPage from "./pages/pagesAdmin/AdminCreateSinteticoPage";
 import AdminPage from "./pages/pagesAdmin/AdminPage";
 import AdminLogsPage from "./pages/pagesAdmin/AdminLogsPage";
+import AdminContactPage from "./pages/pagesAdmin/AdminContactPage";
+import AdminCreateItemPage from "./pages/pagesAdmin/AdminCreateItemPage";
+import AdminProtetoresDeParedePage from "./pages/pagesAdmin/AdminProtetoresDeParede";
 import CalculadoraPagamento6040 from "./pages/pagesAdmin/AdminCalculadora6040";
 import CalculadoraSobMedida from "./pages/pagesAdmin/AdminCalculadoraSobMedidaCama";
 import CalculadoraSobMedidaColchao from "./pages/pagesAdmin/AdminCalculadoraSobMedidaColchao";
-import ApliquesPage from "./pages/ApliquesPage";
-import Footer from "./components/Footer";
-import TecidosPage from "./pages/TecidosPage";
-import CreateApliquePage from "./pages/CreateApliquePage";
-import AdminCategoryPage from "./pages/pagesAdmin/AdminCategoryPage";
-import CreateTecidoPage from "./pages/CreateTecidoPage";
-import CreateSinteticoPage from "./pages/CreateSinteticoPage";
-import SinteticosPageTapetes from "./pages/SinteticosPageTapetes";
-import AdminCreateItemPage from "./pages/pagesAdmin/AdminCreateItemPage";
-import PosCompraPage from "./pages/PosCompraPage";
-import ContactPage from "./pages/ContactPage";
-import AdminContactPage from "./pages/pagesAdmin/AdminContactPage";
-import ComposicaoPage from "./pages/ComposicaoLencolPage";
-import ComposicaoSinteticoPage from "./pages/ComposicaoSinteticoPage";
-import { AdminProtetoresDeParedePage } from "./pages/pagesAdmin/AdminProtetoresDeParede";
-import AdminOrdersPage from "./pages/pagesAdmin/AdminOrdersPage";
-import AdminProductsPage from "./pages/pagesAdmin/AdminProductsPage";
 import EditProductPage from "./pages/EditProductPage";
 import CreateProductPage from "./pages/CreateProductPage";
-import ScrollToTop from "./components/ScrollToTop";
-import GoogleAnalytics from "./components/GoogleAnalytics";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import EditProfilePage from "./pages/auth/EditProfilePage";
-import ProductDetailsPage from "./pages/ProductDetailsPage";
-import SinteticosPage from "./pages/SinteticosPage";
-import EnvironmentPage from "./pages/EnvironmentPage";
-import UnderConstructionPage from "./pages/UnderConstructionPage";
-import InternalAnalytics from "./components/InternalAnalytics";
-import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
-import AdminLayout from "./components/layouts/AdminLayout";
-import VersionCheck from "./components/VersionCheck";
-import AdminUsersPage from "./pages/pagesAdmin/AdminUsersPage";
-import AdminUserDetailsPage from "./pages/pagesAdmin/AdminUserDetailsPage";
 
 function App() {
   const location = useLocation();
@@ -76,7 +82,7 @@ function App() {
         <Route path="/sinteticos" element={<SinteticosPage />} />
         <Route path="/pos-compra" element={<PosCompraPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/composicao-lencol" element={<ComposicaoPage />} />
+        <Route path="/composicao-lencol" element={<ComposicaoLencolPage />} />
         <Route
           path="/composicao-sintetico"
           element={<ComposicaoSinteticoPage />}
@@ -115,17 +121,27 @@ function App() {
             />
             <Route path="/admin/contacts" element={<AdminContactPage />} />
 
-            <Route path="/admin/apliques/new" element={<CreateApliquePage />} />
-            <Route path="/admin/tecidos/new" element={<CreateTecidoPage />} />
-            <Route
-              path="/admin/sinteticos/new"
-              element={<CreateSinteticoPage />}
-            />
             <Route
               path="/composicao/protetores"
               element={<AdminProtetoresDeParedePage />}
             />
-
+            {/* Criar itens */}
+            <Route
+              path="/admin/apliques/new"
+              element={<AdminCreateApliquePage />}
+            />
+            <Route
+              path="/admin/tecidos/new"
+              element={<AdminCreateTecidoPage />}
+            />
+            <Route
+              path="/admin/sinteticos/new"
+              element={<AdminCreateSinteticoPage />}
+            />
+            <Route
+              path="/admin/ambientes/new"
+              element={<AdminCreateEnvironmentPage />}
+            />
             {/* Calculadoras dentro do Admin */}
             <Route
               path="/calculadora-cama-sob-medida"

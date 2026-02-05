@@ -105,7 +105,7 @@ const DESENHO_OPTIONS = [
   { value: "tapete", label: "Tapete" },
 ];
 
-export const AdminProtetoresDeParedePage = () => {
+const AdminProtetoresDeParedePage = () => {
   const [selectedColor, setSelectedColor] = useState("#ccc");
   const [svgColors, setSvgColors] = useState<Record<string, string>>({});
   const [tipoDoDesenho, setTipoDoDesenho] = useState("");
@@ -334,3 +334,5 @@ export const AdminProtetoresDeParedePage = () => {
     </div>
   );
 };
+
+export default AdminProtetoresDeParedePage;

@@ -38,7 +38,7 @@ const AdminContactPage: React.FC = () => {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
         <div>
-          <h1 className="flex items-center gap-3 text-3xl font-bold text-[#313b2f] font-[Poppins]">
+          <h1 className="flex items-center gap-3 text-3xl font-bold text-[#313b2f] ">
             <FaEnvelopeOpenText className="text-[#ffd639]" /> Mensagens
           </h1>
           <p className="text-gray-500 mt-1 ml-1">
