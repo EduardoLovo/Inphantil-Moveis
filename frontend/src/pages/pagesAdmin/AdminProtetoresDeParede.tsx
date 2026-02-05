@@ -284,10 +284,6 @@ const AdminProtetoresDeParedePage = () => {
                     ${isPaintingMode ? 'cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}
                 `}
       >
-        {/* Aplica o cursor também nos filhos SVG se necessário. 
-                   O Tailwind propaga classes, mas o CSS original mirava 'svg'.
-                   Aqui usamos o [&_svg]: para forçar nos SVGs internos.
-                */}
         <div
           className={`w-full max-w-4xl ${isPaintingMode ? '[&_svg]:cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}`}
         >

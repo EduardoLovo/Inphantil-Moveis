@@ -60,7 +60,7 @@ const ViewModal: React.FC<{ item: VisualItem; onClose: () => void }> = ({
         </div>
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-[#313b2f] mb-1 font-[Poppins]">
+          <h2 className="text-2xl font-bold text-[#313b2f] mb-1 ">
             {item.code}
           </h2>
           {item.name && (

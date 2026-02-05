@@ -106,7 +106,7 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 md:pt-32 pb-20">
+    <div className="w-full max-w-4xl mx-auto px-4 py-8  md:pt-32 pb-20">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         {/* --- CABEÇALHO DO PERFIL --- */}
         <div className="bg-[#313b2f] p-8 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">

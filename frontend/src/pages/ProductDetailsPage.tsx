@@ -279,7 +279,7 @@ const ProductDetailsPage = () => {
       {/* --- PRODUTOS RELACIONADOS --- */}
       {relatedProducts.length > 0 && (
         <div className="mt-20 pt-10 border-t border-gray-100">
-          <h2 className="text-2xl font-bold text-[#313b2f] mb-8 font-[Poppins]">
+          <h2 className="text-2xl font-bold text-[#313b2f] mb-8 ">
             Produtos Relacionados
           </h2>
 

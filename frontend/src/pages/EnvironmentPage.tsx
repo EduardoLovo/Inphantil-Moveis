@@ -113,11 +113,11 @@ const EnvironmentPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 pt-[70px] md:pt-[80px]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50  md:pt-[80px]">
       {/* --- SIDEBAR (Lista de Ambientes) --- */}
       <aside className="w-full md:w-80 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col h-[300px] md:h-[calc(100vh-80px)] md:sticky md:top-20">
         <div className="p-6 bg-[#313b2f] text-white">
-          <h2 className="text-2xl font-bold font-[Poppins] flex items-center gap-2">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
             <FaMapMarkerAlt className="text-[#ffd639]" /> Ambientes
           </h2>
           <p className="text-gray-300 text-sm mt-1">Escolha uma inspiração</p>
@@ -170,7 +170,7 @@ const EnvironmentPage: React.FC = () => {
 
               <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 text-white z-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl md:text-5xl font-bold font-[Poppins] mb-2 shadow-sm">
+                  <h1 className="text-3xl md:text-5xl font-bold  mb-2 shadow-sm">
                     {selectedEnv.title}
                   </h1>
                   <p className="text-gray-200 flex items-center gap-2 text-sm md:text-base">

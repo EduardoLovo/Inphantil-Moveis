@@ -51,7 +51,7 @@ import AdminProtetoresDeParedePage from "./pages/pagesAdmin/AdminProtetoresDePar
 import CalculadoraPagamento6040 from "./pages/pagesAdmin/AdminCalculadora6040";
 import CalculadoraSobMedida from "./pages/pagesAdmin/AdminCalculadoraSobMedidaCama";
 import CalculadoraSobMedidaColchao from "./pages/pagesAdmin/AdminCalculadoraSobMedidaColchao";
-import AdminCreateProductPage from "./pages/AdminCreateProductPage";
+import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/LowStockApliquesPage";
 import RestockApliquesPage from "./pages/RestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";

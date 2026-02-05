@@ -116,12 +116,12 @@ const AdminLayout: React.FC = () => {
   const calcItems = filterItems(CALCULADORAS);
 
   return (
-    <div className="flex min-h-screen pt-20 bg-gray-100">
+    <div className="flex min-h-screen md:pt-20 bg-gray-100">
       <aside className="w-64  bg-white pt-20 border-r border-gray-200 fixed inset-y-0 left-0 h-screen hidden md:flex flex-col z-20">
         {/* Cabeçalho do Menu (Fixo) */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-center shrink-0">
           <h2 className="text-xl font-bold text-gray-800">
-            Admin<span className="text-blue-600">Panel</span>
+            Admin<span className="text-blue-600"> Paneil</span>
           </h2>
         </div>
 
@@ -195,7 +195,7 @@ const AdminLayout: React.FC = () => {
       {/* --- CONTEÚDO PRINCIPAL (DIREITA) --- */}
       <main className="flex-1 md:ml-64 overflow-x-hidden w-full flex flex-col min-h-screen">
         {/* Wrapper do conteúdo com padding e crescimento para empurrar o footer */}
-        <div className="flex-1 p-6 md:p-8 pt-20">
+        <div className="flex-1 p-6 md:p-8  ">
           <Outlet />
         </div>
       </main>

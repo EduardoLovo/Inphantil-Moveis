@@ -152,7 +152,7 @@ const EditEnvironmentPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#313b2f] font-[Poppins] flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-[#313b2f]  flex items-center gap-3">
             <FaImage className="text-[#ffd639]" /> Editar Ambiente
           </h1>
           <p className="text-gray-500 text-sm mt-1">
