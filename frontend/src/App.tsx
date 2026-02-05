@@ -25,9 +25,9 @@ import EnvironmentPage from "./pages/EnvironmentPage";
 import ContactPage from "./pages/ContactPage";
 import PosCompraPage from "./pages/PosCompraPage";
 // ROTAS LOGADO
-import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import ProductsPage from "./pages/ProductsPage";
+// import CartPage from "./pages/CartPage";
+// import CheckoutPage from "./pages/CheckoutPage";
+// import ProductsPage from "./pages/ProductsPage";
 // ROTAS LOJA
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import InternalAnalytics from "./components/InternalAnalytics";
