@@ -10,6 +10,7 @@ import {
   FaPhone,
   FaLock,
 } from "react-icons/fa";
+import RecaptchaNotice from "../../components/RecaptchaNotice";
 
 const RegisterPage: React.FC = () => {
   // Estados do formulário
@@ -245,6 +246,7 @@ const RegisterPage: React.FC = () => {
             Faça Login
           </Link>
         </div>
+        <RecaptchaNotice />
       </div>
     </div>
   );

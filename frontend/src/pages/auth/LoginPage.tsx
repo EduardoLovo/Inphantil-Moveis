@@ -3,6 +3,7 @@ import { useAuthStore } from "../../store/AuthStore";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+import RecaptchaNotice from "../../components/RecaptchaNotice";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -170,6 +171,7 @@ const LoginPage = () => {
             </Link>
           </div>
         </form>
+        <RecaptchaNotice />
       </div>
     </div>
   );
