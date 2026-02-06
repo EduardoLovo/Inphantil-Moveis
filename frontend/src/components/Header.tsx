@@ -262,7 +262,7 @@ const Header = () => {
 
       {/* --- NAVEGAÇÃO MOBILE (BOTTOM BAR) --- */}
       {/* Mantém fundo branco no mobile para legibilidade na parte inferior */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50 flex justify-around items-center h-16 pb-safe">
+      <nav className="md:hidden fixed  bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50 flex justify-around items-center h-16 pb-safe">
         <Link
           to="/"
           className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-blue-600 active:text-blue-700 gap-1"

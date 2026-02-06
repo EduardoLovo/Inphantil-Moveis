@@ -8,6 +8,7 @@ import {
   FaLayerGroup,
   FaDotCircle,
   FaCheckCircle,
+  FaCheck,
 } from "react-icons/fa";
 import type { VisualItem } from "../../types/visual-item";
 
@@ -70,7 +71,9 @@ const ComposicaoSinteticoPage: React.FC = () => {
   const handleSelectExterno = (item: VisualItem) => {
     setExternoSelecionado(item);
     setEtapa("ESCOLHA_INTERNO");
-    window.scrollTo({ top: 260, behavior: "smooth" });
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
   };
 
   const handleSelectInterno = (item: VisualItem) => {
@@ -84,6 +87,7 @@ const ComposicaoSinteticoPage: React.FC = () => {
     setInternoSelecionado(null);
     setEtapa("ESCOLHA_EXTERNO");
     setBusca("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading)
@@ -106,44 +110,79 @@ const ComposicaoSinteticoPage: React.FC = () => {
       </div>
     );
 
-  // Componente de Barra de Progresso
+  // Componente de Barra de Progresso ATUALIZADO
   const StepIndicator = () => (
     <div className="flex justify-center items-center mb-12 w-full max-w-3xl mx-auto">
+      {/* PASSO 1: EXTERNO */}
       <div
-        className={`flex flex-col items-center ${etapa === "ESCOLHA_EXTERNO" ? "text-[#313b2f] font-bold" : "text-gray-400"}`}
+        className={`flex flex-col items-center ${
+          etapa === "ESCOLHA_EXTERNO"
+            ? "text-[#313b2f] font-bold"
+            : "text-green-600 font-medium"
+        }`}
       >
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${etapa === "ESCOLHA_EXTERNO" ? "bg-[#ffd639] text-[#313b2f]" : "bg-gray-200"}`}
+          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors shadow-sm ${
+            etapa === "ESCOLHA_EXTERNO"
+              ? "bg-[#ffd639] text-[#313b2f] ring-4 ring-[#ffd639]/30" // Ativo (Amarelo)
+              : "bg-green-500 text-white" // Concluído (Verde) - Se não é a etapa 1, já passou dela
+          }`}
         >
-          1
+          {etapa === "ESCOLHA_EXTERNO" ? "1" : <FaCheck size={12} />}
         </div>
         <span className="text-sm">Externo</span>
       </div>
 
+      {/* Linha Conectora 1-2 */}
       <div
-        className={`h-1 w-16 md:w-32 mx-2 rounded ${etapa !== "ESCOLHA_EXTERNO" ? "bg-[#ffd639]" : "bg-gray-200"}`}
+        className={`h-1 w-16 md:w-32 mx-2 rounded transition-colors duration-500 ${
+          etapa !== "ESCOLHA_EXTERNO" ? "bg-green-500" : "bg-gray-200"
+        }`}
       />
 
+      {/* PASSO 2: INTERNO */}
       <div
-        className={`flex flex-col items-center ${etapa === "ESCOLHA_INTERNO" ? "text-[#313b2f] font-bold" : "text-gray-400"}`}
+        className={`flex flex-col items-center ${
+          etapa === "ESCOLHA_INTERNO"
+            ? "text-[#313b2f] font-bold"
+            : etapa === "RESULTADO"
+              ? "text-green-600 font-medium"
+              : "text-gray-400"
+        }`}
       >
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${etapa === "ESCOLHA_INTERNO" ? "bg-[#ffd639] text-[#313b2f]" : etapa === "RESULTADO" ? "bg-green-500 text-white" : "bg-gray-200"}`}
+          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors shadow-sm ${
+            etapa === "ESCOLHA_INTERNO"
+              ? "bg-[#ffd639] text-[#313b2f] ring-4 ring-[#ffd639]/30" // Ativo
+              : etapa === "RESULTADO"
+                ? "bg-green-500 text-white" // Concluído
+                : "bg-gray-200 text-gray-500" // Inativo
+          }`}
         >
-          2
+          {etapa === "RESULTADO" ? <FaCheck size={12} /> : "2"}
         </div>
         <span className="text-sm">Interno</span>
       </div>
 
+      {/* Linha Conectora 2-3 */}
       <div
-        className={`h-1 w-16 md:w-32 mx-2 rounded ${etapa === "RESULTADO" ? "bg-[#ffd639]" : "bg-gray-200"}`}
+        className={`h-1 w-16 md:w-32 mx-2 rounded transition-colors duration-500 ${
+          etapa === "RESULTADO" ? "bg-green-500" : "bg-gray-200"
+        }`}
       />
 
+      {/* PASSO 3: RESULTADO */}
       <div
-        className={`flex flex-col items-center ${etapa === "RESULTADO" ? "text-[#313b2f] font-bold" : "text-gray-400"}`}
+        className={`flex flex-col items-center ${
+          etapa === "RESULTADO" ? "text-[#313b2f] font-bold" : "text-gray-400"
+        }`}
       >
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${etapa === "RESULTADO" ? "bg-[#ffd639] text-[#313b2f]" : "bg-gray-200"}`}
+          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors shadow-sm ${
+            etapa === "RESULTADO"
+              ? "bg-[#ffd639] text-[#313b2f] ring-4 ring-[#ffd639]/30"
+              : "bg-gray-200 text-gray-500"
+          }`}
         >
           3
         </div>

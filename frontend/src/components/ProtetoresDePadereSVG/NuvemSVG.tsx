@@ -1,54 +1,59 @@
-import React from 'react';
-import './DesenhoSVG.css';
+import React from "react";
+import "./DesenhoSVG.css";
 
 interface Props {
-    colors: Record<string, string>; // Recebe o objeto com todas as cores
-    onClick: (e: React.MouseEvent<SVGElement>) => void;
-    lado: string;
+  colors: Record<string, string>; // Recebe o objeto com todas as cores
+  onClick: (e: React.MouseEvent<SVGElement>) => void;
+  lado: string;
 }
 
 export const NuvemSVG: React.FC<Props> = ({ colors, onClick, lado }) => {
-    // Fallback para cinza se a cor não estiver definida
-    const cor1 = colors['cor1'] || '#ccc';
-    const cor2 = colors['cor2'] || '#ccc';
+  // Fallback para cinza se a cor não estiver definida
+  const cor1 = colors["cor1"] || "#ccc";
+  const cor2 = colors["cor2"] || "#ccc";
 
-    return (
-        <div>
-            <h2 className="titulo-lado">Lado {lado}</h2>
-            <div className={lado}>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="300mm"
-                    height="60mm"
-                    version="1.0"
-                    shape-rendering="geometricPrecision"
-                    text-rendering="geometricPrecision"
-                    image-rendering="optimizeQuality"
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    viewBox="0 0 330000 71000"
-                >
-                    <g id="Camada_x0020_1">
-                        <path
-                            id="cor1" // O ID é crucial para o handler funcionar
-                            fill={cor1}
-                            stroke="black"
-                            strokeWidth="70.56"
-                            onClick={onClick} // Passa o click
-                            d="M278477.57 106.83c14616.44,0 27101.16,8778.7 29536.93,19458.31 11752.99,3342.06 19470.8,15433.22 16812.25,27823.39 2061.9,2284.32 3415.98,6788.32 3415.97,8981.39l0.01 13736.89 -71725.85 -0.01 0 -14021.16c0,-12859.88 -9425.24,-23190.18 -25429.66,-25101.2 -1685.59,-5637.29 -6166.95,-10807.21 -12077.23,-14620.98 8504.28,-9958.17 26483.78,-13605.56 38327.8,-9456.33 5377.8,-4197.3 12862.62,-6800.3 21139.78,-6800.3zm-221707.78 56156.13l0 14021.17 -49430.69 0 -5337.63 0 0 -14021.16c57.87,-10533.26 4378.17,-24087.38 16157.05,-29570.89 1740.49,-16834.91 27428.51,-28025.06 45934.23,-19316.07 17803.09,-7874.5 36774.01,-1124.63 44344.12,7846.2 -2932.08,2131.18 -5609.42,4800.63 -7824.19,8109.22 -17071.02,-588.35 -29178.63,9619.04 -31804.71,22297.86 -6154.28,1256.08 -12038.18,7183.97 -12038.18,10633.67z"
-                        />
-                        <path
-                            className="teste"
-                            id="cor2"
-                            fill={cor2}
-                            stroke="black"
-                            strokeWidth="70.56"
-                            onClick={onClick}
-                            d="M193683.2 10052.24c16286.25,-1709.24 33677.52,8469.26 37404.02,20932.2 16004.42,1911.02 25429.66,12241.32 25429.66,25101.19l0 14021.17 -134274.12 0.01 0 -60016.73c9914.61,-3448.72 20223.11,-2890.81 25061.67,-1145.52 11350.62,-10928.62 37463.88,-11375.21 46378.77,1107.68zm-75681.78 215.17l0 60016.72 -61231.63 0 0 -14021.16c0,-3449.71 5883.9,-9377.6 12038.18,-10633.68 2626.08,-12678.82 14733.69,-22886.21 31804.71,-22297.86 4477.9,-6689.44 10846.74,-10766.13 17388.74,-13064.02z"
-                        />
-                    </g>
-                </svg>
-            </div>
-        </div>
-    );
+  const isEsquerdo = lado.toLowerCase() === "esquerdo";
+
+  return (
+    <div className="w-full mb-8 flex flex-col items-center">
+      <h2 className="text-xl font-bold text-[#313b2f] underline decoration-[#ffd639] underline-offset-4 mb-4 capitalize text-center">
+        Lado {lado}
+      </h2>
+      <div
+        className={`w-full flex justify-center transition-transform duration-300 ${isEsquerdo ? "scale-x-[-1]" : ""}`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-auto max-w-[800px] drop-shadow-sm"
+          viewBox="0 0 330000 71000"
+          version="1.1"
+          shapeRendering="geometricPrecision"
+          textRendering="geometricPrecision"
+          imageRendering="optimizeQuality"
+          fillRule="evenodd"
+          clipRule="evenodd"
+        >
+          <g id="Camada_x0020_1">
+            <path
+              id="cor1" // O ID é crucial para o handler funcionar
+              fill={cor1}
+              stroke="black"
+              strokeWidth="70.56"
+              onClick={onClick} // Passa o click
+              d="M278477.57 106.83c14616.44,0 27101.16,8778.7 29536.93,19458.31 11752.99,3342.06 19470.8,15433.22 16812.25,27823.39 2061.9,2284.32 3415.98,6788.32 3415.97,8981.39l0.01 13736.89 -71725.85 -0.01 0 -14021.16c0,-12859.88 -9425.24,-23190.18 -25429.66,-25101.2 -1685.59,-5637.29 -6166.95,-10807.21 -12077.23,-14620.98 8504.28,-9958.17 26483.78,-13605.56 38327.8,-9456.33 5377.8,-4197.3 12862.62,-6800.3 21139.78,-6800.3zm-221707.78 56156.13l0 14021.17 -49430.69 0 -5337.63 0 0 -14021.16c57.87,-10533.26 4378.17,-24087.38 16157.05,-29570.89 1740.49,-16834.91 27428.51,-28025.06 45934.23,-19316.07 17803.09,-7874.5 36774.01,-1124.63 44344.12,7846.2 -2932.08,2131.18 -5609.42,4800.63 -7824.19,8109.22 -17071.02,-588.35 -29178.63,9619.04 -31804.71,22297.86 -6154.28,1256.08 -12038.18,7183.97 -12038.18,10633.67z"
+            />
+            <path
+              className="teste"
+              id="cor2"
+              fill={cor2}
+              stroke="black"
+              strokeWidth="70.56"
+              onClick={onClick}
+              d="M193683.2 10052.24c16286.25,-1709.24 33677.52,8469.26 37404.02,20932.2 16004.42,1911.02 25429.66,12241.32 25429.66,25101.19l0 14021.17 -134274.12 0.01 0 -60016.73c9914.61,-3448.72 20223.11,-2890.81 25061.67,-1145.52 11350.62,-10928.62 37463.88,-11375.21 46378.77,1107.68zm-75681.78 215.17l0 60016.72 -61231.63 0 0 -14021.16c0,-3449.71 5883.9,-9377.6 12038.18,-10633.68 2626.08,-12678.82 14733.69,-22886.21 31804.71,-22297.86 4477.9,-6689.44 10846.74,-10766.13 17388.74,-13064.02z"
+            />
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
 };

@@ -13,20 +13,21 @@ export const OndaUmaParedeSVG: React.FC<Props> = ({ colors, onClick }) => {
   const cor2 = colors["cor2"] || "#ccc";
 
   return (
-    <div>
-      <h2 className="titulo-lado">Uma Parede</h2>
-      <div className="direito">
+    <div className="w-full mb-8 flex flex-col items-center">
+      <h2 className="text-xl font-bold text-[#313b2f] underline decoration-[#ffd639] underline-offset-4 mb-4 capitalize text-center">
+        Uma Parede
+      </h2>
+      <div className="w-full flex justify-center transition-transform duration-300">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="300mm"
-          height="60mm"
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          image-rendering="optimizeQuality"
-          shape-rendering="geometricPrecision"
-          text-rendering="geometricPrecision"
-          version="1.0"
+          className="w-full h-auto max-w-[800px] drop-shadow-sm"
           viewBox="0 0 210000 80000"
+          version="1.1"
+          shapeRendering="geometricPrecision"
+          textRendering="geometricPrecision"
+          imageRendering="optimizeQuality"
+          fillRule="evenodd"
+          clipRule="evenodd"
         >
           <g
             fill="none"
