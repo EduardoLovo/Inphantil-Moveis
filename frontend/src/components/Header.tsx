@@ -410,6 +410,12 @@ const Header = () => {
             >
               <FaPuzzlePiece /> Apliques
             </Link>
+            <Link
+              to="/tecidos-lencol"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+            >
+              <FaCut /> Tecidos Para Lençol
+            </Link>
 
             <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">
               Ferramentas
@@ -420,6 +426,20 @@ const Header = () => {
             >
               <FaLayerGroup /> Simulador Cama
             </Link>
+            <Link
+              to="/composicao-lencol"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-colors"
+            >
+              <FaLayerGroup /> Simular Lençol
+            </Link>
+            {isLoggedIn && canAccessAdmin && (
+              <Link
+                to="/composicao/protetores"
+                className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-colors"
+              >
+                <FaLayerGroup /> Simular Protetor
+              </Link>
+            )}
 
             {isLoggedIn && canAccessAdmin && (
               <>
