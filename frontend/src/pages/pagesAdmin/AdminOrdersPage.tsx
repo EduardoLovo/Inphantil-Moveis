@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useOrderStore } from "../../store/OrderStore";
 import { useAuthStore } from "../../store/AuthStore";
 import { Navigate } from "react-router-dom";
+import { jsPDF } from "jspdf";
 import {
   FaShoppingCart,
   FaTrashAlt,
@@ -9,6 +10,7 @@ import {
   FaBoxOpen,
   FaUser,
   FaClock,
+  FaFilePdf,
 } from "react-icons/fa";
 import { OrderStatus } from "../../types/order";
 
@@ -52,6 +54,61 @@ const AdminOrdersPage: React.FC = () => {
   useEffect(() => {
     fetchAllOrders();
   }, [fetchAllOrders]);
+
+  const handleDownloadPDF = (order: any) => {
+    const doc = new jsPDF();
+
+    // Cabeçalho
+    doc.setFontSize(22);
+    doc.text("Inphantil Móveis - Produção", 105, 20, { align: "center" });
+
+    doc.setFontSize(16);
+    doc.text(`Pedido #${order.id}`, 105, 30, { align: "center" });
+    doc.line(20, 35, 190, 35); // Linha separadora
+
+    // Dados do Pedido e Cliente
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${order.user.name}`, 20, 50);
+    doc.text(`Email: ${order.user.email}`, 20, 60);
+    doc.text(
+      `Data do Pedido: ${new Date(order.createdAt).toLocaleDateString("pt-BR")}`,
+      20,
+      70,
+    );
+    doc.text(
+      `Status Atual: ${STATUS_LABELS[order.status] || order.status}`,
+      20,
+      80,
+    );
+
+    // Lista de Itens
+    doc.setFontSize(14);
+    doc.text("Itens para Produção:", 20, 100);
+
+    doc.setFontSize(12);
+    let yPos = 110;
+
+    order.items.forEach((item: any) => {
+      const itemText = `${item.quantity}x ${item.product.name}`;
+      // splitTextToSize quebra o texto se for muito longo
+      const splitText = doc.splitTextToSize(itemText, 170);
+      doc.text(splitText, 20, yPos);
+      yPos += 7 * splitText.length + 5; // Ajusta altura dinamicamente
+    });
+
+    // Total e Rodapé
+    doc.line(20, yPos + 5, 190, yPos + 5);
+    doc.setFontSize(14);
+    doc.text(`Total do Pedido: ${formatPrice(order.total)}`, 20, yPos + 20);
+
+    doc.setFontSize(10);
+    doc.text("Documento gerado para controle interno.", 105, 280, {
+      align: "center",
+    });
+
+    // Salvar arquivo
+    doc.save(`pedido_${order.id}_producao.pdf`);
+  };
 
   const handleStatusChange = (
     id: number,
@@ -188,6 +245,13 @@ const AdminOrdersPage: React.FC = () => {
               </select>
               <button
                 className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 border border-red-100"
+                onClick={() => handleDownloadPDF(order)}
+                title="Baixar PDF"
+              >
+                <FaFilePdf />
+              </button>
+              <button
+                className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 border border-red-100"
                 onClick={() => handleDelete(order.id)}
               >
                 <FaTrashAlt />
@@ -264,7 +328,7 @@ const AdminOrdersPage: React.FC = () => {
                   </span>
                 </td>
                 <td className="p-5">
-                  <div className="flex items-center justify-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-center gap-2 opacity-100 group-hover:opacity-100 transition-opacity">
                     <div className="relative">
                       <select
                         className="appearance-none bg-white border border-gray-200 text-gray-700 py-1.5 pl-3 pr-8 rounded-lg shadow-sm focus:ring-2 focus:ring-[#ffd639] outline-none text-xs font-medium cursor-pointer hover:border-gray-300 transition-colors"
@@ -287,6 +351,14 @@ const AdminOrdersPage: React.FC = () => {
                         </svg>
                       </div>
                     </div>
+
+                    <button
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                      onClick={() => handleDownloadPDF(order)}
+                      title="Baixar para Produção (PDF)"
+                    >
+                      <FaFilePdf />
+                    </button>
 
                     <button
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"

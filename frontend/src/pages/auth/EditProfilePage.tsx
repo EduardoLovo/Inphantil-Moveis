@@ -2,18 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useAuthStore } from "../../store/AuthStore";
 import { api } from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
-import { FaUserEdit, FaArrowLeft, FaSave, FaSpinner } from "react-icons/fa";
+import {
+  FaUserEdit,
+  FaArrowLeft,
+  FaSave,
+  FaSpinner,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
 const EditProfilePage: React.FC = () => {
   const { user, initialize } = useAuthStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  // Estados para controlar a visibilidade das senhas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     fone: "",
     password: "",
+    confirmPassword: "", // Novo campo
   });
 
   useEffect(() => {
@@ -23,6 +35,7 @@ const EditProfilePage: React.FC = () => {
         email: user.email,
         fone: user.fone || "",
         password: "",
+        confirmPassword: "",
       });
     }
   }, [user]);
@@ -30,8 +43,19 @@ const EditProfilePage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validação: Senhas iguais
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      alert("As senhas não conferem! Por favor, verifique.");
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Cria uma cópia e remove o confirmPassword antes de enviar
       const payload: any = { ...formData };
+      delete payload.confirmPassword; // Não enviamos este campo para o backend
+
       if (!payload.password) delete payload.password;
 
       await api.patch("/auth/profile", payload);
@@ -123,23 +147,88 @@ const EditProfilePage: React.FC = () => {
               />
             </div>
 
-            {/* Senha */}
-            <div className="pt-2 border-t border-gray-100">
-              <label className="block text-sm font-bold text-[#313b2f] mb-1">
-                Nova Senha{" "}
-                <span className="text-gray-400 font-normal">(Opcional)</span>
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all text-gray-700"
-                placeholder="Deixe em branco para manter a atual"
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Preencha apenas se desejar alterar sua senha de acesso.
+            {/* SEÇÃO DE SENHA */}
+            <div className="pt-4 border-t border-gray-100 space-y-4">
+              {/* Nova Senha */}
+              <div>
+                <label className="block text-sm font-bold text-[#313b2f] mb-1">
+                  Nova Senha{" "}
+                  <span className="text-gray-400 font-normal">(Opcional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all text-gray-700 pr-12"
+                    placeholder="Deixe em branco para manter a atual"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#313b2f] transition-colors"
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash size={20} />
+                    ) : (
+                      <FaEye size={20} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirmar Nova Senha (Só aparece se digitar senha) */}
+              {formData.password.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="block text-sm font-bold text-[#313b2f] mb-1">
+                    Confirmar Nova Senha
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className={`w-full px-4 py-3 bg-gray-50 border rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all text-gray-700 pr-12 ${
+                        formData.confirmPassword &&
+                        formData.password !== formData.confirmPassword
+                          ? "border-red-300 focus:ring-red-200"
+                          : "border-gray-200"
+                      }`}
+                      placeholder="Repita a nova senha"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#313b2f] transition-colors"
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash size={20} />
+                      ) : (
+                        <FaEye size={20} />
+                      )}
+                    </button>
+                  </div>
+                  {formData.confirmPassword &&
+                    formData.password !== formData.confirmPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        As senhas não coincidem.
+                      </p>
+                    )}
+                </div>
+              )}
+
+              <p className="text-xs text-gray-400">
+                Preencha os campos de senha apenas se desejar alterar seu
+                acesso.
               </p>
             </div>
 

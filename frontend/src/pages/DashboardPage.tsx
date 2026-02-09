@@ -18,6 +18,8 @@ import AddressForm from "../components/AddressForm";
 import { useOrderStore } from "../store/OrderStore";
 import type { Address } from "../types/address";
 import axios from "axios";
+import { jsPDF } from "jspdf"; // Importe o jsPDF
+import { FaFilePdf } from "react-icons/fa"; // Importe o ícone de PDF
 
 const STATUS_MAP: Record<string, string> = {
   PENDING: "Pendente",
@@ -104,6 +106,63 @@ const DashboardPage = () => {
       </div>
     );
   }
+
+  // ... outros códigos e hooks
+
+  const handleDownloadPDF = (order: any) => {
+    const doc = new jsPDF();
+
+    // Cabeçalho
+    doc.setFontSize(22);
+    doc.text("Inphantil Móveis", 105, 20, { align: "center" });
+
+    doc.setFontSize(16);
+    doc.text(`Comprovante de Pedido #${order.id}`, 105, 30, {
+      align: "center",
+    });
+    doc.line(20, 35, 190, 35); // Linha separadora
+
+    // Dados do Cliente
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${user?.name}`, 20, 50);
+    doc.text(`Email: ${user?.email}`, 20, 60);
+    doc.text(
+      `Data do Pedido: ${new Date(order.createdAt).toLocaleDateString("pt-BR")}`,
+      20,
+      70,
+    );
+    doc.text(`Status: ${order.status}`, 20, 80);
+
+    // Lista de Itens
+    doc.setFontSize(14);
+    doc.text("Itens do Pedido:", 20, 100);
+
+    doc.setFontSize(12);
+    let yPos = 110;
+
+    order.items.forEach((item: any) => {
+      const itemText = `${item.quantity}x ${item.product?.name}`;
+      doc.text(itemText, 20, yPos);
+      // Se tiver preço unitário no item, pode adicionar aqui
+      yPos += 10;
+    });
+
+    // Total
+    doc.line(20, yPos + 5, 190, yPos + 5);
+    doc.setFontSize(14);
+    doc.text(
+      `Total: ${Number(order.total).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+      20,
+      yPos + 20,
+    );
+
+    // Rodapé
+    doc.setFontSize(10);
+    doc.text("Obrigado pela preferência!", 105, 280, { align: "center" });
+
+    // Salvar arquivo
+    doc.save(`pedido_${order.id}.pdf`);
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8  md:pt-32 pb-20">
@@ -212,6 +271,20 @@ const DashboardPage = () => {
                       >
                         {STATUS_MAP[order.status] || order.status}
                       </span>
+
+                      <button
+                        onClick={() => handleDownloadPDF(order)}
+                        title="Baixar PDF"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#e74c3c", // Cor vermelha estilo PDF
+                          fontSize: "1.2em",
+                        }}
+                      >
+                        <FaFilePdf />
+                      </button>
                     </div>
 
                     <div className="flex justify-between items-center">

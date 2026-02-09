@@ -52,8 +52,8 @@ import CalculadoraPagamento6040 from "./pages/pagesAdmin/AdminCalculadora6040";
 import CalculadoraSobMedida from "./pages/pagesAdmin/AdminCalculadoraSobMedidaCama";
 import CalculadoraSobMedidaColchao from "./pages/pagesAdmin/AdminCalculadoraSobMedidaColchao";
 import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
-import LowStockApliquesPage from "./pages/LowStockApliquesPage";
-import RestockApliquesPage from "./pages/RestockApliquesPage";
+import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
+import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
 

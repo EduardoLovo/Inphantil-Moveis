@@ -242,8 +242,9 @@ export class AuthService {
             },
         });
 
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+        const frontendUrl =
+            process.env.FRONTEND_URL || 'https://inphantilmoveis.com.br';
+        const resetLink = `${frontendUrl}/reset-password?token=${token}`;
         try {
             await this.mailerService.sendMail({
                 to: email,
