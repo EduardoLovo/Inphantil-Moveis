@@ -199,9 +199,9 @@ const HomePage = () => {
           >
             {/* Imagem de Fundo (Ajuste de posição para mobile/desktop) */}
             <motion.img
-              src="https://res.cloudinary.com/dtghitaah/image/upload/v1767724978/IMG_8118_pdtufd.jpg"
+              src="https://i.pinimg.com/736x/b2/e8/af/b2e8af76c335439ed983de05fa17a7bc.jpg"
               alt="Camas Montessorianas"
-              className="w-full h-full object-cover object-center md:object-[0_-800px]"
+              className="w-full h-full object-cover object-center md:object-[0_-650px]"
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 1.5 }}

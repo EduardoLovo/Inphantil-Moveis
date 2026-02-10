@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useApliqueStore } from "../../store/ApliqueStore";
+import { generateApliquesPDF, useApliqueStore } from "../../store/ApliqueStore";
 import { useAuthStore } from "../../store/AuthStore";
 import type { VisualItem } from "../../types/visual-item";
 import {
@@ -11,8 +11,8 @@ import {
   FaTrash,
   FaImage,
   FaBoxOpen,
+  FaFilePdf,
 } from "react-icons/fa";
-
 // =========================================================
 // 1. MODAL DE VISUALIZAÇÃO
 // =========================================================
@@ -337,6 +337,35 @@ const ApliquesPage: React.FC = () => {
               : "Toque nas imagens para ver detalhes ampliado."}
           </p>
         </div>
+        {isStaff && (
+          <div className="flex justify-center my-6">
+            <button
+              onClick={() => generateApliquesPDF(apllyIcons)}
+              disabled={isLoading || apllyIcons.length === 0}
+              className={`
+      group flex items-center justify-center gap-2
+      px-6 py-3
+      bg-red-600 text-white font-semibold text-sm uppercase tracking-wide
+      rounded-lg shadow-md
+      hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5
+      active:translate-y-0 active:shadow-sm
+      transition-all duration-200 ease-in-out
+      disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
+    `}
+            >
+              {/* Ícone com animação de loading condicional ou ícone estático */}
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+              ) : (
+                <FaFilePdf className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+              )}
+
+              <span>
+                {isLoading ? "Gerando Catálogo..." : "Baixar Catálogo em PDF"}
+              </span>
+            </button>
+          </div>
+        )}
 
         <div className="relative w-full md:w-96">
           <input

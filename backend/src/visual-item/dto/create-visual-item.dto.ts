@@ -61,7 +61,7 @@ export class CreateVisualItemDto {
     color?: ItemColor;
 
     @ApiProperty({
-        example: ItemSize.BERÇO,
+        example: ItemSize.BERCO,
         description: 'Tamanho (padrão de berço/cama).',
         enum: ItemSize,
         required: false,

@@ -21,6 +21,7 @@ import { EnvironmentModule } from './environment/environment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { UsersModule } from './users/users.module';
+import { ProxyModule } from './proxy/proxy.module';
 
 @Module({
     imports: [
@@ -59,6 +60,7 @@ import { UsersModule } from './users/users.module';
         EnvironmentModule,
         AnalyticsModule,
         UsersModule,
+        ProxyModule,
     ],
     controllers: [AppController],
     providers: [

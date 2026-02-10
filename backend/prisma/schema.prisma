@@ -163,7 +163,7 @@ enum VisualItemType {
   APLIQUE
   TECIDO
   PANTONE
-  LENÇOL
+  LENCOL
   SINTETICO
   SHOWROOM
 }
@@ -188,7 +188,7 @@ enum ItemColor {
 }
 
 enum ItemSize {
-  BERÇO
+  BERCO
   JUNIOR
   SOLTEIRO
   SOLTEIRAO
