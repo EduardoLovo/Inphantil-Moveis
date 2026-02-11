@@ -51,14 +51,6 @@ const Footer: React.FC = () => {
                 Apliques Decorativos
               </Link>
             </li>
-            <li>
-              <Link
-                to="/calculadora-colchao"
-                className="text-sm hover:text-[#fefe85] transition-colors duration-200 block"
-              >
-                Calculadora Sob Medida
-              </Link>
-            </li>
           </ul>
         </div>
 

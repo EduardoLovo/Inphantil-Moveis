@@ -166,6 +166,12 @@ const Header = () => {
                     >
                       <FaCut className="text-gray-400" /> Tecidos Para Lençol
                     </Link>
+                    <Link
+                      to="/lencois"
+                      className="px-6 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3"
+                    >
+                      <FaCut className="text-gray-400" /> Lençois Pronta-entrega
+                    </Link>
                   </div>
 
                   <div className="px-4 py-2 mt-2 border-t border-b border-gray-50 bg-gray-50/50">
@@ -415,6 +421,12 @@ const Header = () => {
               className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
             >
               <FaCut /> Tecidos Para Lençol
+            </Link>
+            <Link
+              to="/lencois"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+            >
+              <FaCut /> Lençois Pronta-entrega
             </Link>
 
             <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">

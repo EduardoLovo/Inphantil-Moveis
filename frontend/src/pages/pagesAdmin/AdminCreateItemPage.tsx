@@ -25,7 +25,7 @@ const CREATE_ITEMS_MENU: AdminCard[] = [
       "Cadastre novos desenhos, formas e cores de apliques para personalização.",
     IconComponent: FaBox,
     link: "/admin/apliques/new",
-    requiredRoles: ["DEV", "ADMIN", "SELLER"],
+    requiredRoles: ["DEV", "ADMIN"],
   },
   {
     title: "Criar Novo Tecido",
@@ -33,7 +33,7 @@ const CREATE_ITEMS_MENU: AdminCard[] = [
       "Adicione novas opções de tecidos e estampas ao catálogo de produção.",
     IconComponent: FaListAlt,
     link: "/admin/tecidos/new",
-    requiredRoles: ["DEV", "ADMIN", "SELLER"],
+    requiredRoles: ["DEV", "ADMIN"],
   },
   {
     title: "Criar Novo Sintético",
@@ -41,7 +41,7 @@ const CREATE_ITEMS_MENU: AdminCard[] = [
       "Gerencie as cores e materiais sintéticos disponíveis para os móveis.",
     IconComponent: FaChartBar,
     link: "/admin/sinteticos/new",
-    requiredRoles: ["DEV", "ADMIN", "SELLER"],
+    requiredRoles: ["DEV", "ADMIN"],
   },
   {
     title: "Criar Novo Ambiente",
@@ -49,7 +49,15 @@ const CREATE_ITEMS_MENU: AdminCard[] = [
       "Adicione fotos inspiradoras de ambientes (Showroom) ao catálogo visual.",
     IconComponent: FaImage,
     link: "/admin/ambientes/new",
-    requiredRoles: ["DEV", "ADMIN", "SELLER"],
+    requiredRoles: ["DEV", "ADMIN"],
+  },
+  {
+    title: "Criar Novo Lençol",
+    description:
+      "Adicione novos lençóis ao catálogo, com opções de cores, tamanhos e estampas.",
+    IconComponent: FaImage,
+    link: "/admin/lencol/new",
+    requiredRoles: ["DEV", "ADMIN"],
   },
 ];
 

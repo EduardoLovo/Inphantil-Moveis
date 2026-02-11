@@ -56,6 +56,8 @@ import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
 import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
+import LencoisPage from "./pages/catalogs/LencoisPage";
+import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 
 function App() {
   const location = useLocation();
@@ -86,6 +88,7 @@ function App() {
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
+        <Route path="/lencois" element={<LencoisPage />} />
         <Route path="/sinteticos/tapetes" element={<SinteticosPageTapetes />} />
         <Route path="/sinteticos" element={<SinteticosPage />} />
         <Route path="/pos-compra" element={<PosCompraPage />} />
@@ -109,6 +112,10 @@ function App() {
             <Route path="/admin" element={<AdminPage />} />
             {/* Sub-rotas */}
             <Route path="/admin/products" element={<AdminProductsPage />} />
+            <Route
+              path="/admin/lencol/new"
+              element={<AdminCreateLencolPage />}
+            />
             <Route
               path="/admin/products/new"
               element={<AdminCreateProductPage />}

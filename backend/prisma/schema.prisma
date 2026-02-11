@@ -179,6 +179,7 @@ enum ItemColor {
   LARANJA
   LILAS
   MOSTARDA
+  PALHA
   PRATA
   ROSA
   ROSABEBE
@@ -188,6 +189,7 @@ enum ItemColor {
 }
 
 enum ItemSize {
+  FRONHA
   BERCO
   JUNIOR
   SOLTEIRO

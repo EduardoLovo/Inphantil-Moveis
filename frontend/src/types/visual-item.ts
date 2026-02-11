@@ -8,6 +8,7 @@ export enum VisualItemType {
 }
 
 export enum ItemSize {
+  FRONHA = "FRONHA",
   BERCO = "BERCO",
   JUNIOR = "JUNIOR",
   SOLTEIRO = "SOLTEIRO",
@@ -29,6 +30,7 @@ export enum ItemColor {
   LARANJA = "LARANJA",
   LILAS = "LILAS",
   MOSTARDA = "MOSTARDA",
+  PALHA = "PALHA",
   PRATA = "PRATA",
   ROSA = "ROSA",
   ROSABEBE = "ROSABEBE",
