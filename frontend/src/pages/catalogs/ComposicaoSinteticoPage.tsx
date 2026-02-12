@@ -52,7 +52,9 @@ const ComposicaoSinteticoPage: React.FC = () => {
   // 2. Filtra Listas (Memoizado)
   const materiaisExternos = useMemo(() => {
     return sinteticos
-      .filter((item) => item.isExternal === true && item.inStock)
+      .filter(
+        (item) => item.isExternal === true && item.inStock && !item.isTapete,
+      )
       .sort((a, b) => a.code.localeCompare(b.code));
   }, [sinteticos]);
 
@@ -62,7 +64,8 @@ const ComposicaoSinteticoPage: React.FC = () => {
         const matchesSearch = item.code
           .toLowerCase()
           .includes(busca.toLowerCase());
-        return item.inStock && matchesSearch;
+
+        return item.inStock && matchesSearch && !item.isTapete;
       })
       .sort((a, b) => a.code.localeCompare(b.code));
   }, [sinteticos, busca]);
