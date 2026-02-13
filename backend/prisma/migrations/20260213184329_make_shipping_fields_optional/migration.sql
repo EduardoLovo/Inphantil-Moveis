@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "ShippingQuote" ALTER COLUMN "quoteDetails" DROP NOT NULL,
+ALTER COLUMN "customerName" DROP NOT NULL,
+ALTER COLUMN "customerCpf" DROP NOT NULL,
+ALTER COLUMN "customerZipCode" DROP NOT NULL,
+ALTER COLUMN "customerAddress" DROP NOT NULL,
+ALTER COLUMN "customerCity" DROP NOT NULL,
+ALTER COLUMN "customerState" DROP NOT NULL;

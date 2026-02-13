@@ -20,7 +20,7 @@ model User {
   email     String   @unique
   fone      String?
   password  String?
-  googleId  String?  @unique // Novo campo
+  googleId  String?  @unique 
   avatar    String?  // Opcional: para salvar a foto do Google
   role      Role     @default(USER)
   createdAt DateTime @default(now())
@@ -32,7 +32,8 @@ model User {
   addresses Address[]
   orders    Order[]
   authLogs  AuthLog[]
-  contactMessages ContactMessage[] // <--- Adicione esta linha
+  contactMessages ContactMessage[] 
+  shippingQuotes ShippingQuote[]
 }
 
 model Address {
@@ -259,4 +260,45 @@ model SiteAccess {
   path      String   @db.VarChar(200) // Qual página foi acessada
   ip        String?  // IP do visitante (opcional, para contar únicos)
   createdAt DateTime @default(now())
+}
+
+model ShippingQuote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) // Data da solicitação
+  updatedAt DateTime @updatedAt
+  
+  // -- Dados da Solicitação (Preenchido pela Vendedora) --
+  quoteDetails    String?   @db.Text // Detalhes do orçamento/produtos
+  customerName    String?   @db.VarChar(150)
+  customerCpf     String?   @db.VarChar(14) // Com pontuação
+  customerZipCode String?   @db.VarChar(10)
+  customerAddress String?   @db.VarChar(255) // Rua, Bairro, Número
+  customerCity    String?   @db.VarChar(100) // Vindo do ViaCEP
+  customerState   String?   @db.VarChar(2)   // Vindo do ViaCEP (UF)
+
+  // Quem solicitou
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id])
+
+  // -- Status --
+  isConcluded Boolean   @default(false)
+  concludedAt DateTime? // Data em que foi respondido/finalizado
+
+  // -- Dados da Cotação (Preenchido pela Logística/Admin) --
+  carrierName       String?     @db.VarChar(150) // Transportadora
+  deliveryDeadline  String?     @db.VarChar(50)
+  volumeQuantity    Int?        // Quantidade de volumes
+  shippingValue     Decimal?    @db.Decimal(10, 2) // Valor do frete
+  weight            String?     @db.VarChar(50) // Ex: "15kg"
+  orderValue        Decimal?    @db.Decimal(10, 2) // Valor da Nota/Pedido
+  bedSize           ItemSize?   // Tamanho da cama
+  
+  hasWallProtector  Boolean     @default(false)
+  wallProtectorSize String?   // Tamanho do protetor (se houver)
+  
+  hasRug            Boolean     @default(false)
+  rugSize           String?     @db.VarChar(100) // Tamanho do tapete (texto livre, ex: "1.50x2.00")
+  
+  hasAccessories    Boolean     @default(false)
+  accessoryQuantity Int?        // Quantidade de acessórios
 }

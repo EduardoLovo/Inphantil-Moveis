@@ -58,6 +58,9 @@ import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LencoisPage from "./pages/catalogs/LencoisPage";
 import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
+import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
+import AdminShippingQuotePage from "./pages/pagesAdmin/AdminShippingQuotePage";
+import SearchShippingQuotePage from "./pages/pagesAdmin/AdminSearchShippingQuotePage";
 
 function App() {
   const location = useLocation();
@@ -181,6 +184,18 @@ function App() {
             <Route
               path="/calculadora-6040"
               element={<CalculadoraPagamento6040 />}
+            />
+            <Route
+              path="/cotacao-frete"
+              element={<ShippingQuoteRequestPage />}
+            />
+            <Route
+              path="/admin/cotacoes"
+              element={<AdminShippingQuotePage />}
+            />
+            <Route
+              path="/cotacoes/pesquisa"
+              element={<SearchShippingQuotePage />}
             />
           </Route>
         </Route>

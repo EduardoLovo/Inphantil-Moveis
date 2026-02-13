@@ -12,6 +12,7 @@ import {
   FaSignOutAlt,
   FaUserAlt,
   FaMoneyBillAlt,
+  FaTruck,
 } from "react-icons/fa";
 import { SlLogin } from "react-icons/sl";
 import { RiScissorsCutFill } from "react-icons/ri";
@@ -29,6 +30,27 @@ const SIDEBAR_ITEMS = [
     title: "Protetores",
     path: "/composicao/protetores",
     icon: FaPalette,
+    roles: ["DEV", "ADMIN", "SELLER"],
+    end: true,
+  },
+  {
+    title: "Solicitar Cotações",
+    path: "/cotacao-frete",
+    icon: FaTruck,
+    roles: ["DEV", "ADMIN", "SELLER"],
+    end: true,
+  },
+  {
+    title: "Cotações",
+    path: "/admin/cotacoes",
+    icon: FaTruck,
+    roles: ["DEV", "ADMIN", "SELLER"],
+    end: true,
+  },
+  {
+    title: "Pesquisar Frete",
+    path: "/cotacoes/pesquisa",
+    icon: FaTruck,
     roles: ["DEV", "ADMIN", "SELLER"],
     end: true,
   },
