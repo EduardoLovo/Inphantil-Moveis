@@ -195,14 +195,14 @@ const Header = () => {
                     {isLoggedIn && canAccessAdmin && (
                       <div>
                         <Link
-                          to="/composicao/protetores"
+                          to="/admin/composicao/protetores"
                           className="px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 flex items-center gap-3"
                         >
                           <FaLayerGroup className="text-gray-400" /> Simular
                           Protetor
                         </Link>
                         <Link
-                          to="/cotacao-frete"
+                          to="/admin/cotacao-frete"
                           className="px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 flex items-center gap-3"
                         >
                           🚚 Cotação de Frete
@@ -455,13 +455,13 @@ const Header = () => {
             {isLoggedIn && canAccessAdmin && (
               <div>
                 <Link
-                  to="/composicao/protetores"
+                  to="/admin/composicao/protetores"
                   className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-colors"
                 >
                   <FaLayerGroup /> Simular Protetor
                 </Link>
                 <Link
-                  to="/cotacao-frete"
+                  to="/admin/cotacao-frete"
                   className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-colors"
                 >
                   🚚 Cotação de Frete

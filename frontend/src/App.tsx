@@ -152,7 +152,7 @@ function App() {
             />
 
             <Route
-              path="/composicao/protetores"
+              path="/admin/composicao/protetores"
               element={<AdminProtetoresDeParedePage />}
             />
             {/* Criar itens */}
@@ -186,7 +186,7 @@ function App() {
               element={<CalculadoraPagamento6040 />}
             />
             <Route
-              path="/cotacao-frete"
+              path="/admin/cotacao-frete"
               element={<ShippingQuoteRequestPage />}
             />
             <Route
@@ -194,7 +194,7 @@ function App() {
               element={<AdminShippingQuotePage />}
             />
             <Route
-              path="/cotacoes/pesquisa"
+              path="/admin/cotacoes/pesquisa"
               element={<SearchShippingQuotePage />}
             />
           </Route>

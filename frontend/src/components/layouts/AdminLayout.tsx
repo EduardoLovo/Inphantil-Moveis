@@ -28,14 +28,14 @@ const SIDEBAR_ITEMS = [
   },
   {
     title: "Protetores",
-    path: "/composicao/protetores",
+    path: "/admin/composicao/protetores",
     icon: FaPalette,
     roles: ["DEV", "ADMIN", "SELLER"],
     end: true,
   },
   {
     title: "Solicitar Cotações",
-    path: "/cotacao-frete",
+    path: "/admin/cotacao-frete",
     icon: FaTruck,
     roles: ["DEV", "ADMIN", "SELLER"],
     end: true,
@@ -49,7 +49,7 @@ const SIDEBAR_ITEMS = [
   },
   {
     title: "Pesquisar Frete",
-    path: "/cotacoes/pesquisa",
+    path: "/admin/cotacoes/pesquisa",
     icon: FaTruck,
     roles: ["DEV", "ADMIN", "SELLER"],
     end: true,
