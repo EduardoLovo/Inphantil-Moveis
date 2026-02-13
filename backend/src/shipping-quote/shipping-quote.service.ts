@@ -22,7 +22,7 @@ export class ShippingQuoteService {
     }
 
     // 2. Listagem
-    async findAll(carrier?: string, city?: string) {
+    async findAll(carrier?: string, city?: string, status?: string) {
         const where: any = {};
 
         // Se passou transportadora, busca por texto parcial (insensitive = ignora maiúscula/minúscula)
@@ -36,6 +36,11 @@ export class ShippingQuoteService {
                 contains: city,
                 mode: 'insensitive', // Permite achar "londrina" mesmo se salvo "Londrina"
             };
+        }
+
+        if (status) {
+            // Se vier 'true', busca concluídas. Se vier 'false', busca pendentes.
+            where.isConcluded = status === 'true';
         }
 
         return this.prisma.shippingQuote.findMany({

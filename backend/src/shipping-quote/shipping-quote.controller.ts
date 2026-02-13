@@ -41,8 +41,12 @@ export class ShippingQuoteController {
 
     @Get()
     @ApiOperation({ summary: 'Listar cotações (com filtros opcionais)' })
-    findAll(@Query('carrier') carrier?: string, @Query('city') city?: string) {
-        return this.shippingQuoteService.findAll(carrier, city);
+    findAll(
+        @Query('carrier') carrier?: string,
+        @Query('city') city?: string,
+        @Query('status') status?: string,
+    ) {
+        return this.shippingQuoteService.findAll(carrier, city, status);
     }
 
     @Get(':id')

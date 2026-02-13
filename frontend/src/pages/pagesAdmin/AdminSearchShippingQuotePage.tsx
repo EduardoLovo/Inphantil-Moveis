@@ -46,9 +46,8 @@ const SearchShippingQuotePage: React.FC = () => {
     try {
       const params = new URLSearchParams();
       if (carrierSearch) params.append("carrier", carrierSearch);
-
-      // --- ENVIA O PARÂMETRO CITY ---
       if (citySearch) params.append("city", citySearch);
+      params.append("status", "true");
 
       const response = await api.get(`/shipping-quote?${params.toString()}`);
       setResults(response.data);
