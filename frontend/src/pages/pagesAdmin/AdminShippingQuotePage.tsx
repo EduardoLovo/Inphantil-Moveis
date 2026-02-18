@@ -379,9 +379,15 @@ ${volumesText}Peso Total: ${formData.weight || ""}`;
                   >
                     <td className={tdClass}>{formatDate(quote.createdAt)}</td>
                     <td className={tdClass}>
-                      <span className="font-medium text-gray-700 break-words max-w-[100px] block">
-                        {quote.createdBy?.name || "Desconhecido"}
-                      </span>
+                      {quote.createdBy?.id === user?.id ? (
+                        <span className="font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded text-[10px] break-words max-w-[100px] inline-block">
+                          {quote.createdBy?.name}
+                        </span>
+                      ) : (
+                        <span className="font-medium text-gray-700 break-words max-w-[100px] block">
+                          {quote.createdBy?.name || "Desconhecido"}
+                        </span>
+                      )}
                     </td>
                     <td className={tdClass}>
                       <div className="font-semibold break-words max-w-[120px]">

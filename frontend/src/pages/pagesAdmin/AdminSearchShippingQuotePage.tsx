@@ -23,7 +23,7 @@ const SearchShippingQuotePage: React.FC = () => {
 
   // Estados dos Filtros
   const [carrierSearch, setCarrierSearch] = useState("");
-  const [citySearch, setCitySearch] = useState(""); // <--- MUDOU DE CEP PARA CIDADE
+  const [citySearch, setCitySearch] = useState("");
 
   // Estado dos Resultados
   const [results, setResults] = useState<ShippingQuote[] | null>(null);
@@ -126,7 +126,6 @@ const SearchShippingQuotePage: React.FC = () => {
             />
           </div>
 
-          {/* --- CAMPO DE CIDADE --- */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Cidade do Cliente
@@ -245,7 +244,8 @@ const SearchShippingQuotePage: React.FC = () => {
                             {item.bedSize || "Ver Detalhes"}
                           </span>
 
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {/* Protetor (Azul) */}
                             {item.hasWallProtector && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200"
@@ -256,12 +256,27 @@ const SearchShippingQuotePage: React.FC = () => {
                               </span>
                             )}
 
+                            {/* --- NOVO: Tapete (Laranja) --- */}
+                            {item.hasRug && (
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200"
+                                title="Possui Tapete"
+                              >
+                                <FaCheckCircle size={10} />
+                                {`Tapete ${item.rugSize}`.trim()}
+                              </span>
+                            )}
+
+                            {/* Acessórios (Roxo) */}
                             {item.hasAccessories && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200"
-                                title="Possui Acessórios"
+                                title={`Acessórios: ${item.accessoryQuantity || "Sim"}`}
                               >
                                 <FaCheckCircle size={10} /> Acessórios
+                                {item.accessoryQuantity
+                                  ? ` (${item.accessoryQuantity})`
+                                  : ""}
                               </span>
                             )}
                           </div>
