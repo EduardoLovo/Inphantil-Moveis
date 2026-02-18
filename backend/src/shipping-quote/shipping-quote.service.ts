@@ -25,39 +25,49 @@ export class ShippingQuoteService {
     async findAll(carrier?: string, city?: string, status?: string) {
         const where: any = {};
 
-        // Se passou transportadora, busca por texto parcial (insensitive = ignora maiúscula/minúscula)
+        // 1. Prepara os filtros de Transportadora e Status para o Banco de Dados
         if (carrier) {
             where.carrierName = { contains: carrier, mode: 'insensitive' };
         }
 
-        // Se passou CEP, busca se o CEP contém os números
-        if (city) {
-            where.customerCity = {
-                contains: city,
-                mode: 'insensitive', // Permite achar "londrina" mesmo se salvo "Londrina"
-            };
-        }
-
         if (status) {
-            // Se vier 'true', busca concluídas. Se vier 'false', busca pendentes.
             where.isConcluded = status === 'true';
         }
 
-        return this.prisma.shippingQuote.findMany({
-            where, // Aplica os filtros (se estiverem vazios, traz tudo, mas nossa página vai controlar isso)
+        // 2. Busca os dados no Banco
+        let quotes = await this.prisma.shippingQuote.findMany({
+            where,
             orderBy: {
                 createdAt: 'desc',
             },
             include: {
                 createdBy: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    },
+                    select: { id: true, name: true, email: true },
                 },
             },
         });
+
+        // 3. Filtro Inteligente de Cidade (Ignorando Acentos e Maiúsculas/Minúsculas)
+        if (city) {
+            // Função mágica que tira acentos (ex: "São Paulo" vira "sao paulo")
+            const removeAcentos = (str: string | null) => {
+                if (!str) return '';
+                return str
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove os caracteres de acentuação
+                    .toLowerCase();
+            };
+
+            const cidadePesquisada = removeAcentos(city);
+
+            // Filtra a lista comparando as strings sem acento
+            quotes = quotes.filter((quote) => {
+                const cidadeDoCliente = removeAcentos(quote.customerCity);
+                return cidadeDoCliente.includes(cidadePesquisada);
+            });
+        }
+
+        return quotes;
     }
 
     // 3. Buscar uma específica (Para a tela de detalhes/edição)
