@@ -103,4 +103,12 @@ export class UpdateShippingQuoteDto extends PartialType(
     @IsOptional()
     @IsNumber()
     orderValue?: number;
+
+    @ApiProperty({
+        description: 'Se a cotação já foi solicitada para a transp',
+        required: false,
+    })
+    @IsOptional()
+    @IsBoolean()
+    isRequested?: boolean;
 }

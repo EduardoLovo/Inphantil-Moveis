@@ -281,8 +281,9 @@ model ShippingQuote {
   createdBy   User @relation(fields: [createdById], references: [id])
 
   // -- Status --
-  isConcluded Boolean   @default(false)
-  concludedAt DateTime? // Data em que foi respondido/finalizado
+  isRequested     Boolean     @default(false)
+  isConcluded     Boolean     @default(false)
+  concludedAt     DateTime? // Data em que foi respondido/finalizado
 
   // -- Dados da Cotação (Preenchido pela Logística/Admin) --
   carrierName       String?     @db.VarChar(150) // Transportadora

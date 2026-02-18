@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { api } from "../../services/api";
 import { type ShippingQuote, ItemSize } from "../../types/shipping-quote";
-import { FaTrash, FaExclamationTriangle, FaCopy } from "react-icons/fa";
+import { FaTrash, FaCopy, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useAuthStore } from "../../store/AuthStore";
 
 // --- LISTA DE OPÇÕES ---
@@ -137,15 +137,20 @@ const AdminShippingQuotePage: React.FC = () => {
   const [selectedQuote, setSelectedQuote] = useState<ShippingQuote | null>(
     null,
   );
-  const [formData, setFormData] = useState<Partial<ShippingQuote>>({});
+
+  // Estado para abrir/fechar a solicitação original
+  const [showOriginalQuote, setShowOriginalQuote] = useState(false);
+
+  // Adicionado isRequested no formData (Novo Status)
+  const [formData, setFormData] = useState<
+    Partial<ShippingQuote & { isRequested?: boolean }>
+  >({});
   const [saving, setSaving] = useState(false);
 
-  // Autocomplete State
   const [showProtectorSuggestions, setShowProtectorSuggestions] =
     useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Texto Gerado
   const [generatedText, setGeneratedText] = useState("");
 
   const fetchQuotes = async () => {
@@ -175,9 +180,13 @@ const AdminShippingQuotePage: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleOpenModal = (quote: ShippingQuote) => {
+  const handleOpenModal = (
+    quote: ShippingQuote & { isRequested?: boolean },
+  ) => {
     setSelectedQuote(quote);
     setGeneratedText("");
+    setShowOriginalQuote(!canEdit); // Se for Vendedor, já abre direto. Se for Logística, começa fechado.
+
     setFormData({
       carrierName: quote.carrierName || "",
       deliveryDeadline: quote.deliveryDeadline || "",
@@ -192,6 +201,7 @@ const AdminShippingQuotePage: React.FC = () => {
       rugSize: quote.rugSize || "",
       hasAccessories: quote.hasAccessories || false,
       accessoryQuantity: quote.accessoryQuantity || 0,
+      isRequested: quote.isRequested || false, // <--- NOVO
       isConcluded: quote.isConcluded || false,
     });
     setIsModalOpen(true);
@@ -221,7 +231,6 @@ const AdminShippingQuotePage: React.FC = () => {
   ) => {
     if (!canEdit) return;
     const { name, value, type } = e.target;
-
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
@@ -245,7 +254,6 @@ const AdminShippingQuotePage: React.FC = () => {
 
   const generateQuoteText = () => {
     if (!selectedQuote) return;
-
     const valorPedidoFormatado = formData.orderValue
       ? Number(formData.orderValue).toLocaleString("pt-BR", {
           style: "currency",
@@ -256,7 +264,7 @@ const AdminShippingQuotePage: React.FC = () => {
     let volumesText = "";
     const qtdVolumes = Number(formData.volumeQuantity) || 1;
     for (let i = 1; i <= qtdVolumes; i++) {
-      volumesText += `Volume${i}: \n`;
+      volumesText += `Volume ${i}: \n`;
     }
 
     const template = `Olá, tudo bem?
@@ -264,10 +272,18 @@ Por gentileza, preciso de uma cotação com as seguintes informações:
 CNPJ: 037616830001-98
 Dados do destinatário : ${selectedQuote.customerName} - CPF: ${selectedQuote.customerCpf}
 CEP: ${selectedQuote.customerZipCode}
-Valor Pedido (R$): ${valorPedidoFormatado}
-${volumesText}Peso: ${formData.weight || ""}`;
+Valor Pedido: ${valorPedidoFormatado}
+${volumesText}Peso Total: ${formData.weight || ""}`;
 
     setGeneratedText(template);
+  };
+
+  // Botão de Copiar Texto
+  const handleCopyText = () => {
+    if (generatedText) {
+      navigator.clipboard.writeText(generatedText);
+      alert("Texto copiado para a área de transferência!");
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -282,6 +298,7 @@ ${volumesText}Peso: ${formData.weight || ""}`;
         volumeQuantity: Number(formData.volumeQuantity),
         accessoryQuantity: Number(formData.accessoryQuantity),
         orderValue: Number(formData.orderValue),
+        isRequested: formData.isRequested, // Envia o novo status pro banco
       });
       alert("Cotação atualizada!");
       handleCloseModal();
@@ -300,7 +317,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
       .includes((formData.wallProtectorSize || "").toLowerCase()),
   );
 
-  // --- ESTILOS COMPACTOS (PARA CABER NA TELA) ---
   const thClass =
     "px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50";
   const tdClass =
@@ -356,22 +372,17 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                   </td>
                 </tr>
               ) : (
-                quotes.map((quote) => (
+                quotes.map((quote: any) => (
                   <tr
                     key={quote.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    {/* 1. DATA */}
                     <td className={tdClass}>{formatDate(quote.createdAt)}</td>
-
-                    {/* 2. SOLICITANTE */}
                     <td className={tdClass}>
                       <span className="font-medium text-gray-700 break-words max-w-[100px] block">
                         {quote.createdBy?.name || "Desconhecido"}
                       </span>
                     </td>
-
-                    {/* 3. CLIENTE */}
                     <td className={tdClass}>
                       <div className="font-semibold break-words max-w-[120px]">
                         {quote.customerName || "-"}
@@ -380,8 +391,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                         {quote.customerCpf}
                       </div>
                     </td>
-
-                    {/* 4. CIDADE */}
                     <td className={tdClass}>
                       <div className="break-words max-w-[100px] leading-tight">
                         {quote.customerCity
@@ -389,8 +398,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                           : "-"}
                       </div>
                     </td>
-
-                    {/* 5. TRANSP E PRAZO */}
                     <td className={tdClass}>
                       <div className="flex flex-col">
                         {quote.carrierName ? (
@@ -402,7 +409,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                             A definir
                           </span>
                         )}
-
                         {quote.deliveryDeadline && (
                           <span className="text-[10px] text-gray-600 mt-0.5 leading-tight">
                             Prazo: {quote.deliveryDeadline}
@@ -410,19 +416,21 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                         )}
                       </div>
                     </td>
-
-                    {/* 6. FRETE */}
                     <td className={tdClass}>
                       <span className="font-medium text-gray-900">
                         {formatCurrency(quote.shippingValue)}
                       </span>
                     </td>
 
-                    {/* 7. STATUS */}
+                    {/* --- LÓGICA DO NOVO STATUS --- */}
                     <td className={tdClass}>
                       {quote.isConcluded ? (
                         <span className="px-1.5 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-green-100 text-green-800">
                           Concluído
+                        </span>
+                      ) : quote.isRequested ? (
+                        <span className="px-1.5 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-blue-100 text-blue-800 border border-blue-200">
+                          Aguardando Resposta
                         </span>
                       ) : (
                         <span className="px-1.5 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-yellow-100 text-yellow-800">
@@ -431,7 +439,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                       )}
                     </td>
 
-                    {/* 8. AÇÕES */}
                     <td className={tdClass}>
                       <div className="flex items-center gap-2">
                         <button
@@ -463,6 +470,7 @@ ${volumesText}Peso: ${formData.weight || ""}`;
         </div>
       </div>
 
+      {/* --- MODAL --- */}
       {isModalOpen && selectedQuote && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -476,20 +484,10 @@ ${volumesText}Peso: ${formData.weight || ""}`;
 
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
               <form onSubmit={handleSave}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  {!canEdit && (
-                    <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                      <div className="flex">
-                        <FaExclamationTriangle className="h-5 w-5 text-yellow-400" />
-                        <p className="ml-3 text-sm text-yellow-700">
-                          Modo de Visualização
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mb-4 border-b pb-2">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                <div className="bg-white px-6 pt-5 pb-6">
+                  {/* Cabeçalho do Modal */}
+                  <div className="mb-4 border-b pb-3">
+                    <h3 className="text-lg font-bold text-gray-900">
                       Cotação #{selectedQuote.id} - {selectedQuote.customerName}
                     </h3>
                     <p className="text-sm text-gray-500 mt-1">
@@ -498,71 +496,40 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-50 p-4 rounded text-sm text-gray-700 h-fit">
-                      <h4 className="font-bold mb-2 text-gray-900">
-                        Solicitação Original
-                      </h4>
-                      {/* Aqui é exibido o que foi digitado em "O que está sendo orçado?" */}
-                      <p className="whitespace-pre-wrap mb-4">
-                        {selectedQuote.quoteDetails}
-                      </p>
-
-                      {/* --- MUDANÇA AQUI --- */}
-                      {/* O botão e o textarea de gerar texto agora SÓ aparecem se canEdit for true (Admin/Dev) */}
-                      {canEdit && (
-                        <div className="border-t pt-4 mt-2">
-                          <button
-                            type="button"
-                            onClick={generateQuoteText}
-                            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded mb-2 w-full flex items-center justify-center gap-2"
-                          >
-                            <FaCopy /> Gerar Texto para Cotação
-                          </button>
-                          {generatedText && (
-                            <textarea
-                              className="w-full text-xs p-2 border rounded bg-white text-gray-800 font-mono"
-                              rows={8}
-                              value={generatedText}
-                              onChange={(e) => setGeneratedText(e.target.value)}
-                            />
-                          )}
+                  {/* --- UMA COLUNA: FLUXO DE CIMA PARA BAIXO --- */}
+                  <div className="flex flex-col gap-6">
+                    {/* 1. Solicitação Original (Abre e Fecha) */}
+                    <div className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setShowOriginalQuote(!showOriginalQuote)}
+                        className="w-full flex justify-between items-center p-3 hover:bg-gray-100 transition-colors"
+                      >
+                        <span className="font-bold text-gray-800 text-sm">
+                          Ver Solicitação Original
+                        </span>
+                        {showOriginalQuote ? (
+                          <FaChevronUp className="text-gray-500" />
+                        ) : (
+                          <FaChevronDown className="text-gray-500" />
+                        )}
+                      </button>
+                      {showOriginalQuote && (
+                        <div className="p-4 border-t border-gray-200 text-sm text-gray-700 whitespace-pre-wrap bg-white">
+                          {selectedQuote.quoteDetails}
                         </div>
                       )}
                     </div>
 
-                    <div>
-                      <h4 className="font-bold mb-2 text-gray-900">
-                        Dados da Logística
+                    {/* 2. Dados da Logística (Físico/Itens) */}
+                    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+                      <h4 className="font-bold text-gray-900 mb-3 border-b pb-2">
+                        Dados da Carga & Itens
                       </h4>
 
-                      <div>
-                        <label className={labelClass}>Transportadora</label>
-                        <input
-                          name="carrierName"
-                          value={formData.carrierName}
-                          onChange={handleFormChange}
-                          disabled={!canEdit}
-                          className={inputClass}
-                        />
-                      </div>
-
-                      <div className="mt-2">
-                        <label className={labelClass}>Prazo de Entrega</label>
-                        <input
-                          type="text"
-                          name="deliveryDeadline"
-                          placeholder="Ex: 15 dias úteis"
-                          value={formData.deliveryDeadline || ""}
-                          onChange={handleFormChange}
-                          disabled={!canEdit}
-                          className={inputClass}
-                        />
-                      </div>
-
-                      {/* VALOR PEDIDO E PESO */}
-                      <div className="flex gap-2 mt-2">
-                        <div className="flex-1">
+                      {/* Grid interno para alinhar Peso, Valor e Volumes bonitinho */}
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div>
                           <label className={labelClass}>Peso (Ex: 15kg)</label>
                           <input
                             type="text"
@@ -573,7 +540,7 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                             className={inputClass}
                           />
                         </div>
-                        <div className="flex-1">
+                        <div>
                           <label className={labelClass}>
                             Valor Pedido (R$)
                           </label>
@@ -593,11 +560,239 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                             className={inputClass}
                           />
                         </div>
+                        <div>
+                          <label className={labelClass}>Qtd. Volumes</label>
+                          <input
+                            type="number"
+                            name="volumeQuantity"
+                            value={formData.volumeQuantity}
+                            onChange={handleFormChange}
+                            disabled={!canEdit}
+                            className={inputClass}
+                          />
+                        </div>
                       </div>
 
-                      {/* VALOR FRETE E VOLUMES */}
-                      <div className="flex gap-2 mt-2">
-                        <div className="flex-1">
+                      {/* Itens Adicionais */}
+                      <div className="space-y-3 bg-gray-50 p-3 rounded border border-gray-100">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Tamanho da Cama
+                          </label>
+                          <select
+                            name="bedSize"
+                            value={formData.bedSize}
+                            onChange={handleFormChange}
+                            disabled={!canEdit}
+                            className={inputClass}
+                          >
+                            <option value="">Nenhuma / Selecione...</option>
+                            {Object.keys(ItemSize).map((key) => (
+                              <option key={key} value={key}>
+                                {key}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                          {/* Protetor */}
+                          <div ref={wrapperRef}>
+                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
+                              <input
+                                type="checkbox"
+                                name="hasWallProtector"
+                                checked={formData.hasWallProtector}
+                                onChange={handleFormChange}
+                                disabled={!canEdit}
+                                className="h-4 w-4 text-blue-600 rounded mr-2"
+                              />
+                              Tem Protetor?
+                            </label>
+                            {formData.hasWallProtector && (
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  name="wallProtectorSize"
+                                  placeholder="Filtrar modelo..."
+                                  value={formData.wallProtectorSize}
+                                  onChange={(e) => {
+                                    handleFormChange(e);
+                                    setShowProtectorSuggestions(true);
+                                  }}
+                                  onFocus={() =>
+                                    canEdit && setShowProtectorSuggestions(true)
+                                  }
+                                  disabled={!canEdit}
+                                  className={inputClass}
+                                  autoComplete="off"
+                                />
+                                {showProtectorSuggestions && canEdit && (
+                                  <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                                    {filteredProtectors.length > 0 ? (
+                                      filteredProtectors.map((opt) => (
+                                        <li
+                                          key={opt}
+                                          onClick={() => selectProtector(opt)}
+                                          className="px-3 py-2 hover:bg-blue-100 cursor-pointer text-xs text-gray-700 border-b border-gray-100"
+                                        >
+                                          {opt}
+                                        </li>
+                                      ))
+                                    ) : (
+                                      <li className="px-3 py-2 text-xs text-gray-400 italic">
+                                        Nada encontrado
+                                      </li>
+                                    )}
+                                  </ul>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Tapete */}
+                          <div>
+                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
+                              <input
+                                type="checkbox"
+                                name="hasRug"
+                                checked={formData.hasRug}
+                                onChange={handleFormChange}
+                                disabled={!canEdit}
+                                className="h-4 w-4 text-blue-600 rounded mr-2"
+                              />
+                              Tem Tapete?
+                            </label>
+                            {formData.hasRug && (
+                              <input
+                                type="text"
+                                name="rugSize"
+                                placeholder="Tamanho..."
+                                value={formData.rugSize}
+                                onChange={handleFormChange}
+                                disabled={!canEdit}
+                                className={inputClass}
+                              />
+                            )}
+                          </div>
+
+                          {/* Acessórios */}
+                          <div>
+                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
+                              <input
+                                type="checkbox"
+                                name="hasAccessories"
+                                checked={formData.hasAccessories}
+                                onChange={handleFormChange}
+                                disabled={!canEdit}
+                                className="h-4 w-4 text-blue-600 rounded mr-2"
+                              />
+                              Tem Acessórios?
+                            </label>
+                            {formData.hasAccessories && (
+                              <input
+                                type="number"
+                                name="accessoryQuantity"
+                                placeholder="Qtd..."
+                                value={formData.accessoryQuantity}
+                                onChange={handleFormChange}
+                                disabled={!canEdit}
+                                className={inputClass}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Gerador de Texto e Botão Copiar (SÓ ADMIN VÊ) */}
+                    {canEdit && (
+                      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                        <button
+                          type="button"
+                          onClick={generateQuoteText}
+                          className="w-full bg-white border border-blue-300 text-blue-700 font-bold py-2 px-4 rounded shadow-sm hover:bg-blue-100 transition flex justify-center items-center gap-2"
+                        >
+                          <FaCopy /> Gerar Texto para Enviar à Transportadora
+                        </button>
+
+                        {generatedText && (
+                          <div className="mt-3">
+                            <textarea
+                              className="w-full text-sm p-3 border border-blue-300 rounded bg-white text-gray-800 font-mono shadow-inner"
+                              rows={8}
+                              value={generatedText}
+                              onChange={(e) => setGeneratedText(e.target.value)}
+                            />
+                            <button
+                              type="button"
+                              onClick={handleCopyText}
+                              className="mt-2 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 shadow-md"
+                            >
+                              COPIAR TEXTO ACIMA
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 4. Checkbox "Solicitado / Aguardando Resposta" */}
+                    <div
+                      className={`p-4 rounded border-2 ${formData.isRequested ? "bg-blue-50 border-blue-400" : "bg-gray-50 border-gray-200"} ${!canEdit && "opacity-70 pointer-events-none"}`}
+                    >
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="isRequested"
+                          checked={formData.isRequested}
+                          onChange={handleFormChange}
+                          disabled={!canEdit}
+                          className="h-5 w-5 text-blue-600 rounded"
+                        />
+                        <div className="ml-3">
+                          <span className="font-bold text-gray-800 block">
+                            Solicitado (Aguardando Resposta)
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Marque isso após enviar os dados para a
+                            transportadora.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* 5. Resposta da Transportadora */}
+                    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+                      <h4 className="font-bold text-gray-900 mb-3 border-b pb-2">
+                        Resposta da Transportadora
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className={labelClass}>
+                            Nome da Transportadora
+                          </label>
+                          <input
+                            name="carrierName"
+                            placeholder="Ex: Braspress"
+                            value={formData.carrierName}
+                            onChange={handleFormChange}
+                            disabled={!canEdit}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Prazo de Entrega</label>
+                          <input
+                            type="text"
+                            name="deliveryDeadline"
+                            placeholder="Ex: 15 dias úteis"
+                            value={formData.deliveryDeadline || ""}
+                            onChange={handleFormChange}
+                            disabled={!canEdit}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
                           <label className={labelClass}>Custo Frete (R$)</label>
                           <input
                             type="text"
@@ -616,182 +811,53 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                             className={inputClass}
                           />
                         </div>
-                        <div className="flex-1">
-                          <label className={labelClass}>Qtd. Volumes</label>
-                          <input
-                            type="number"
-                            name="volumeQuantity"
-                            value={formData.volumeQuantity}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className={inputClass}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-4 space-y-2">
-                        <div>
-                          <label className={labelClass}>Tamanho da Cama</label>
-                          <select
-                            name="bedSize"
-                            value={formData.bedSize}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className={inputClass}
-                          >
-                            <option value="">Selecione...</option>
-                            {Object.keys(ItemSize).map((key) => (
-                              <option key={key} value={key}>
-                                {key}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="pt-2" ref={wrapperRef}>
-                          <div className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="hasWallProtector"
-                              checked={formData.hasWallProtector}
-                              onChange={handleFormChange}
-                              disabled={!canEdit}
-                              className="h-4 w-4 text-blue-600 rounded"
-                            />
-                            <label className="ml-2 text-sm text-gray-700">
-                              Tem Protetor?
-                            </label>
-                          </div>
-
-                          {formData.hasWallProtector && (
-                            <div className="relative mt-1">
-                              <input
-                                type="text"
-                                name="wallProtectorSize"
-                                placeholder="Digite para filtrar..."
-                                value={formData.wallProtectorSize}
-                                onChange={(e) => {
-                                  handleFormChange(e);
-                                  setShowProtectorSuggestions(true);
-                                }}
-                                onFocus={() =>
-                                  canEdit && setShowProtectorSuggestions(true)
-                                }
-                                disabled={!canEdit}
-                                className={inputClass}
-                                autoComplete="off"
-                              />
-                              {showProtectorSuggestions && canEdit && (
-                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1">
-                                  {filteredProtectors.length > 0 ? (
-                                    filteredProtectors.map((opt) => (
-                                      <li
-                                        key={opt}
-                                        onClick={() => selectProtector(opt)}
-                                        className="px-4 py-2 hover:bg-blue-100 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-0"
-                                      >
-                                        {opt}
-                                      </li>
-                                    ))
-                                  ) : (
-                                    <li className="px-4 py-2 text-sm text-gray-400 italic">
-                                      Nada encontrado
-                                    </li>
-                                  )}
-                                </ul>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center pt-2">
-                          <input
-                            type="checkbox"
-                            name="hasRug"
-                            checked={formData.hasRug}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className="h-4 w-4 text-blue-600 rounded"
-                          />
-                          <label className="ml-2 text-sm text-gray-700">
-                            Tem Tapete?
-                          </label>
-                        </div>
-                        {formData.hasRug && (
-                          <input
-                            type="text"
-                            name="rugSize"
-                            placeholder="Tamanho do tapete"
-                            value={formData.rugSize}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className={inputClass}
-                          />
-                        )}
-
-                        <div className="flex items-center pt-2">
-                          <input
-                            type="checkbox"
-                            name="hasAccessories"
-                            checked={formData.hasAccessories}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className="h-4 w-4 text-blue-600 rounded"
-                          />
-                          <label className="ml-2 text-sm text-gray-700">
-                            Tem Acessórios?
-                          </label>
-                        </div>
-                        {formData.hasAccessories && (
-                          <input
-                            type="number"
-                            name="accessoryQuantity"
-                            placeholder="Qtd."
-                            value={formData.accessoryQuantity}
-                            onChange={handleFormChange}
-                            disabled={!canEdit}
-                            className={inputClass}
-                          />
-                        )}
                       </div>
                     </div>
-                  </div>
 
-                  <div
-                    className={`mt-6 pt-4 border-t flex items-center justify-between p-3 rounded ${!canEdit ? "opacity-50 pointer-events-none" : "bg-yellow-50"}`}
-                  >
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="isConcluded"
-                        checked={formData.isConcluded}
-                        onChange={handleFormChange}
-                        disabled={!canEdit}
-                        className="h-5 w-5 text-green-600 rounded"
-                      />
-                      <span className="ml-3 font-bold text-gray-800">
-                        Marcar como CONCLUÍDO
-                      </span>
-                    </label>
+                    {/* 6. Checkbox "Concluído" */}
+                    <div
+                      className={`p-4 rounded border-2 ${formData.isConcluded ? "bg-green-50 border-green-400" : "bg-gray-50 border-gray-200"} ${!canEdit && "opacity-70 pointer-events-none"}`}
+                    >
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="isConcluded"
+                          checked={formData.isConcluded}
+                          onChange={handleFormChange}
+                          disabled={!canEdit}
+                          className="h-5 w-5 text-green-600 rounded"
+                        />
+                        <div className="ml-3">
+                          <span className="font-bold text-gray-800 block">
+                            Marcar como CONCLUÍDO
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            A cotação está finalizada e pronta para o cliente.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+
+                {/* Rodapé do Modal */}
+                <div className="bg-gray-100 px-4 py-3 sm:px-6 flex justify-end gap-3 rounded-b-lg border-t">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 rounded shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    {canEdit ? "Cancelar" : "Fechar Visualização"}
+                  </button>
                   {canEdit && (
                     <button
                       type="submit"
                       disabled={saving}
-                      className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm ${saving ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+                      className={`w-full sm:w-auto px-6 py-2 rounded shadow-sm text-sm font-bold text-white ${saving ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}`}
                     >
-                      {saving ? "Salvando..." : "Salvar Dados"}
+                      {saving ? "Salvando..." : "Salvar Cotação"}
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    {canEdit ? "Cancelar" : "Fechar"}
-                  </button>
                 </div>
               </form>
             </div>
