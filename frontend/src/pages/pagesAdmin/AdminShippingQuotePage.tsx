@@ -380,7 +380,7 @@ ${volumesText}Peso Total: ${formData.weight || ""}`;
                     <td className={tdClass}>{formatDate(quote.createdAt)}</td>
                     <td className={tdClass}>
                       {quote.createdBy?.id === user?.id ? (
-                        <span className="font-extrabold text-violet-700 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded text-[10px] break-words max-w-[100px] inline-block">
+                        <span className="font-bold text-violet-700 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded text-[10px] break-words max-w-[100px] inline-block">
                           {quote.createdBy?.name}
                         </span>
                       ) : (
