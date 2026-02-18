@@ -273,7 +273,8 @@ CNPJ: 037616830001-98
 Dados do destinatário : ${selectedQuote.customerName} - CPF: ${selectedQuote.customerCpf}
 CEP: ${selectedQuote.customerZipCode}
 Valor Pedido: ${valorPedidoFormatado}
-${volumesText}Peso Total: ${formData.weight || ""}`;
+${volumesText}Peso Total: ${formData.weight || ""}
+Qual o prazo de Entrega?`;
 
     setGeneratedText(template);
   };
