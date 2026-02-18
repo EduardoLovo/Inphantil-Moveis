@@ -301,7 +301,6 @@ ${volumesText}Peso: ${formData.weight || ""}`;
   );
 
   // --- ESTILOS COMPACTOS (PARA CABER NA TELA) ---
-  // Fonte reduzida, sem quebra de linha forçada, padding menor
   const thClass =
     "px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50";
   const tdClass =
@@ -504,27 +503,32 @@ ${volumesText}Peso: ${formData.weight || ""}`;
                       <h4 className="font-bold mb-2 text-gray-900">
                         Solicitação Original
                       </h4>
+                      {/* Aqui é exibido o que foi digitado em "O que está sendo orçado?" */}
                       <p className="whitespace-pre-wrap mb-4">
                         {selectedQuote.quoteDetails}
                       </p>
 
-                      <div className="border-t pt-4 mt-2">
-                        <button
-                          type="button"
-                          onClick={generateQuoteText}
-                          className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded mb-2 w-full flex items-center justify-center gap-2"
-                        >
-                          <FaCopy /> Gerar Texto para Cotação
-                        </button>
-                        {generatedText && (
-                          <textarea
-                            className="w-full text-xs p-2 border rounded bg-white text-gray-800 font-mono"
-                            rows={8}
-                            value={generatedText}
-                            onChange={(e) => setGeneratedText(e.target.value)}
-                          />
-                        )}
-                      </div>
+                      {/* --- MUDANÇA AQUI --- */}
+                      {/* O botão e o textarea de gerar texto agora SÓ aparecem se canEdit for true (Admin/Dev) */}
+                      {canEdit && (
+                        <div className="border-t pt-4 mt-2">
+                          <button
+                            type="button"
+                            onClick={generateQuoteText}
+                            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded mb-2 w-full flex items-center justify-center gap-2"
+                          >
+                            <FaCopy /> Gerar Texto para Cotação
+                          </button>
+                          {generatedText && (
+                            <textarea
+                              className="w-full text-xs p-2 border rounded bg-white text-gray-800 font-mono"
+                              rows={8}
+                              value={generatedText}
+                              onChange={(e) => setGeneratedText(e.target.value)}
+                            />
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div>
