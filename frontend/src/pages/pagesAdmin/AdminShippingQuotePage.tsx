@@ -140,6 +140,7 @@ const AdminShippingQuotePage: React.FC = () => {
 
   // Estado para abrir/fechar a solicitação original
   const [showOriginalQuote, setShowOriginalQuote] = useState(false);
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
 
   // Adicionado isRequested no formData (Novo Status)
   const [formData, setFormData] = useState<
@@ -318,6 +319,10 @@ Qual o prazo de Entrega?`;
       .includes((formData.wallProtectorSize || "").toLowerCase()),
   );
 
+  const displayedQuotes = showOnlyMine
+    ? quotes.filter((q) => q.createdBy?.id === user?.id)
+    : quotes;
+
   const thClass =
     "px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50";
   const tdClass =
@@ -330,12 +335,24 @@ Qual o prazo de Entrega?`;
     <div className="container mx-auto px-2 py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-bold text-gray-800">Gerenciar Cotações</h1>
-        <button
-          onClick={fetchQuotes}
-          className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
-        >
-          Atualizar Lista
-        </button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center text-sm font-medium text-gray-700 cursor-pointer bg-white px-3 py-1.5 rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+            <input
+              type="checkbox"
+              checked={showOnlyMine}
+              onChange={(e) => setShowOnlyMine(e.target.checked)}
+              className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            Mostrar apenas minhas cotações
+          </label>
+
+          <button
+            onClick={fetchQuotes}
+            className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+          >
+            Atualizar Lista
+          </button>
+        </div>
       </div>
 
       <div className="bg-white shadow overflow-hidden rounded-lg border border-gray-200">
@@ -363,7 +380,7 @@ Qual o prazo de Entrega?`;
                     Carregando...
                   </td>
                 </tr>
-              ) : quotes.length === 0 ? (
+              ) : displayedQuotes.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
@@ -373,7 +390,7 @@ Qual o prazo de Entrega?`;
                   </td>
                 </tr>
               ) : (
-                quotes.map((quote: any) => (
+                displayedQuotes.map((quote: any) => (
                   <tr
                     key={quote.id}
                     className="hover:bg-gray-50 transition-colors"
