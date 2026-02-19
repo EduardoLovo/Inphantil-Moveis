@@ -1,14 +1,3 @@
-export enum ItemSize {
-  BERCO = "BERÇO",
-  JUNIOR = "JUNIOR",
-  SOLTEIRO = "SOLTEIRO",
-  SOLTEIRAO = "SOLTEIRÃO",
-  VIUVA = "VIUVA",
-  CASAL = "CASAL",
-  QUEEN = "QUEEN",
-  KING = "KING",
-}
-
 export interface ShippingQuote {
   id: number;
   createdAt: string;
@@ -37,7 +26,7 @@ export interface ShippingQuote {
   weight?: string;
   orderValue?: number;
   shippingValue?: number;
-  bedSize?: ItemSize;
+  bedSize?: string;
   hasWallProtector: boolean;
   wallProtectorSize?: string;
   hasRug: boolean;

@@ -43,8 +43,8 @@ export class UpdateShippingQuoteDto extends PartialType(
         required: false,
     })
     @IsOptional()
-    @IsEnum(ItemSize)
-    bedSize?: ItemSize;
+    @IsString() //
+    bedSize?: string;
 
     @ApiProperty({ description: 'Tem protetor de parede?', required: false })
     @IsOptional()

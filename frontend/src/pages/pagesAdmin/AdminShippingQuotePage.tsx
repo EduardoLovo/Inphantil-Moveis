@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { api } from "../../services/api";
-import { type ShippingQuote, ItemSize } from "../../types/shipping-quote";
+import { type ShippingQuote } from "../../types/shipping-quote";
 import { FaTrash, FaCopy, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useAuthStore } from "../../store/AuthStore";
 
@@ -104,6 +104,24 @@ const PROTECTOR_OPTIONS = [
   "Pico 2,16",
   "Pico 2,12",
   "Pico 2,21",
+];
+
+const BED_SIZE_OPTIONS = [
+  "Berço",
+  "Junior",
+  "Solteiro",
+  "Solteirão",
+  "Casal",
+  "Queen",
+  "King",
+  "Borda Berço",
+  "Borda Junior",
+  "Borda Solteiro",
+  "Borda Solteirão",
+  "Borda Casal",
+  "Borda Queen",
+  "Borda King",
+  "Sob Medida",
 ];
 
 const formatCurrency = (value: number | string | undefined) => {
@@ -605,18 +623,61 @@ Qual o prazo de Entrega?`;
                           </label>
                           <select
                             name="bedSize"
-                            value={formData.bedSize}
-                            onChange={handleFormChange}
+                            // Se o texto começar com "Sob Medida", ele trava o select na opção "Sob Medida"
+                            value={
+                              formData.bedSize?.startsWith("Sob Medida")
+                                ? "Sob Medida"
+                                : formData.bedSize || ""
+                            }
+                            onChange={(e) => {
+                              if (!canEdit) return;
+                              if (e.target.value === "Sob Medida") {
+                                // Se escolheu sob medida, prepara a string
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  bedSize: "Sob Medida: ",
+                                }));
+                              } else {
+                                // Se for tamanho padrão, salva o padrão
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  bedSize: e.target.value,
+                                }));
+                              }
+                            }}
                             disabled={!canEdit}
                             className={inputClass}
                           >
                             <option value="">Nenhuma / Selecione...</option>
-                            {Object.keys(ItemSize).map((key) => (
-                              <option key={key} value={key}>
-                                {key}
+                            {BED_SIZE_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
                               </option>
                             ))}
                           </select>
+
+                          {/* CAIXA EXTRA: Aparece apenas se "Sob Medida" estiver selecionado */}
+                          {formData.bedSize?.startsWith("Sob Medida") && (
+                            <input
+                              type="text"
+                              placeholder="Digite as medidas. Ex: 1,40 x 2,00"
+                              // Tira o prefixo só visualmente para a pessoa digitar
+                              value={formData.bedSize.replace(
+                                "Sob Medida: ",
+                                "",
+                              )}
+                              onChange={(e) => {
+                                if (!canEdit) return;
+                                // Salva no banco com o prefixo
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  bedSize: `Sob Medida: ${e.target.value}`,
+                                }));
+                              }}
+                              disabled={!canEdit}
+                              className={`mt-2 ${inputClass} border-blue-300 bg-blue-50 focus:border-blue-500`}
+                            />
+                          )}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">

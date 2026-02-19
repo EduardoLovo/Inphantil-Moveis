@@ -292,7 +292,7 @@ model ShippingQuote {
   shippingValue     Decimal?    @db.Decimal(10, 2) // Valor do frete
   weight            String?     @db.VarChar(50) // Ex: "15kg"
   orderValue        Decimal?    @db.Decimal(10, 2) // Valor da Nota/Pedido
-  bedSize           ItemSize?   // Tamanho da cama
+  bedSize           String?     @db.VarChar(100)
   
   hasWallProtector  Boolean     @default(false)
   wallProtectorSize String?   // Tamanho do protetor (se houver)
