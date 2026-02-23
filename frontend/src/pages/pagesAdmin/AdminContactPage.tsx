@@ -6,13 +6,15 @@ import {
   FaEnvelopeOpenText,
   FaUser,
   FaSpinner,
-  FaPaperPlane,
+  FaTrash,
   FaUserSecret,
   FaInbox,
 } from "react-icons/fa";
 
 const AdminContactPage: React.FC = () => {
-  const { messages, isLoading, error, fetchMessages } = useContactStore();
+  // 1. Adicione a função deleteMessage vinda do store
+  const { messages, isLoading, error, fetchMessages, deleteMessage } =
+    useContactStore();
   const { user } = useAuthStore();
 
   const canAccess =
@@ -24,6 +26,17 @@ const AdminContactPage: React.FC = () => {
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  // 2. Função para confirmar e deletar
+  const handleDelete = async (id: number) => {
+    if (
+      window.confirm(
+        "Tem certeza que deseja excluir esta mensagem definitivamente?",
+      )
+    ) {
+      await deleteMessage(id);
+    }
+  };
 
   if (isLoading)
     return (
@@ -101,12 +114,15 @@ const AdminContactPage: React.FC = () => {
               </div>
             </div>
 
-            <a
-              href={`mailto:${msg.email}?subject=Re: ${msg.subject}`}
-              className="mt-2 w-full py-2 bg-[#313b2f] text-white rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-gray-800 transition-colors"
-            >
-              <FaPaperPlane /> Responder
-            </a>
+            {/* 3. Botão Excluir (Mobile) - Aparece apenas para DEV */}
+            {user?.role === "DEV" && (
+              <button
+                onClick={() => handleDelete(msg.id)}
+                className="mt-2 w-full py-2 bg-red-50 text-red-600 rounded-lg flex items-center justify-center gap-2 text-sm font-bold hover:bg-red-100 transition-colors border border-red-100"
+              >
+                <FaTrash /> Excluir
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -178,13 +194,18 @@ const AdminContactPage: React.FC = () => {
                 </td>
 
                 <td className="p-5 text-center">
-                  <a
-                    href={`mailto:${msg.email}?subject=Re: ${msg.subject}`}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-flex items-center justify-center border border-transparent hover:border-blue-100"
-                    title="Responder por Email"
-                  >
-                    <FaPaperPlane />
-                  </a>
+                  {/* 4. Botão Excluir (Desktop) - Aparece apenas para DEV */}
+                  {user?.role === "DEV" ? (
+                    <button
+                      onClick={() => handleDelete(msg.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center justify-center border border-transparent hover:border-red-100"
+                      title="Excluir Mensagem"
+                    >
+                      <FaTrash />
+                    </button>
+                  ) : (
+                    <span className="text-gray-300 text-xs">-</span>
+                  )}
                 </td>
               </tr>
             ))}

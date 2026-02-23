@@ -111,4 +111,12 @@ export class UpdateShippingQuoteDto extends PartialType(
     @IsOptional()
     @IsBoolean()
     isRequested?: boolean;
+
+    @ApiProperty({
+        description: 'Observações internas (apenas Admin)',
+        required: false,
+    })
+    @IsOptional()
+    @IsString()
+    adminNotes?: string;
 }

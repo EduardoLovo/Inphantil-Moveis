@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from "react";
+import React, { useEffect, useState, type FormEvent } from "react";
 import { api } from "../services/api";
 import {
   FaEnvelope,
@@ -23,6 +23,14 @@ const ContactPage: React.FC = () => {
     text: string;
   } | null>(null);
 
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      name: user?.name || "",
+      email: user?.email || "",
+    }));
+  }, [user]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -34,17 +42,36 @@ const ContactPage: React.FC = () => {
     setLoading(true);
     setStatus(null);
 
+    // Criamos um objeto limpo para enviar apenas o necessário
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+    };
+
     try {
-      await api.post("/contact", formData);
+      // Enviamos o payload sanitizado
+      await api.post("/contact", payload);
+
       setStatus({
         type: "success",
-        text: "Mensagem enviada com sucesso! Entraremos em contato em breve.",
+        text: "Mensagem enviada com sucesso!",
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch (error) {
+
+      // Limpa apenas assunto e mensagem, mantém nome/email se estiver logado
+      setFormData((prev) => ({
+        ...prev,
+        subject: "",
+        message: "",
+      }));
+    } catch (error: any) {
+      // Tente logar o erro real aqui para ver o que o NestJS diz
+      console.error("Erro da API:", error.response?.data);
+
       setStatus({
         type: "error",
-        text: "Erro ao enviar mensagem. Tente novamente.",
+        text: error.response?.data?.message || "Erro ao enviar mensagem.",
       });
     } finally {
       setLoading(false);

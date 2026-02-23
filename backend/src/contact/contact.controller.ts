@@ -1,4 +1,13 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Body,
+    UseGuards,
+    Req,
+    Get,
+    Delete,
+    Param,
+} from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import {
@@ -12,13 +21,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-
+import { Public } from 'src/auth/decorators/public.decorator';
 @ApiTags('contact')
 @Controller('contact')
 export class ContactController {
     constructor(private readonly contactService: ContactService) {}
 
     @Post()
+    @Public()
     @UseGuards(OptionalJwtAuthGuard) // ⬅️ Tenta ler o usuário, mas não bloqueia se não tiver
     @ApiBearerAuth() // Indica no Swagger que pode usar token (opcional)
     @ApiOperation({
@@ -42,5 +52,15 @@ export class ContactController {
     })
     findAll() {
         return this.contactService.findAll();
+    }
+
+    @Delete(':id')
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(Role.DEV) // ⬅️ Somente DEV consegue acessar esta rota
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Excluir uma mensagem de contato (Apenas DEV)' })
+    remove(@Param('id') id: string) {
+        // O '+' converte a string do ID da URL para número
+        return this.contactService.remove(+id);
     }
 }

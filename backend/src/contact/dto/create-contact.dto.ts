@@ -28,6 +28,5 @@ export class CreateContactDto {
     })
     @IsString()
     @IsNotEmpty({ message: 'A mensagem é obrigatória' })
-    @MinLength(10, { message: 'A mensagem deve ter pelo menos 10 caracteres' })
     message!: string;
 }

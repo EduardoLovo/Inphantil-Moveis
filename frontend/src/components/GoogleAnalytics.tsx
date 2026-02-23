@@ -1,31 +1,31 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import ReactGA from 'react-ga4';
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import ReactGA from "react-ga4";
 
 const GoogleAnalytics = () => {
-    const location = useLocation();
+  const location = useLocation();
+  const isInitialized = useRef(false); // Guarda o status de inicialização
 
-    useEffect(() => {
-        // 1. Inicializa o GA apenas uma vez (se o ID existir)
-        const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  useEffect(() => {
+    const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
-        if (gaId) {
-            // Verifica se já foi inicializado para evitar warnings no console
-            if (!(window as any).ga) {
-                ReactGA.initialize(gaId);
-            }
+    // 1. Inicializa apenas SE tiver o ID e SE ainda não foi inicializado
+    if (gaId && !isInitialized.current) {
+      ReactGA.initialize(gaId);
+      isInitialized.current = true; // Marca como inicializado
+    }
 
-            // 2. Envia o "pageview" para a rota atual
-            // O hitType "pageview" registra que uma página foi visitada
-            ReactGA.send({
-                hitType: 'pageview',
-                page: location.pathname + location.search,
-                title: document.title,
-            });
-        }
-    }, [location]); // Executa toda vez que a rota mudar
+    // 2. Só envia o pageview se o GA estiver inicializado
+    if (isInitialized.current) {
+      ReactGA.send({
+        hitType: "pageview",
+        page: location.pathname + location.search,
+        title: document.title,
+      });
+    }
+  }, [location]);
 
-    return null; // Este componente não renderiza nada visualmente
+  return null;
 };
 
 export default GoogleAnalytics;

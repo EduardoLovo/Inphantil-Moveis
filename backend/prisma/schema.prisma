@@ -283,6 +283,7 @@ model ShippingQuote {
   // -- Status --
   isRequested     Boolean     @default(false)
   isConcluded     Boolean     @default(false)
+  adminNotes      String?     @db.Text
   concludedAt     DateTime? // Data em que foi respondido/finalizado
 
   // -- Dados da Cotação (Preenchido pela Logística/Admin) --

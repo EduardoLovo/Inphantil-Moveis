@@ -26,4 +26,10 @@ export class ContactService {
             },
         });
     }
+
+    async remove(id: number) {
+        return this.prisma.contactMessage.delete({
+            where: { id },
+        });
+    }
 }

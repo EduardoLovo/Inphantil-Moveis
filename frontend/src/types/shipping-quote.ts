@@ -34,5 +34,6 @@ export interface ShippingQuote {
   hasAccessories: boolean;
   accessoryQuantity?: number;
   isConcluded: boolean;
+  adminNotes?: string;
   concludedAt?: string;
 }

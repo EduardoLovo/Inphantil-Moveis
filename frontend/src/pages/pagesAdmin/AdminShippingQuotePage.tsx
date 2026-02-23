@@ -161,6 +161,7 @@ const AdminShippingQuotePage: React.FC = () => {
   // Estado para abrir/fechar a solicitação original
   const [showOriginalQuote, setShowOriginalQuote] = useState(false);
   const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [showAdminNotes, setShowAdminNotes] = useState(false);
 
   // Adicionado isRequested no formData (Novo Status)
   const [formData, setFormData] = useState<
@@ -222,8 +223,9 @@ const AdminShippingQuotePage: React.FC = () => {
       rugSize: quote.rugSize || "",
       hasAccessories: quote.hasAccessories || false,
       accessoryQuantity: quote.accessoryQuantity || 0,
-      isRequested: quote.isRequested || false, // <--- NOVO
+      isRequested: quote.isRequested || false,
       isConcluded: quote.isConcluded || false,
+      adminNotes: quote.adminNotes || "",
     });
     setIsModalOpen(true);
   };
@@ -248,10 +250,13 @@ const AdminShippingQuotePage: React.FC = () => {
   };
 
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >, // <--- Adicionado o HTMLTextAreaElement aqui
   ) => {
     if (!canEdit) return;
     const { name, value, type } = e.target;
+
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
@@ -320,7 +325,8 @@ Qual o prazo de Entrega?`;
         volumeQuantity: Number(formData.volumeQuantity),
         accessoryQuantity: Number(formData.accessoryQuantity),
         orderValue: Number(formData.orderValue),
-        isRequested: formData.isRequested, // Envia o novo status pro banco
+        isRequested: formData.isRequested,
+        adminNotes: formData.adminNotes,
       });
       alert("Cotação atualizada!");
       handleCloseModal();
@@ -564,6 +570,38 @@ Qual o prazo de Entrega?`;
                         </div>
                       )}
                     </div>
+                    {/* --- OBSERVAÇÕES INTERNAS (SÓ ADMIN/DEV VÊ E EDITA) --- */}
+                    {canEdit && (
+                      <div className="border border-yellow-300 rounded-lg bg-yellow-50 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setShowAdminNotes(!showAdminNotes)}
+                          className="w-full flex justify-between items-center p-3 hover:bg-yellow-100 transition-colors"
+                        >
+                          <span className="font-bold text-yellow-900 text-sm">
+                            Observações Internas
+                          </span>
+                          {showAdminNotes ? (
+                            <FaChevronUp className="text-yellow-700" />
+                          ) : (
+                            <FaChevronDown className="text-yellow-700" />
+                          )}
+                        </button>
+
+                        {showAdminNotes && (
+                          <div className="p-4 border-t border-yellow-200 bg-white">
+                            <textarea
+                              name="adminNotes"
+                              value={formData.adminNotes || ""}
+                              onChange={handleFormChange}
+                              rows={3}
+                              placeholder="Ex: Transportadora X não atende essa região..."
+                              className="w-full p-2.5 border border-yellow-300 rounded-md focus:ring-2 focus:ring-yellow-500 outline-none text-sm bg-yellow-50"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* 2. Dados da Logística (Físico/Itens) */}
                     <div className="bg-white border border-gray-200 p-4 rounded-lg">
