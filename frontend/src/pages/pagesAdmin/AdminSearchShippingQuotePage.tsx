@@ -4,7 +4,6 @@ import { type ShippingQuote } from "../../types/shipping-quote";
 import { FaCheckCircle, FaTrash } from "react-icons/fa";
 import { useAuthStore } from "../../store/AuthStore";
 
-// Função auxiliar de formatação
 const formatCurrency = (value: number | string | undefined) => {
   if (!value) return "R$ 0,00";
   return new Intl.NumberFormat("pt-BR", {
@@ -17,6 +16,37 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("pt-BR");
 };
 
+// Lista de Estados (UF)
+const ESTADOS_BR = [
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
+];
+
 const SearchShippingQuotePage: React.FC = () => {
   const { user } = useAuthStore();
   const isDev = user?.role === "DEV";
@@ -24,6 +54,7 @@ const SearchShippingQuotePage: React.FC = () => {
   // Estados dos Filtros
   const [carrierSearch, setCarrierSearch] = useState("");
   const [citySearch, setCitySearch] = useState("");
+  const [stateSearch, setStateSearch] = useState(""); // <-- NOVO ESTADO AQUI
 
   // Estado dos Resultados
   const [results, setResults] = useState<ShippingQuote[] | null>(null);
@@ -33,9 +64,11 @@ const SearchShippingQuotePage: React.FC = () => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação: precisa de pelo menos um campo
-    if (!carrierSearch.trim() && !citySearch.trim()) {
-      alert("Por favor, preencha a Transportadora ou a Cidade para pesquisar.");
+    // Validação: precisa de pelo menos um dos 3 campos
+    if (!carrierSearch.trim() && !citySearch.trim() && !stateSearch.trim()) {
+      alert(
+        "Por favor, preencha Transportadora, Cidade ou selecione um Estado.",
+      );
       return;
     }
 
@@ -47,6 +80,7 @@ const SearchShippingQuotePage: React.FC = () => {
       const params = new URLSearchParams();
       if (carrierSearch) params.append("carrier", carrierSearch);
       if (citySearch) params.append("city", citySearch);
+      if (stateSearch) params.append("state", stateSearch); // <-- ENVIA PARA O BACKEND
       params.append("status", "true");
 
       const response = await api.get(`/shipping-quote?${params.toString()}`);
@@ -62,6 +96,7 @@ const SearchShippingQuotePage: React.FC = () => {
   const handleClear = () => {
     setCarrierSearch("");
     setCitySearch("");
+    setStateSearch(""); // Limpa o estado
     setResults(null);
     setHasSearched(false);
   };
@@ -102,8 +137,8 @@ const SearchShippingQuotePage: React.FC = () => {
           Pesquisa de Cotações
         </h1>
         <p className="text-gray-600">
-          Busque por histórico de fretes usando a transportadora ou a cidade do
-          cliente.
+          Busque por histórico de fretes usando a transportadora, cidade ou
+          estado do cliente.
         </p>
       </div>
 
@@ -111,7 +146,7 @@ const SearchShippingQuotePage: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
         <form
           onSubmit={handleSearch}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end"
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
         >
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -128,15 +163,34 @@ const SearchShippingQuotePage: React.FC = () => {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Cidade do Cliente
+              Cidade
             </label>
             <input
               type="text"
-              placeholder="Ex: São Paulo, Curitiba..."
+              placeholder="Ex: Curitiba..."
               value={citySearch}
               onChange={(e) => setCitySearch(e.target.value)}
               className={inputClass}
             />
+          </div>
+
+          {/* NOVO CAMPO: SELEÇÃO DE ESTADO */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Estado (UF)
+            </label>
+            <select
+              value={stateSearch}
+              onChange={(e) => setStateSearch(e.target.value)}
+              className={`${inputClass} bg-white cursor-pointer`}
+            >
+              <option value="">Todos os Estados</option>
+              {ESTADOS_BR.map((uf) => (
+                <option key={uf} value={uf}>
+                  {uf}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-2">
@@ -207,7 +261,6 @@ const SearchShippingQuotePage: React.FC = () => {
                         )}
                       </td>
 
-                      {/* Valor e Prazo */}
                       <td className={tdClass}>
                         <div className="flex flex-col">
                           {item.shippingValue ? (
@@ -245,7 +298,6 @@ const SearchShippingQuotePage: React.FC = () => {
                           </span>
 
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {/* Protetor (Azul) */}
                             {item.hasWallProtector && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200"
@@ -256,7 +308,6 @@ const SearchShippingQuotePage: React.FC = () => {
                               </span>
                             )}
 
-                            {/* --- NOVO: Tapete (Laranja) --- */}
                             {item.hasRug && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200"
@@ -267,7 +318,6 @@ const SearchShippingQuotePage: React.FC = () => {
                               </span>
                             )}
 
-                            {/* Acessórios (Roxo) */}
                             {item.hasAccessories && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200"
@@ -303,7 +353,7 @@ const SearchShippingQuotePage: React.FC = () => {
             <div className="p-10 text-center flex flex-col items-center justify-center text-gray-500">
               <p className="text-lg font-medium">Nenhuma cotação encontrada.</p>
               <p className="text-sm">
-                Verifique o nome da cidade ou transportadora.
+                Verifique o nome da cidade, estado ou transportadora.
               </p>
             </div>
           )}
