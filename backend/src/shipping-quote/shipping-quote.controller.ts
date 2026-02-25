@@ -44,9 +44,9 @@ export class ShippingQuoteController {
     findAll(
         @Query('carrier') carrier?: string,
         @Query('city') city?: string,
-        @Query('status') status?: string,
+        @Query('state') state?: string,
     ) {
-        return this.shippingQuoteService.findAll(carrier, city, status);
+        return this.shippingQuoteService.findAll(carrier, city, state);
     }
 
     @Get(':id')

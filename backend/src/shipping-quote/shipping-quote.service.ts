@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShippingQuoteDto } from './dto/create-shipping-quote.dto';
 import { UpdateShippingQuoteDto } from './dto/update-shipping-quote.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ShippingQuoteService {
@@ -22,16 +23,17 @@ export class ShippingQuoteService {
     }
 
     // 2. Listagem
-    async findAll(carrier?: string, city?: string, status?: string) {
-        const where: any = {};
+    async findAll(
+        carrier?: string,
+        city?: string,
+        state?: string,
+        // status removido!
+    ) {
+        const where: Prisma.ShippingQuoteWhereInput = {};
 
-        // 1. Prepara os filtros de Transportadora e Status para o Banco de Dados
-        if (carrier) {
-            where.carrierName = { contains: carrier, mode: 'insensitive' };
-        }
-
-        if (status) {
-            where.isConcluded = status === 'true';
+        // 1. O único filtro que vai direto para o Banco de Dados agora é o Estado
+        if (state) {
+            where.customerState = { equals: state, mode: 'insensitive' };
         }
 
         // 2. Busca os dados no Banco
@@ -47,22 +49,30 @@ export class ShippingQuoteService {
             },
         });
 
-        // 3. Filtro Inteligente de Cidade (Ignorando Acentos e Maiúsculas/Minúsculas)
-        if (city) {
-            // Função mágica que tira acentos (ex: "São Paulo" vira "sao paulo")
-            const removeAcentos = (str: string | null) => {
-                if (!str) return '';
-                return str
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '') // Remove os caracteres de acentuação
-                    .toLowerCase();
-            };
+        // 3. Função Mágica de Limpeza (Agora com .trim() para tirar espaços sobrando)
+        const normalizeString = (str: string | null) => {
+            if (!str) return '';
+            return str
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                .toLowerCase() // Tudo minúsculo
+                .trim(); // Remove espaços no começo e no final
+        };
 
-            const cidadePesquisada = removeAcentos(city);
-
-            // Filtra a lista comparando as strings sem acento
+        // 4. Filtro Inteligente de Transportadora
+        if (carrier) {
+            const transportadoraPesquisada = normalizeString(carrier);
             quotes = quotes.filter((quote) => {
-                const cidadeDoCliente = removeAcentos(quote.customerCity);
+                const nomeTransportadora = normalizeString(quote.carrierName);
+                return nomeTransportadora.includes(transportadoraPesquisada);
+            });
+        }
+
+        // 5. Filtro Inteligente de Cidade
+        if (city) {
+            const cidadePesquisada = normalizeString(city);
+            quotes = quotes.filter((quote) => {
+                const cidadeDoCliente = normalizeString(quote.customerCity);
                 return cidadeDoCliente.includes(cidadePesquisada);
             });
         }

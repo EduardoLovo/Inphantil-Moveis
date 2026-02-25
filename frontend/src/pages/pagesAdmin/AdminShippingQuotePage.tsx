@@ -158,12 +158,10 @@ const AdminShippingQuotePage: React.FC = () => {
     null,
   );
 
-  // Estado para abrir/fechar a solicitação original
   const [showOriginalQuote, setShowOriginalQuote] = useState(false);
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [showAdminNotes, setShowAdminNotes] = useState(false);
 
-  // Adicionado isRequested no formData (Novo Status)
   const [formData, setFormData] = useState<
     Partial<ShippingQuote & { isRequested?: boolean }>
   >({});
@@ -207,7 +205,7 @@ const AdminShippingQuotePage: React.FC = () => {
   ) => {
     setSelectedQuote(quote);
     setGeneratedText("");
-    setShowOriginalQuote(!canEdit); // Se for Vendedor, já abre direto. Se for Logística, começa fechado.
+    setShowOriginalQuote(!canEdit);
 
     setFormData({
       carrierName: quote.carrierName || "",
@@ -252,7 +250,7 @@ const AdminShippingQuotePage: React.FC = () => {
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >, // <--- Adicionado o HTMLTextAreaElement aqui
+    >,
   ) => {
     if (!canEdit) return;
     const { name, value, type } = e.target;
@@ -305,7 +303,6 @@ Qual o prazo de Entrega?`;
     setGeneratedText(template);
   };
 
-  // Botão de Copiar Texto
   const handleCopyText = () => {
     if (generatedText) {
       navigator.clipboard.writeText(generatedText);
@@ -345,9 +342,10 @@ Qual o prazo de Entrega?`;
       .includes((formData.wallProtectorSize || "").toLowerCase()),
   );
 
-  const displayedQuotes = showOnlyMine
-    ? quotes.filter((q) => q.createdBy?.id === user?.id)
-    : quotes;
+  // Filtra as cotações, pega as mais recentes e LIMITA a 50 itens
+  const displayedQuotes = (
+    showOnlyMine ? quotes.filter((q) => q.createdBy?.id === user?.id) : quotes
+  ).slice(0, 50);
 
   const thClass =
     "px-2 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50";
@@ -386,6 +384,7 @@ Qual o prazo de Entrega?`;
           <table className="min-w-full divide-y divide-gray-200 table-auto">
             <thead className="bg-gray-50">
               <tr>
+                <th className={`${thClass} w-16 text-center`}>ID</th>
                 <th className={`${thClass} w-20`}>Data</th>
                 <th className={thClass}>Solicitante</th>
                 <th className={thClass}>Cliente</th>
@@ -400,7 +399,7 @@ Qual o prazo de Entrega?`;
               {loading ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-6 py-4 text-center text-gray-500"
                   >
                     Carregando...
@@ -409,7 +408,7 @@ Qual o prazo de Entrega?`;
               ) : displayedQuotes.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-6 py-4 text-center text-gray-500"
                   >
                     Nenhuma cotação encontrada.
@@ -421,15 +420,24 @@ Qual o prazo de Entrega?`;
                     key={quote.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
+                    {/* COLUNA DO ID */}
+                    <td
+                      className={`${tdClass} text-center font-mono font-bold text-gray-500`}
+                    >
+                      #{quote.id}
+                    </td>
+
                     <td className={tdClass}>{formatDate(quote.createdAt)}</td>
                     <td className={tdClass}>
+                      {/* O NOME MOSTRA APENAS O PRIMEIRO NOME */}
                       {quote.createdBy?.id === user?.id ? (
                         <span className="font-bold text-violet-700 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded text-[10px] break-words max-w-[100px] inline-block">
-                          {quote.createdBy?.name}
+                          {quote.createdBy?.name?.split(" ")[0]}
                         </span>
                       ) : (
                         <span className="font-medium text-gray-700 break-words max-w-[100px] block">
-                          {quote.createdBy?.name || "Desconhecido"}
+                          {quote.createdBy?.name?.split(" ")[0] ||
+                            "Desconhecido"}
                         </span>
                       )}
                     </td>
@@ -548,7 +556,7 @@ Qual o prazo de Entrega?`;
 
                   {/* --- UMA COLUNA: FLUXO DE CIMA PARA BAIXO --- */}
                   <div className="flex flex-col gap-6">
-                    {/* 1. Solicitação Original (Abre e Fecha) */}
+                    {/* 1. Solicitação Original */}
                     <div className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
                       <button
                         type="button"
@@ -570,7 +578,8 @@ Qual o prazo de Entrega?`;
                         </div>
                       )}
                     </div>
-                    {/* --- OBSERVAÇÕES INTERNAS (SÓ ADMIN/DEV VÊ E EDITA) --- */}
+
+                    {/* Observações Internas (ADMIN/DEV) */}
                     {canEdit && (
                       <div className="border border-yellow-300 rounded-lg bg-yellow-50 overflow-hidden">
                         <button
@@ -603,13 +612,12 @@ Qual o prazo de Entrega?`;
                       </div>
                     )}
 
-                    {/* 2. Dados da Logística (Físico/Itens) */}
+                    {/* 2. Dados da Logística */}
                     <div className="bg-white border border-gray-200 p-4 rounded-lg">
                       <h4 className="font-bold text-gray-900 mb-3 border-b pb-2">
                         Dados da Carga & Itens
                       </h4>
 
-                      {/* Grid interno para alinhar Peso, Valor e Volumes bonitinho */}
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div>
                           <label className={labelClass}>Peso (Ex: 15kg)</label>
@@ -655,7 +663,6 @@ Qual o prazo de Entrega?`;
                         </div>
                       </div>
 
-                      {/* Itens Adicionais */}
                       <div className="space-y-3 bg-gray-50 p-3 rounded border border-gray-100">
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -663,7 +670,6 @@ Qual o prazo de Entrega?`;
                           </label>
                           <select
                             name="bedSize"
-                            // Se o texto começar com "Sob Medida", ele trava o select na opção "Sob Medida"
                             value={
                               formData.bedSize?.startsWith("Sob Medida")
                                 ? "Sob Medida"
@@ -672,13 +678,11 @@ Qual o prazo de Entrega?`;
                             onChange={(e) => {
                               if (!canEdit) return;
                               if (e.target.value === "Sob Medida") {
-                                // Se escolheu sob medida, prepara a string
                                 setFormData((prev) => ({
                                   ...prev,
                                   bedSize: "Sob Medida: ",
                                 }));
                               } else {
-                                // Se for tamanho padrão, salva o padrão
                                 setFormData((prev) => ({
                                   ...prev,
                                   bedSize: e.target.value,
@@ -696,19 +700,16 @@ Qual o prazo de Entrega?`;
                             ))}
                           </select>
 
-                          {/* CAIXA EXTRA: Aparece apenas se "Sob Medida" estiver selecionado */}
                           {formData.bedSize?.startsWith("Sob Medida") && (
                             <input
                               type="text"
                               placeholder="Digite as medidas. Ex: 1,40 x 2,00"
-                              // Tira o prefixo só visualmente para a pessoa digitar
                               value={formData.bedSize.replace(
                                 "Sob Medida: ",
                                 "",
                               )}
                               onChange={(e) => {
                                 if (!canEdit) return;
-                                // Salva no banco com o prefixo
                                 setFormData((prev) => ({
                                   ...prev,
                                   bedSize: `Sob Medida: ${e.target.value}`,
@@ -721,7 +722,6 @@ Qual o prazo de Entrega?`;
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                          {/* Protetor */}
                           <div ref={wrapperRef}>
                             <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
                               <input
@@ -775,7 +775,6 @@ Qual o prazo de Entrega?`;
                             )}
                           </div>
 
-                          {/* Tapete */}
                           <div>
                             <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
                               <input
@@ -801,7 +800,6 @@ Qual o prazo de Entrega?`;
                             )}
                           </div>
 
-                          {/* Acessórios */}
                           <div>
                             <label className="flex items-center text-sm font-semibold text-gray-700 mb-1">
                               <input
@@ -830,7 +828,7 @@ Qual o prazo de Entrega?`;
                       </div>
                     </div>
 
-                    {/* 3. Gerador de Texto e Botão Copiar (SÓ ADMIN VÊ) */}
+                    {/* 3. Gerador de Texto (SÓ ADMIN) */}
                     {canEdit && (
                       <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                         <button
@@ -861,7 +859,7 @@ Qual o prazo de Entrega?`;
                       </div>
                     )}
 
-                    {/* 4. Checkbox "Solicitado / Aguardando Resposta" */}
+                    {/* 4. Solicitado / Aguardando Resposta */}
                     <div
                       className={`p-4 rounded border-2 ${formData.isRequested ? "bg-blue-50 border-blue-400" : "bg-gray-50 border-gray-200"} ${!canEdit && "opacity-70 pointer-events-none"}`}
                     >
@@ -926,7 +924,9 @@ Qual o prazo de Entrega?`;
                               formData.shippingValue
                                 ? formData.shippingValue.toLocaleString(
                                     "pt-BR",
-                                    { minimumFractionDigits: 2 },
+                                    {
+                                      minimumFractionDigits: 2,
+                                    },
                                   )
                                 : ""
                             }
@@ -939,7 +939,7 @@ Qual o prazo de Entrega?`;
                       </div>
                     </div>
 
-                    {/* 6. Checkbox "Concluído" */}
+                    {/* 6. Concluído */}
                     <div
                       className={`p-4 rounded border-2 ${formData.isConcluded ? "bg-green-50 border-green-400" : "bg-gray-50 border-gray-200"} ${!canEdit && "opacity-70 pointer-events-none"}`}
                     >
