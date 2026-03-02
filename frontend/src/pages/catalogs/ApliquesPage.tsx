@@ -13,6 +13,7 @@ import {
   FaBoxOpen,
   FaFilePdf,
 } from "react-icons/fa";
+
 // =========================================================
 // 1. MODAL DE VISUALIZAÇÃO
 // =========================================================
@@ -144,7 +145,6 @@ const EditModal: React.FC<{
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              {/* CORREÇÃO: Mantido apenas 'block' aqui pois não tem ícone */}
               <label className="block text-sm font-bold text-gray-700 mb-1">
                 Código
               </label>
@@ -178,7 +178,6 @@ const EditModal: React.FC<{
               </div>
             </div>
             <div>
-              {/* CORREÇÃO: Removido 'block', mantido 'flex' para alinhar ícone */}
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1">
                 <FaCube className="text-gray-400" /> Quantidade
               </label>
@@ -194,7 +193,6 @@ const EditModal: React.FC<{
               />
             </div>
             <div>
-              {/* CORREÇÃO: Removido 'block', mantido 'flex' para alinhar ícone */}
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1">
                 <FaSortNumericUp className="text-gray-400" /> Sequência
               </label>
@@ -288,11 +286,22 @@ const ApliquesPage: React.FC = () => {
 
   const apliquesFiltrados = useMemo(() => {
     const termo = busca.toLowerCase().trim();
+
     const filtrados = apllyIcons.filter((item) => {
+      // REGRA: Se estoque for false E quantidade for 0 (ou nula), NÃO MOSTRAR
+      const hasZeroQuantity =
+        item.quantity === 0 ||
+        item.quantity === null ||
+        item.quantity === undefined;
+      if (item.inStock === false && hasZeroQuantity) {
+        return false;
+      }
+
       const codigo = item.code?.toLowerCase() || "";
       const nome = item.name?.toLowerCase() || "";
       return codigo.includes(termo) || nome.includes(termo);
     });
+
     return [...filtrados].sort((a, b) =>
       (a.code || "").localeCompare(b.code || ""),
     );

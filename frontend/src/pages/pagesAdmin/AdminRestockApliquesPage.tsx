@@ -71,13 +71,13 @@ const RestockApliquesPage: React.FC = () => {
     }
   }, [fetchApliques, apllyIcons.length]);
 
-  // Filtra itens indisponíveis com quantidade baixa
+  // Filtra itens indisponíveis com quantidade menor que 4
   const restockItems = apllyIcons.filter(
     (item) =>
       item.inStock === false &&
       (item.quantity === null ||
         item.quantity === undefined ||
-        item.quantity <= 2),
+        item.quantity <= 4), // <-- AQUI FOI ALTERADO PARA MENOR QUE 4
   );
 
   // Função responsável por gerar o PDF
