@@ -40,22 +40,17 @@ export class VisualItemService {
             whereCondition.type = typeEnum;
         }
 
-        // 2. LÓGICA DE VISIBILIDADE DE ESTOQUE CORRIGIDA
+        // 2. LÓGICA DE VISIBILIDADE DE ESTOQUE ATUALIZADA
 
-        // Apenas ADMIN e DEV têm a permissão irrestrita (podem ver inStock: false)
+        // Apenas ADMIN e DEV têm a permissão irrestrita (podem ver tudo, inclusive estoque false e qtd 0)
         const isUnrestrictedStaff =
             userRole === Role.ADMIN || userRole === Role.DEV;
 
-        // Se o usuário NÃO for ADMIN ou DEV (ou seja, é USER, SELLER ou Deslogado),
-        // APLICAMOS o filtro inStock: true.
+        // Se o usuário NÃO for ADMIN ou DEV, aplicamos a nova regra:
+        // Mostrar se: (inStock === true) OU (quantity > 0)
         if (!isUnrestrictedStaff) {
-            whereCondition = {
-                ...whereCondition,
-                inStock: true, // Filtra para mostrar apenas o que está em estoque
-            };
+            whereCondition.OR = [{ inStock: true }, { quantity: { gt: 0 } }];
         }
-        // Se for ADMIN ou DEV, o whereCondition não recebe a cláusula inStock: true,
-        // e o Prisma retorna todos os itens.
 
         return this.prisma.visualItem.findMany({
             where: whereCondition,
