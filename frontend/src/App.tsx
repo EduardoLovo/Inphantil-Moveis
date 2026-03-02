@@ -55,12 +55,15 @@ import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
 import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
-import UnderConstructionPage from "./pages/UnderConstructionPage";
+// import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LencoisPage from "./pages/catalogs/LencoisPage";
 import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
 import AdminShippingQuotePage from "./pages/pagesAdmin/AdminShippingQuotePage";
 import SearchShippingQuotePage from "./pages/pagesAdmin/AdminSearchShippingQuotePage";
+// import CartPage from "./pages/CartPage";
+// import CheckoutPage from "./pages/CheckoutPage";
+import EditEnvironmentPage from "./pages/pagesAdmin/AdminEditEnvironmentPage";
 
 function App() {
   const location = useLocation();
@@ -84,10 +87,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* <Route path="/products" element={<ProductsPage />} /> */}
-        <Route path="/products" element={<UnderConstructionPage />} />
-        {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
-        <Route path="/checkout" element={<UnderConstructionPage />} />
+        {/* <Route path="/products" element={<UnderConstructionPage />} /> */}
+        {/* <Route path="/checkout" element={<UnderConstructionPage />} /> */}
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -106,11 +107,15 @@ function App() {
         <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        {/* <Route path="/products" element={<ProductsPage />} /> */}
+
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           {/* <Route path="/cart" element={<CartPage />} /> */}
-          <Route path="/cart" element={<UnderConstructionPage />} />
+          {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
           <Route path="/profile/edit" element={<EditProfilePage />} />
+          {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
+
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminPage />} />
             {/* Sub-rotas */}
@@ -146,10 +151,6 @@ function App() {
               path="/admin/low-stock-apliques"
               element={<LowStockApliquesPage />}
             />
-            <Route
-              path="/admin/restock-apliques"
-              element={<RestockApliquesPage />}
-            />
 
             <Route
               path="/admin/composicao/protetores"
@@ -171,6 +172,10 @@ function App() {
             <Route
               path="/admin/ambientes/new"
               element={<AdminCreateEnvironmentPage />}
+            />
+            <Route
+              path="/admin/ambientes/edit/:id"
+              element={<EditEnvironmentPage />}
             />
             {/* Calculadoras dentro do Admin */}
             <Route
@@ -199,6 +204,7 @@ function App() {
             />
           </Route>
         </Route>
+        <Route path="/restock-apliques" element={<RestockApliquesPage />} />
       </Routes>
       {!isAdminRoute && <Footer />}
     </>

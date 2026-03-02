@@ -99,7 +99,7 @@ const SIDEBAR_ITEMS = [
   },
   {
     title: "Apliques Para Comprar",
-    path: "/admin/restock-apliques",
+    path: "/restock-apliques",
     icon: FaMoneyBillAlt,
     roles: ["DEV", "ADMIN"],
   },
