@@ -36,16 +36,17 @@ const ViewModal: React.FC<{ item: VisualItem; onClose: () => void }> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      {/* 1. Mudamos de max-w-md para max-w-sm para deixar o modal um pouco mais estreito */}
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-200 flex flex-col">
         <button
-          className="absolute top-4 right-4 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-600 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md z-10"
+          className="absolute top-3 right-3 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-600 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md z-10"
           onClick={onClose}
         >
           <FaTimes />
         </button>
 
-        {/* Imagem */}
-        <div className="w-full aspect-square bg-gray-50 flex items-center justify-center relative flex-shrink-0">
+        {/* 2. Imagem: Trocamos 'aspect-square' por uma altura fixa menor 'h-52' (aprox. 208px) */}
+        <div className="w-full h-96 bg-gray-50 flex items-center justify-center relative flex-shrink-0">
           <img
             src={item.imageUrl}
             alt={item.name}
@@ -53,46 +54,47 @@ const ViewModal: React.FC<{ item: VisualItem; onClose: () => void }> = ({
           />
         </div>
 
-        {/* Conteúdo */}
-        <div className="p-6 overflow-y-auto">
-          <h2 className="text-2xl font-bold text-[#313b2f] mb-1 flex items-center gap-2">
+        {/* 3. Reduzimos o padding (p-5 em vez de p-6) e as margens inferiores (mb-4 em vez de mb-6) */}
+        <div className="p-5">
+          <h2 className="text-xl font-bold text-[#313b2f] mb-1 flex items-center gap-2">
             {item.code}
           </h2>
           {item.name && (
-            <p className="text-gray-500 text-lg font-medium mb-4">
+            <p className="text-gray-500 text-base font-medium mb-3">
               {item.name}
             </p>
           )}
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-4">
             {item.size && (
-              <span className="px-3 py-1 bg-purple-50 text-purple-700 text-sm font-bold uppercase rounded-full border border-purple-100 flex items-center gap-1">
+              <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-bold uppercase rounded-full border border-purple-100 flex items-center gap-1">
                 <FaRulerCombined /> {item.size}
               </span>
             )}
             {item.color && (
-              <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-bold uppercase rounded-full border border-blue-100 flex items-center gap-1">
+              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold uppercase rounded-full border border-blue-100 flex items-center gap-1">
                 <FaPalette /> {item.color}
               </span>
             )}
             {item.inStock ? (
-              <span className="px-3 py-1 bg-green-50 text-green-700 text-sm font-bold uppercase rounded-full border border-green-100 flex items-center gap-1">
+              <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold uppercase rounded-full border border-green-100 flex items-center gap-1">
                 <FaCheckCircle /> Pronta Entrega
               </span>
             ) : (
-              <span className="px-3 py-1 bg-red-50 text-red-700 text-sm font-bold uppercase rounded-full border border-red-100 flex items-center gap-1">
+              <span className="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold uppercase rounded-full border border-red-100 flex items-center gap-1">
                 <FaExclamationCircle /> Indisponível
               </span>
             )}
           </div>
 
+          {/* 4. Botão levemente menor (py-2.5 e text-base) */}
           <a
             href={whatsappLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-lg"
+            className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-base"
           >
-            <FaWhatsapp className="text-2xl" /> Tenho Interesse
+            <FaWhatsapp className="text-xl" /> Tenho Interesse
           </a>
         </div>
       </div>
@@ -432,6 +434,7 @@ const LencoisPage: React.FC = () => {
                   {item.size}
                 </span>
               )}
+
               {!item.inStock && !isStaff && (
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
                   <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
@@ -449,6 +452,7 @@ const LencoisPage: React.FC = () => {
                 {item.name || item.code}
               </h3>
               <p className="text-xs text-gray-500 mb-3">{item.code}</p>
+              <p className="text-xs text-gray-500 mb-3">{item.color}</p>
 
               <div className="mt-auto">
                 <a
