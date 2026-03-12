@@ -100,7 +100,7 @@ const Header = () => {
               Loja
             </Link>
             <Link
-              to="/pos-compra"
+              to="/pos-compra-informacoes"
               className="text-gray-200 hover:text-[#ffffbc] font-medium transition-colors"
             >
               Pós-compra
