@@ -103,6 +103,12 @@ const SIDEBAR_ITEMS = [
     icon: FaMoneyBillAlt,
     roles: ["DEV", "ADMIN"],
   },
+  {
+    title: "Relatórios",
+    path: "/admin/relatorios",
+    icon: FaListAlt,
+    roles: ["DEV", "ADMIN"],
+  },
 ];
 
 const CALCULADORAS = [

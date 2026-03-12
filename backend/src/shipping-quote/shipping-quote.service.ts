@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateShippingQuoteDto } from './dto/create-shipping-quote.dto';
 import { UpdateShippingQuoteDto } from './dto/update-shipping-quote.dto';
 import { Prisma } from '@prisma/client';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class ShippingQuoteService {
@@ -130,5 +131,53 @@ export class ShippingQuoteService {
         return this.prisma.shippingQuote.delete({
             where: { id },
         });
+    }
+
+    async gerarRelatorioExcel(): Promise<Buffer> {
+        // Busca todas as cotações (você pode adicionar filtros aqui futuramente se quiser)
+        const quotes = await this.prisma.shippingQuote.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+
+        // Cria a planilha
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Cotações de Frete');
+
+        // Define as 4 colunas solicitadas
+        worksheet.columns = [
+            { header: 'Estado', key: 'customerState', width: 15 },
+            { header: 'Transportadora', key: 'carrierName', width: 35 },
+            { header: 'Valor do Pedido', key: 'orderValue', width: 25 },
+            { header: 'Valor do Frete', key: 'shippingValue', width: 25 },
+        ];
+
+        // Estiliza o cabeçalho
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        worksheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF4F81BD' }, // Fundo azul
+        };
+
+        // Formata as colunas de valores para moeda (R$) no Excel
+        worksheet.getColumn('orderValue').numFmt = '"R$ "#,##0.00';
+        worksheet.getColumn('shippingValue').numFmt = '"R$ "#,##0.00';
+
+        // Preenche as linhas com os dados
+        quotes.forEach((quote) => {
+            worksheet.addRow({
+                customerState: quote.customerState || '-',
+                carrierName: quote.carrierName || 'Não informada',
+                // O Prisma retorna Decimal, precisamos converter para Number pro Excel entender
+                orderValue: quote.orderValue ? Number(quote.orderValue) : 0,
+                shippingValue: quote.shippingValue
+                    ? Number(quote.shippingValue)
+                    : 0,
+            });
+        });
+
+        // Gera o buffer do arquivo
+        const buffer = await workbook.xlsx.writeBuffer();
+        return buffer as unknown as Buffer;
     }
 }

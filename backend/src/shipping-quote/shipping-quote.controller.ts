@@ -1,3 +1,4 @@
+import { Response } from 'express'; // <--- 1. ADICIONE ESTA LINHA AQUI
 import {
     Controller,
     Get,
@@ -9,6 +10,7 @@ import {
     UseGuards,
     ParseIntPipe,
     Query,
+    Res,
 } from '@nestjs/common';
 import { ShippingQuoteService } from './shipping-quote.service';
 import { CreateShippingQuoteDto } from './dto/create-shipping-quote.dto';
@@ -19,8 +21,8 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '@prisma/client';
 
 @ApiTags('Cotação de Frete')
-@ApiBearerAuth() // Indica no Swagger que precisa de token
-@UseGuards(JwtAuthGuard) // Protege todas as rotas deste controller
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('shipping-quote')
 export class ShippingQuoteController {
     constructor(private readonly shippingQuoteService: ShippingQuoteService) {}
@@ -31,7 +33,7 @@ export class ShippingQuoteController {
     })
     create(
         @Body() createShippingQuoteDto: CreateShippingQuoteDto,
-        @GetUser() user: User, // Pega o usuário logado automaticamente
+        @GetUser() user: User,
     ) {
         return this.shippingQuoteService.create(
             createShippingQuoteDto,
@@ -47,6 +49,24 @@ export class ShippingQuoteController {
         @Query('state') state?: string,
     ) {
         return this.shippingQuoteService.findAll(carrier, city, state);
+    }
+
+    // --- 2. MOVIDO PARA CÁ! Antes do :id ---
+    @Get('exportar-relatorio/excel')
+    @ApiOperation({ summary: 'Exportar cotações para Excel' })
+    async exportarExcel(@Res() res: Response) {
+        // <--- Agora este Response é o do Express
+        const buffer = await this.shippingQuoteService.gerarRelatorioExcel();
+
+        res.set({
+            'Content-Type':
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition':
+                'attachment; filename="relatorio-cotacoes.xlsx"',
+            'Content-Length': buffer.length.toString(), // Converter para string é uma boa prática
+        });
+
+        res.end(buffer);
     }
 
     @Get(':id')

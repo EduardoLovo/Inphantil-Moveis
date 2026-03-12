@@ -23,13 +23,13 @@ import SinteticosPage from "./pages/catalogs/SinteticosPage";
 import EnvironmentPage from "./pages/EnvironmentPage";
 // ROTAS PUBLICAS
 import ContactPage from "./pages/ContactPage";
-import PosCompraPage from "./pages/PosCompraPage";
 // ROTAS LOGADO
 // import CartPage from "./pages/CartPage";
-// import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutPage from "./pages/CheckoutPage";
 // import ProductsPage from "./pages/ProductsPage";
+import PosCompraPage from "./pages/PosCompraPage";
 // ROTAS LOJA
-import ProductDetailsPage from "./pages/ProductDetailsPage";
+// import ProductDetailsPage from "./pages/ProductDetailsPage";
 import InternalAnalytics from "./components/InternalAnalytics";
 import VersionCheck from "./components/VersionCheck";
 // ROTAS ADMIN
@@ -61,9 +61,11 @@ import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
 import AdminShippingQuotePage from "./pages/pagesAdmin/AdminShippingQuotePage";
 import SearchShippingQuotePage from "./pages/pagesAdmin/AdminSearchShippingQuotePage";
-// import CartPage from "./pages/CartPage";
-// import CheckoutPage from "./pages/CheckoutPage";
 import EditEnvironmentPage from "./pages/pagesAdmin/AdminEditEnvironmentPage";
+import PosCompraInformationPage from "./pages/PosCompraInformationPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
+import DetalhesPedidoPage from "./pages/OrderDetailPage";
+import { AdminReportsPage } from "./pages/AdminReportsPage";
 
 function App() {
   const location = useLocation();
@@ -95,7 +97,10 @@ function App() {
         <Route path="/lencois" element={<LencoisPage />} />
         <Route path="/sinteticos/tapetes" element={<SinteticosPageTapetes />} />
         <Route path="/sinteticos" element={<SinteticosPage />} />
-        <Route path="/pos-compra" element={<PosCompraPage />} />
+        <Route
+          path="/pos-compra-informacoes"
+          element={<PosCompraInformationPage />}
+        />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/composicao-lencol" element={<ComposicaoLencolPage />} />
         <Route
@@ -104,18 +109,20 @@ function App() {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/products/:id" element={<ProductDetailsPage />} />
+        {/* <Route path="/products/:id" element={<ProductDetailsPage />} /> */}
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         {/* <Route path="/products" element={<ProductsPage />} /> */}
+        {/* <Route path="/cart" element={<CartPage />} /> */}
 
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          {/* <Route path="/cart" element={<CartPage />} /> */}
           {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
           <Route path="/profile/edit" element={<EditProfilePage />} />
-          {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
-
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/pos-compra" element={<PosCompraPage />} />
+          <Route path="/meus-pedidos" element={<MyOrdersPage />} />
+          <Route path="/pedidos/:id" element={<DetalhesPedidoPage />} />
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminPage />} />
             {/* Sub-rotas */}
@@ -202,6 +209,7 @@ function App() {
               path="/admin/cotacoes/pesquisa"
               element={<SearchShippingQuotePage />}
             />
+            <Route path="/admin/relatorios" element={<AdminReportsPage />} />
           </Route>
         </Route>
         <Route path="/restock-apliques" element={<RestockApliquesPage />} />
