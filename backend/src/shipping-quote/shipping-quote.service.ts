@@ -134,41 +134,44 @@ export class ShippingQuoteService {
     }
 
     async gerarRelatorioExcel(): Promise<Buffer> {
-        // Busca todas as cotações (você pode adicionar filtros aqui futuramente se quiser)
         const quotes = await this.prisma.shippingQuote.findMany({
             orderBy: { createdAt: 'desc' },
         });
 
-        // Cria a planilha
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Cotações de Frete');
 
-        // Define as 4 colunas solicitadas
+        // 1. Define as colunas e suas larguras
         worksheet.columns = [
-            { header: 'Estado', key: 'customerState', width: 15 },
-            { header: 'Transportadora', key: 'carrierName', width: 35 },
-            { header: 'Valor do Pedido', key: 'orderValue', width: 25 },
-            { header: 'Valor do Frete', key: 'shippingValue', width: 25 },
+            { header: 'Estado', key: 'customerState', width: 12 },
+            { header: 'Transportadora', key: 'carrierName', width: 40 },
+            { header: 'Valor do Pedido', key: 'orderValue', width: 20 },
+            { header: 'Valor do Frete', key: 'shippingValue', width: 20 },
         ];
 
-        // Estiliza o cabeçalho
-        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-        worksheet.getRow(1).fill = {
+        // 2. Estilização Master do Cabeçalho (Linha 1)
+        const headerRow = worksheet.getRow(1);
+        headerRow.height = 25; // Deixa o cabeçalho mais altinho
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 };
+        headerRow.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF4F81BD' }, // Fundo azul
+            fgColor: { argb: 'FF0F766E' }, // Um verde elegante (estilo Tailwind teal-700)
         };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-        // Formata as colunas de valores para moeda (R$) no Excel
+        // 3. Adiciona o botão de "Filtro" automático no Excel nas colunas de A até D
+        worksheet.autoFilter = 'A1:D1';
+
+        // 4. Formatação de Moeda
         worksheet.getColumn('orderValue').numFmt = '"R$ "#,##0.00';
         worksheet.getColumn('shippingValue').numFmt = '"R$ "#,##0.00';
 
-        // Preenche as linhas com os dados
+        // 5. Adiciona os dados
         quotes.forEach((quote) => {
             worksheet.addRow({
                 customerState: quote.customerState || '-',
                 carrierName: quote.carrierName || 'Não informada',
-                // O Prisma retorna Decimal, precisamos converter para Number pro Excel entender
                 orderValue: quote.orderValue ? Number(quote.orderValue) : 0,
                 shippingValue: quote.shippingValue
                     ? Number(quote.shippingValue)
@@ -176,7 +179,54 @@ export class ShippingQuoteService {
             });
         });
 
-        // Gera o buffer do arquivo
+        // 6. Estilização Fina das Células (Bordas, Cores Alternadas e Alinhamento)
+        worksheet.eachRow((row, rowNumber) => {
+            // Efeito "Zebra" (cores alternadas nas linhas pares) para facilitar a leitura
+            if (rowNumber > 1 && rowNumber % 2 === 0) {
+                row.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF3F4F6' }, // Cinza bem clarinho (gray-100)
+                };
+            }
+
+            // Aplica bordas e alinhamentos célula por célula
+            row.eachCell((cell, colNumber) => {
+                // Adiciona uma borda fina cinza em todas as células
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                    left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                    bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                    right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+                };
+
+                // Personaliza o alinhamento dependendo da coluna (ignora a linha 1 que é o cabeçalho)
+                if (rowNumber > 1) {
+                    if (colNumber === 1) {
+                        // Coluna Estado: Centralizada
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: 'center',
+                        };
+                    } else if (colNumber === 2) {
+                        // Coluna Transportadora: Alinhada à esquerda com um pequeno recuo
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: 'left',
+                            indent: 1,
+                        };
+                    } else {
+                        // Colunas de Valores: Alinhadas à direita
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: 'right',
+                        };
+                    }
+                }
+            });
+        });
+
+        // 7. Gera o arquivo final
         const buffer = await workbook.xlsx.writeBuffer();
         return buffer as unknown as Buffer;
     }
