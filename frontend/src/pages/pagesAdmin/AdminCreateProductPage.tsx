@@ -5,7 +5,6 @@ import { useCategoryStore } from "../../store/CategoryStore";
 import {
   FaSave,
   FaArrowLeft,
-  FaImages,
   FaTrash,
   FaPlus,
   FaImage,
@@ -14,311 +13,884 @@ import {
   FaDollarSign,
   FaLayerGroup,
   FaSpinner,
+  FaPalette,
+  FaRuler,
+  FaBarcode,
+  FaPlusCircle,
+  FaMagic,
+  FaCheckDouble,
 } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
+import FullScreenLoader from "../../components/FullScreenLoader";
+
+const CAMA_COLORS = [
+  {
+    id: "cz6-cz26",
+    Externo: "CZ6",
+    Interno: "CZ26",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#cbcbcb",
+  },
+  {
+    id: "cz6-vd25",
+    Externo: "CZ6",
+    Interno: "VD25",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#bfc6c9",
+  },
+  {
+    id: "cz6-r12",
+    Externo: "CZ6",
+    Interno: "R12",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#e0c7d2",
+  },
+  {
+    id: "cz6-az10",
+    Externo: "CZ6",
+    Interno: "AZ10",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#9ebdd0",
+  },
+  {
+    id: "cz6-l11",
+    Externo: "CZ6",
+    Interno: "L11",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#d4c7d9",
+  },
+  {
+    id: "cz6-am14",
+    Externo: "CZ6",
+    Interno: "AM14",
+    hexExterno: "#b4b7ba",
+    hexInterno: "#f4e0ad",
+  },
+  {
+    id: "b6-b8",
+    Externo: "B6",
+    Interno: "B8",
+    hexExterno: "#c4bcad",
+    hexInterno: "#dad6cb",
+  },
+  {
+    id: "b6-vd25",
+    Externo: "B6",
+    Interno: "VD25",
+    hexExterno: "#c4bcad",
+    hexInterno: "#bfcab4",
+  },
+  {
+    id: "b6-r12",
+    Externo: "B6",
+    Interno: "R12",
+    hexExterno: "#c4bcad",
+    hexInterno: "#e0c7d2",
+  },
+  {
+    id: "b6-az10",
+    Externo: "B6",
+    Interno: "AZ10",
+    hexExterno: "#c4bcad",
+    hexInterno: "#9ebdd0",
+  },
+  {
+    id: "b6-l11",
+    Externo: "B6",
+    Interno: "L11",
+    hexExterno: "#c4bcad",
+    hexInterno: "#d4c7d9",
+  },
+  {
+    id: "b6-am14",
+    Externo: "B6",
+    Interno: "AM14",
+    hexExterno: "#c4bcad",
+    hexInterno: "#f4e0ad",
+  },
+];
+
+const LENCOL_COLORS = [
+  "AZ3",
+  "AZUL BEBÊ",
+  "BEGE",
+  "BRANCO",
+  "CINZA",
+  "PALHA",
+  "PRATA",
+  "ROSA BEBÊ",
+  "ROSA",
+  "VERDE",
+];
+
+const ITEM_SIZES = [
+  "BERÇO",
+  "JUNIOR",
+  "SOLTEIRO",
+  "SOLTEIRAO",
+  "VIUVA",
+  "CASAL",
+  "QUEEN",
+  "KING",
+];
+
+interface VariantForm {
+  id: string;
+  color: string;
+  size: string;
+  complement: string;
+  price: string;
+  stock: string;
+  sku: string;
+  imageUrls: string[];
+  isFeatured: boolean;
+}
 
 const AdminCreateProductPage: React.FC = () => {
   const navigate = useNavigate();
-  const { createProduct, isLoading } = useProductStore();
+  const { createProduct } = useProductStore();
   const { categories, fetchCategories } = useCategoryStore();
 
-  // Estados do Formulário
+  // Estados Base
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
   const [categoryId, setCategoryId] = useState("");
-
-  // Estados de Imagem
   const [mainImage, setMainImage] = useState("");
-  const [galleryInput, setGalleryInput] = useState("");
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+
+  const [variants, setVariants] = useState<VariantForm[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Estados do Gerador em Lote (Batch)
+  const [batchSize, setBatchSize] = useState("");
+  const [batchComplement, setBatchComplement] = useState("");
+  const [batchPrice, setBatchPrice] = useState("");
+  const [batchStock, setBatchStock] = useState("10"); // Default 10
+  const [batchColors, setBatchColors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleAddGalleryImage = () => {
-    if (galleryInput.trim()) {
-      setGalleryImages([...galleryImages, galleryInput.trim()]);
-      setGalleryInput("");
+  const selectedCategoryObj = categories.find(
+    (c) => c.id.toString() === categoryId,
+  );
+  const categoryName = selectedCategoryObj
+    ? selectedCategoryObj.name.toLowerCase()
+    : "";
+
+  const isCama = categoryName.includes("cama");
+  const isLencol =
+    categoryName.includes("lençol") || categoryName.includes("lencol");
+  const isProtetor = categoryName.includes("protetor");
+  const isColorRequired = !isProtetor;
+
+  // --- LÓGICA DO GERADOR EM LOTE ---
+  const toggleBatchColor = (colorId: string) => {
+    setBatchColors((prev) =>
+      prev.includes(colorId)
+        ? prev.filter((c) => c !== colorId)
+        : [...prev, colorId],
+    );
+  };
+
+  const handleSelectAllColors = () => {
+    const allColors = isCama
+      ? CAMA_COLORS.map((c) => c.id)
+      : isLencol
+        ? LENCOL_COLORS
+        : [];
+    if (batchColors.length === allColors.length) {
+      setBatchColors([]); // Desmarca todas
+    } else {
+      setBatchColors(allColors); // Marca todas
     }
   };
 
-  const handleRemoveImage = (index: number) => {
-    const newGallery = galleryImages.filter((_, i) => i !== index);
-    setGalleryImages(newGallery);
+  const handleGenerateBatch = () => {
+    if (!batchSize || !batchPrice || !batchStock || batchColors.length === 0) {
+      toast.error(
+        "Preencha Tamanho, Preço, Estoque e selecione pelo menos 1 Cor!",
+      );
+      return;
+    }
+
+    const newVariants: VariantForm[] = batchColors.map((color) => ({
+      id: Math.random().toString(),
+      color: color,
+      size: batchSize,
+      complement: batchComplement,
+      price: batchPrice,
+      stock: batchStock,
+      sku: "",
+      imageUrls: [""],
+      isFeatured: false,
+    }));
+
+    // Remove a variação vazia se for a única, senão apenas adiciona no final
+    setVariants((prev) => {
+      if (
+        prev.length === 1 &&
+        !prev[0].color &&
+        !prev[0].size &&
+        !prev[0].price
+      ) {
+        return newVariants;
+      }
+      return [...prev, ...newVariants];
+    });
+
+    toast.success(`${newVariants.length} variações geradas com sucesso!`, {
+      icon: "🪄",
+    });
+    // Limpar as cores para a próxima geração (mantém tamanho e complemento para facilitar)
+    setBatchColors([]);
+  };
+  // ---------------------------------
+
+  const handleAddVariant = () => {
+    setVariants([
+      ...variants,
+      {
+        id: Math.random().toString(),
+        color: "",
+        size: "",
+        complement: "",
+        price: "",
+        stock: "",
+        sku: "",
+        imageUrls: [""],
+        isFeatured: false,
+      },
+    ]);
+  };
+
+  const handleRemoveVariant = (id: string) => {
+    setVariants(variants.filter((v) => v.id !== id));
+  };
+
+  const handleVariantChange = (
+    id: string,
+    field: keyof VariantForm,
+    value: string,
+  ) => {
+    setVariants(
+      variants.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
+    );
+  };
+
+  const handleVariantImageChange = (
+    variantId: string,
+    imageIndex: number,
+    value: string,
+  ) => {
+    setVariants(
+      variants.map((v) => {
+        if (v.id === variantId) {
+          const newUrls = [...v.imageUrls];
+          newUrls[imageIndex] = value;
+          return { ...v, imageUrls: newUrls };
+        }
+        return v;
+      }),
+    );
+  };
+
+  const handleAddVariantImage = (variantId: string) => {
+    setVariants(
+      variants.map((v) =>
+        v.id === variantId ? { ...v, imageUrls: [...v.imageUrls, ""] } : v,
+      ),
+    );
+  };
+
+  const handleRemoveVariantImage = (variantId: string, imageIndex: number) => {
+    setVariants(
+      variants.map((v) => {
+        if (v.id === variantId) {
+          return {
+            ...v,
+            imageUrls: v.imageUrls.filter((_, idx) => idx !== imageIndex),
+          };
+        }
+        return v;
+      }),
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!categoryId) {
-      alert("Por favor, selecione uma categoria.");
+      toast.error("Por favor, selecione uma categoria.");
       return;
     }
+
+    if (variants.length === 0) {
+      toast.error("Gere ou adicione pelo menos uma variação.");
+      return;
+    }
+
+    const invalidVariant = variants.find(
+      (v) => (isColorRequired && !v.color) || !v.size || !v.price || !v.stock,
+    );
+
+    if (invalidVariant) {
+      toast.error(
+        "Preencha todos os campos obrigatórios das variações geradas.",
+      );
+      return;
+    }
+
+    const basePrice = Math.min(...variants.map((v) => parseCurrency(v.price)));
+    const totalStock = variants.reduce(
+      (sum, v) => sum + (parseInt(v.stock) || 0),
+      0,
+    );
 
     const productData = {
       name,
       description,
-      price: parseFloat(price),
-      stock: parseInt(stock),
       categoryId: parseInt(categoryId),
       mainImage,
-      images: galleryImages,
+      price: basePrice,
+      stock: totalStock,
+      variants: variants.map((v) => ({
+        color: isColorRequired ? v.color : "Cor Única",
+        size: v.size,
+        complement: v.complement.trim() !== "" ? v.complement : undefined,
+        price: parseCurrency(v.price),
+        stock: parseInt(v.stock),
+        sku: v.sku || undefined,
+        isFeatured: v.isFeatured,
+        images: v.imageUrls
+          .filter((url) => url.trim() !== "")
+          .map((url) => ({ url })),
+      })),
     };
 
-    await createProduct(productData);
-    navigate("/admin/products");
+    try {
+      setIsSaving(true);
+
+      await createProduct(productData);
+      toast.success("Produto criado com sucesso!");
+      setTimeout(() => navigate("/admin/products"), 1500);
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.message;
+      const msg = Array.isArray(errorMessage)
+        ? errorMessage[0]
+        : errorMessage || "Erro ao criar produto.";
+      toast.error(`Erro: ${msg}`);
+    }
   };
 
+  // 1. Transforma o que o utilizador digita na máscara visual (ex: 1.200,50)
+  const formatCurrencyInput = (value: string) => {
+    const onlyNumbers = value.replace(/\D/g, ""); // Remove tudo o que não for número
+    if (!onlyNumbers) return "";
+    return (Number(onlyNumbers) / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  // 2. Transforma a máscara visual de volta num número para o Backend (ex: 1200.50)
+  const parseCurrency = (value: string) => {
+    if (!value) return 0;
+    // Remove os pontos de milhar e troca a vírgula por ponto
+    const cleanString = value.replace(/\./g, "").replace(",", ".");
+    return parseFloat(cleanString) || 0;
+  };
   return (
     <div className="w-full max-w-5xl mx-auto p-4 md:p-8 pt-24 pb-20">
-      {/* Header */}
+      <Toaster />
+      <FullScreenLoader
+        isLoading={isSaving}
+        title="A criar magia! ✨"
+        message={
+          <>
+            Estamos a gerar as suas dezenas de variações no banco de dados.
+            <br />
+            <span className="font-bold text-[#ffd639]">
+              Não feche a página.
+            </span>
+          </>
+        }
+      />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[#313b2f] flex items-center gap-3">
             <FaBoxOpen className="text-[#ffd639]" /> Novo Produto
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Adicione um novo item ao catálogo.
+            Adicione um novo item e gere centenas de variações em segundos.
           </p>
         </div>
         <button
           onClick={() => navigate("/admin/products")}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm self-start md:self-auto"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm"
         >
           <FaArrowLeft /> Voltar
         </button>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-      >
-        {/* --- COLUNA ESQUERDA: DADOS PRINCIPAIS --- */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-[#313b2f] mb-4 flex items-center gap-2 pb-2 border-b border-gray-50">
-              <FaTag className="text-gray-400" /> Informações Básicas
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* INFORMAÇÕES BÁSICAS */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold text-[#313b2f] mb-4 flex items-center gap-2 pb-2 border-b border-gray-50">
+            <FaTag className="text-gray-400" /> Informações Básicas
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Nome do Produto
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Descrição Detalhada
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none resize-y"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                URL da Imagem Principal
+              </label>
+              <input
+                type="text"
+                value={mainImage}
+                onChange={(e) => setMainImage(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Categoria
+              </label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none bg-white"
+              >
+                <option value="">Selecione uma categoria...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* GERADOR MÁGICO DE VARIAÇÕES (SÓ APARECE DEPOIS DE ESCOLHER CATEGORIA) */}
+        {categoryId && isColorRequired && (
+          <div className="bg-[#313b2f] p-6 rounded-2xl shadow-md border border-[#ffd639]/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <FaMagic size={100} className="text-white" />
+            </div>
+
+            <h2 className="text-xl font-bold text-[#ffd639] mb-1 flex items-center gap-2 relative z-10">
+              <FaMagic /> Gerador Rápido de Variações
             </h2>
+            <p className="text-gray-300 text-sm mb-6 relative z-10">
+              Crie dezenas de combinações automaticamente com o mesmo preço e
+              tamanho.
+            </p>
 
-            <div className="space-y-4">
-              {/* Nome */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">
-                  Nome do Produto
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Ex: Cama Casinha"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all"
-                />
-              </div>
-
-              {/* Descrição */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">
-                  Descrição Detalhada
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  placeholder="Descreva os materiais, dimensões e detalhes..."
-                  rows={5}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all resize-y"
-                />
-              </div>
-
-              {/* Preço e Estoque */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-5 rounded-xl space-y-5 relative z-10">
+              {/* Passo 1: Definições Base */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  {/* CORREÇÃO AQUI: removido 'block', mantido 'flex' */}
-                  <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1">
+                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                    <FaRuler className="text-gray-400" /> Tamanho Fixo
+                  </label>
+                  <select
+                    value={batchSize}
+                    onChange={(e) => setBatchSize(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
+                  >
+                    <option value="">Selecione...</option>
+                    {ITEM_SIZES.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                    <FaPlusCircle className="text-gray-400" /> Opção Extra{" "}
+                    <span className="text-gray-400 font-normal">
+                      (ex: Com Colchão)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={batchComplement}
+                    onChange={(e) => setBatchComplement(e.target.value)}
+                    placeholder="Deixe em branco se não houver"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
                     <FaDollarSign className="text-gray-400" /> Preço (R$)
                   </label>
                   <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                    step="0.01"
-                    placeholder="0.00"
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all"
+                    type="text" // ERA number, AGORA É text!
+                    value={batchPrice}
+                    onChange={(e) =>
+                      setBatchPrice(formatCurrencyInput(e.target.value))
+                    }
+                    placeholder="0,00"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
                   />
                 </div>
+
                 <div>
-                  {/* CORREÇÃO AQUI: removido 'block', mantido 'flex' */}
-                  <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1">
+                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
                     <FaLayerGroup className="text-gray-400" /> Estoque Inicial
                   </label>
                   <input
                     type="number"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    required
-                    placeholder="0"
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all"
+                    value={batchStock}
+                    onChange={(e) => setBatchStock(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
                   />
                 </div>
               </div>
 
-              {/* Categoria */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">
-                  Categoria
-                </label>
-                <div className="relative">
-                  <select
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    required
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all appearance-none bg-white cursor-pointer"
-                  >
-                    <option value="">Selecione uma categoria...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                        fillRule="evenodd"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* --- COLUNA DIREITA: IMAGENS --- */}
-        <div className="space-y-6">
-          {/* Imagem de Capa */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-[#313b2f] mb-4 flex items-center gap-2">
-              <FaImage className="text-gray-400" /> Foto de Capa
-            </h2>
-
-            <div className="mb-4">
-              {mainImage ? (
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-200 group">
-                  <img
-                    src={mainImage}
-                    alt="Capa"
-                    className="w-full h-full object-cover"
-                  />
+              {/* Passo 2: Seleção de Cores */}
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FaPalette className="text-gray-400" /> Quais cores terão
+                    esse preço e tamanho?
+                  </label>
                   <button
                     type="button"
-                    onClick={() => setMainImage("")}
-                    className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-red-500 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                    onClick={handleSelectAllColors}
+                    className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full font-bold text-gray-600 flex items-center gap-1 transition-colors"
                   >
-                    <FaTrash />
+                    <FaCheckDouble /> Selecionar Todas
                   </button>
                 </div>
-              ) : (
-                <div className="aspect-video rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                  <FaImage className="text-4xl mb-2 opacity-50" />
-                  <span className="text-xs">Cole a URL abaixo</span>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                  {isCama &&
+                    CAMA_COLORS.map((color) => (
+                      <label
+                        key={color.id}
+                        className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer transition-all text-xs font-medium ${batchColors.includes(color.id) ? "border-[#313b2f] bg-[#313b2f]/5 text-[#313b2f]" : "border-gray-200 text-gray-500 hover:border-gray-300"}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={batchColors.includes(color.id)}
+                          onChange={() => toggleBatchColor(color.id)}
+                          className="w-4 h-4 text-[#313b2f] rounded focus:ring-[#313b2f]"
+                        />
+                        {color.id.toUpperCase()}
+                      </label>
+                    ))}
+                  {isLencol &&
+                    LENCOL_COLORS.map((color) => (
+                      <label
+                        key={color}
+                        className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer transition-all text-xs font-medium ${batchColors.includes(color) ? "border-[#313b2f] bg-[#313b2f]/5 text-[#313b2f]" : "border-gray-200 text-gray-500 hover:border-gray-300"}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={batchColors.includes(color)}
+                          onChange={() => toggleBatchColor(color)}
+                          className="w-4 h-4 text-[#313b2f] rounded focus:ring-[#313b2f]"
+                        />
+                        {color}
+                      </label>
+                    ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <input
-              type="text"
-              value={mainImage}
-              onChange={(e) => setMainImage(e.target.value)}
-              placeholder="URL da imagem principal..."
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all text-sm"
-            />
-          </div>
-
-          {/* Galeria */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-[#313b2f] flex items-center gap-2">
-                <FaImages className="text-gray-400" /> Galeria
-              </h2>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">
-                {galleryImages.length} fotos
-              </span>
-            </div>
-
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={galleryInput}
-                onChange={(e) => setGalleryInput(e.target.value)}
-                placeholder="URL da foto extra..."
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none transition-all text-sm"
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  (e.preventDefault(), handleAddGalleryImage())
-                }
-              />
+              {/* Botão de Gerar */}
               <button
                 type="button"
-                onClick={handleAddGalleryImage}
-                className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                onClick={handleGenerateBatch}
+                className="w-full py-3 bg-[#ffd639] text-[#313b2f] font-bold rounded-xl hover:bg-[#e6c135] shadow-sm transition-all flex items-center justify-center gap-2"
               >
-                <FaPlus />
+                <FaMagic /> Gerar{" "}
+                {batchColors.length > 0 ? batchColors.length : ""} Variações
+                Agora
               </button>
             </div>
+          </div>
+        )}
 
-            {galleryImages.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                {galleryImages.map((url, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
-                  >
-                    <img
-                      src={url}
-                      alt={`Galeria ${index}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-400 text-xs py-4 italic">
-                Nenhuma foto extra.
-              </p>
-            )}
+        {/* LISTA DE VARIAÇÕES INDIVIDUAIS */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-50">
+            <h2 className="text-lg font-bold text-[#313b2f] flex items-center gap-2">
+              <FaLayerGroup className="text-gray-400" /> Lista de Variações
+            </h2>
+            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-500">
+              {variants.length} geradas
+            </span>
           </div>
 
-          {/* Botão Salvar */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-4 bg-[#ffd639] text-[#313b2f] font-bold rounded-xl hover:bg-[#e6c235] hover:-translate-y-1 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <>
-                <FaSpinner className="animate-spin" /> Salvando...
-              </>
-            ) : (
-              <>
-                <FaSave /> Salvar Produto
-              </>
+          <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+            {variants.length === 0 && (
+              <div className="text-center py-10 text-gray-400">
+                <FaBoxOpen className="text-4xl mx-auto mb-2 opacity-30" />
+                <p>
+                  Nenhuma variação criada. Use o gerador mágico acima ou
+                  adicione manualmente.
+                </p>
+              </div>
             )}
-          </button>
+
+            {variants.map((variant, index) => (
+              <div
+                key={variant.id}
+                className="p-5 border-2 border-gray-100 rounded-xl bg-gray-50 relative group"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleRemoveVariant(variant.id)}
+                  className="absolute -top-3 -right-3 bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
+                  title="Remover Variação"
+                >
+                  <FaTrash size={12} />
+                </button>
+
+                <h3 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider">
+                  Variação #{index + 1}
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                  {!isProtetor && (
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <FaPalette className="text-gray-400" /> Cor
+                      </label>
+                      <select
+                        value={variant.color}
+                        onChange={(e) =>
+                          handleVariantChange(
+                            variant.id,
+                            "color",
+                            e.target.value,
+                          )
+                        }
+                        required={isColorRequired}
+                        disabled={!categoryId}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
+                      >
+                        <option value="">
+                          {categoryId
+                            ? "Selecione..."
+                            : "Escolha a categoria antes"}
+                        </option>
+                        {isCama &&
+                          CAMA_COLORS.map((color) => (
+                            <option key={color.id} value={color.id}>
+                              Ext: {color.Externo} / Int: {color.Interno}
+                            </option>
+                          ))}
+                        {isLencol &&
+                          LENCOL_COLORS.map((color) => (
+                            <option key={color} value={color}>
+                              {color}
+                            </option>
+                          ))}
+                        {!isCama && !isLencol && !isProtetor && categoryId && (
+                          <option value="Unica">Cor Única</option>
+                        )}
+                      </select>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaRuler className="text-gray-400" /> Tamanho
+                    </label>
+                    <select
+                      value={variant.size}
+                      onChange={(e) =>
+                        handleVariantChange(variant.id, "size", e.target.value)
+                      }
+                      required
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
+                    >
+                      <option value="">Selecione...</option>
+                      {ITEM_SIZES.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaPlusCircle className="text-gray-400" /> Opção Extra
+                    </label>
+                    <input
+                      type="text"
+                      value={variant.complement}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          variant.id,
+                          "complement",
+                          e.target.value,
+                        )
+                      }
+                      placeholder="Ex: Com Colchão"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaDollarSign className="text-gray-400" /> Preço (R$)
+                    </label>
+                    <input
+                      type="text" // ERA number, AGORA É text!
+                      value={variant.price}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          variant.id,
+                          "price",
+                          formatCurrencyInput(e.target.value),
+                        )
+                      }
+                      required
+                      placeholder="0,00"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaLayerGroup className="text-gray-400" /> Estoque
+                    </label>
+                    <input
+                      type="number"
+                      value={variant.stock}
+                      onChange={(e) =>
+                        handleVariantChange(variant.id, "stock", e.target.value)
+                      }
+                      required
+                      placeholder="Qtd"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 md:col-span-2">
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaBarcode className="text-gray-400" /> SKU{" "}
+                      <span className="text-gray-400 font-normal">
+                        (Opcional)
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={variant.sku}
+                      onChange={(e) =>
+                        handleVariantChange(variant.id, "sku", e.target.value)
+                      }
+                      placeholder="Ex: CAMA-SOLT"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                    />
+                  </div>
+
+                  {/* MULTIPLAS IMAGENS DA VARIAÇÃO */}
+                  <div className="sm:col-span-2 md:col-span-3">
+                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                      <FaImage className="text-gray-400" /> Imagens Específicas
+                    </label>
+                    <div className="space-y-2">
+                      {variant.imageUrls.map((url, imgIdx) => (
+                        <div key={imgIdx} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={url}
+                            onChange={(e) =>
+                              handleVariantImageChange(
+                                variant.id,
+                                imgIdx,
+                                e.target.value,
+                              )
+                            }
+                            placeholder="https://..."
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                          />
+                          {variant.imageUrls.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveVariantImage(variant.id, imgIdx)
+                              }
+                              className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => handleAddVariantImage(variant.id)}
+                        className="text-xs text-[#007bff] font-bold hover:underline mt-1"
+                      >
+                        + Adicionar outra foto
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={handleAddVariant}
+              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-400 hover:text-[#313b2f] transition-all"
+            >
+              <FaPlus /> Adicionar Variação Manualmente
+            </button>
+          </div>
         </div>
+
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="w-full py-4 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isSaving ? (
+            <>
+              <FaSpinner className="animate-spin" /> Salvando...
+            </>
+          ) : (
+            <>
+              <FaSave /> Salvar Produto Completo
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

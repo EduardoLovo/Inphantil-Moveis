@@ -94,6 +94,12 @@ const Header = () => {
               Início
             </Link>
             <Link
+              to="/products"
+              className="text-gray-200 hover:text-[#ffffbc] font-medium transition-colors"
+            >
+              Loja
+            </Link>
+            <Link
               to="/pos-compra"
               className="text-gray-200 hover:text-[#ffffbc] font-medium transition-colors"
             >
@@ -245,6 +251,12 @@ const Header = () => {
                     className="text-sm font-medium text-gray-200 hover:text-white"
                   >
                     Meu Perfil
+                  </Link>
+                  <Link
+                    to="/meus-pedidos"
+                    className="text-sm font-medium text-gray-200 hover:text-white"
+                  >
+                    Meus Pedidos
                   </Link>
                   <button
                     onClick={handleLogout}

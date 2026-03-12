@@ -11,6 +11,7 @@ async function bootstrap() {
             'https://www.inphantil.com.br', // O NOVO COM WWW
             'https://inphantil.com.br', // O NOVO SEM WWW
             'http://localhost:5173',
+            'http://192.168.0.110:5173',
         ],
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
@@ -40,11 +41,13 @@ async function bootstrap() {
     // (Ex: http://localhost:3000/api)
     SwaggerModule.setup('api', app, document);
 
-    await app.listen(process.env.PORT ?? 3000);
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('Api em produção');
+    await app.listen(process.env.PORT || 3000);
+    if (process.env.NODE_ENV === 'production') {
+        console.log('🚀 API Inphantil rodando em PRODUÇÃO');
     } else {
-        console.log(`Server running on http://localhost:3000`);
+        console.log(
+            '💻 API Inphantil rodando localmente em http://localhost:3000',
+        );
     }
 }
 bootstrap();

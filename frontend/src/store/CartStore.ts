@@ -1,18 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Product } from "../types/products";
+import type { Product, ProductVariant } from "../types/products";
 
-// Extende o tipo Produto para incluir quantidade no carrinho
 export interface CartItem extends Product {
+  cartItemId: string; // NOVO: ID único no carrinho (ex: "produto1-variante5")
   quantity: number;
-  imageUrl?: string;
+  selectedVariant?: ProductVariant; // NOVO: Guarda os dados da variação escolhida
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  // Atualizado para aceitar a variante opcionalmente
+  addItem: (product: Product, variant?: ProductVariant) => void;
+  removeItem: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
   getTotal: () => number;
   getCount: () => number;
@@ -23,43 +24,59 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product) => {
+      addItem: (product, variant) => {
+        // Cria um ID único combinando o Produto e a Variante
+        const cartItemId = variant
+          ? `${product.id}-${variant.id}`
+          : `${product.id}-base`;
         const currentItems = get().items;
         const existingItem = currentItems.find(
-          (item) => item.id === product.id,
+          (item) => item.cartItemId === cartItemId,
         );
 
         if (existingItem) {
-          // Se já existe, aumenta a quantidade
+          // Se já existe EXATAMENTE a mesma variação no carrinho, só aumenta a quantidade
           set({
             items: currentItems.map((item) =>
-              item.id === product.id
+              item.cartItemId === cartItemId
                 ? { ...item, quantity: item.quantity + 1 }
                 : item,
             ),
           });
         } else {
-          // Se não, adiciona com quantidade 1
+          // Pega o preço da variação (se existir), senão pega do produto base
+          const priceToUse = variant
+            ? Number(variant.price)
+            : Number(product.price);
+
           set({
-            items: [...currentItems, { ...product, quantity: 1 }],
+            items: [
+              ...currentItems,
+              {
+                ...product,
+                price: priceToUse, // Sobrescreve o preço para o valor da variação
+                cartItemId,
+                selectedVariant: variant,
+                quantity: 1,
+              },
+            ],
           });
         }
       },
 
-      removeItem: (productId) => {
+      removeItem: (cartItemId) => {
         set({
-          items: get().items.filter((item) => item.id !== productId),
+          items: get().items.filter((item) => item.cartItemId !== cartItemId),
         });
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (cartItemId, quantity) => {
         if (quantity <= 0) {
-          // Se diminuir para 0, remove o item
-          get().removeItem(productId);
+          get().removeItem(cartItemId);
         } else {
           set({
             items: get().items.map((item) =>
-              item.id === productId ? { ...item, quantity } : item,
+              item.cartItemId === cartItemId ? { ...item, quantity } : item,
             ),
           });
         }
@@ -69,7 +86,7 @@ export const useCartStore = create<CartState>()(
 
       getTotal: () => {
         return get().items.reduce(
-          (total, item) => total + item.price * item.quantity,
+          (total, item) => total + Number(item.price) * item.quantity,
           0,
         );
       },

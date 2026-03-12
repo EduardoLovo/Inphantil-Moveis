@@ -231,6 +231,11 @@ const DashboardPage = () => {
           <section>
             <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
               <FaBoxOpen className="text-[#ffd639]" /> Meus Pedidos
+              <Link to="/meus-pedidos" className="ml-auto">
+                <span className="text-xs font-bold text-blue-600">
+                  Ver todos os pedidos
+                </span>
+              </Link>
             </h2>
 
             {ordersLoading ? (
@@ -256,57 +261,59 @@ const DashboardPage = () => {
                     key={order.id}
                     className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 pb-3 border-b border-gray-50 gap-2">
-                      <div>
-                        <span className="font-bold text-[#313b2f]">
-                          Pedido #{order.id}
-                        </span>
-                        <span className="text-gray-400 mx-2">|</span>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(order.createdAt)}
-                        </span>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${STATUS_STYLES[order.status] || "bg-gray-100 text-gray-600"}`}
-                      >
-                        {STATUS_MAP[order.status] || order.status}
-                      </span>
-
-                      <button
-                        onClick={() => handleDownloadPDF(order)}
-                        title="Baixar PDF"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#e74c3c", // Cor vermelha estilo PDF
-                          fontSize: "1.2em",
-                        }}
-                      >
-                        <FaFilePdf />
-                      </button>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-gray-600">
-                        {order.items?.length} item(s)
-                      </div>
-                      <div className="text-lg font-bold text-green-600">
-                        {formatPrice(order.total)}
-                      </div>
-                    </div>
-
-                    {/* Lista resumida de produtos */}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {order.items?.map((item) => (
+                    <Link to={`/pedidos/${order.id}`} className="">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 pb-3 border-b border-gray-50 gap-2">
+                        <div>
+                          <span className="font-bold text-[#313b2f]">
+                            Pedido #{order.id}
+                          </span>
+                          <span className="text-gray-400 mx-2">|</span>
+                          <span className="text-sm text-gray-500">
+                            {formatDate(order.createdAt)}
+                          </span>
+                        </div>
                         <span
-                          key={item.id}
-                          className="bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded border border-gray-100"
+                          className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${STATUS_STYLES[order.status] || "bg-gray-100 text-gray-600"}`}
                         >
-                          {item.quantity}x {item.product?.name}
+                          {STATUS_MAP[order.status] || order.status}
                         </span>
-                      ))}
-                    </div>
+
+                        <button
+                          onClick={() => handleDownloadPDF(order)}
+                          title="Baixar PDF"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#e74c3c", // Cor vermelha estilo PDF
+                            fontSize: "1.2em",
+                          }}
+                        >
+                          <FaFilePdf />
+                        </button>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          {order.items?.length} item(s)
+                        </div>
+                        <div className="text-lg font-bold text-green-600">
+                          {formatPrice(order.total)}
+                        </div>
+                      </div>
+
+                      {/* Lista resumida de produtos */}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {order.items?.map((item) => (
+                          <span
+                            key={item.id}
+                            className="bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded border border-gray-100"
+                          >
+                            {item.quantity}x {item.product?.name}
+                          </span>
+                        ))}
+                      </div>
+                    </Link>
                   </div>
                 ))}
               </div>

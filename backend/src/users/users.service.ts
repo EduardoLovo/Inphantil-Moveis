@@ -34,7 +34,7 @@ export class UsersService {
                     include: {
                         items: {
                             include: {
-                                product: true, // Inclui nome do produto no pedido
+                                variant: { include: { product: true } },
                             },
                         },
                     },

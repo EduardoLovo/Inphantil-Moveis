@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { downloadRelatorioCotacoes } from "../services/api";
 
 export const AdminReportsPage = () => {

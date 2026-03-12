@@ -8,7 +8,6 @@ import {
   FaEdit,
   FaTrashAlt,
   FaImage,
-  FaSpinner,
   FaSearch,
 } from "react-icons/fa";
 
@@ -41,16 +40,16 @@ const AdminProductsPage: React.FC = () => {
     }
   };
 
-  const formatPrice = (val: number) =>
-    val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-  if (isLoading)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-500 animate-pulse">
-        <FaSpinner className="animate-spin text-4xl text-[#ffd639] mb-4" />
-        <p className="text-lg font-medium">Carregando Produtos...</p>
-      </div>
-    );
+  const formatPrice = (price?: number | string) => {
+    // Se o preço não existir ou for inválido, retorna R$ 0,00 para não quebrar a tela
+    if (price === undefined || price === null || isNaN(Number(price))) {
+      return "R$ 0,00";
+    }
+    return Number(price).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto  space-y-8 animate-in fade-in duration-500">
@@ -170,15 +169,11 @@ const AdminProductsPage: React.FC = () => {
               >
                 <td className="p-4">
                   <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <FaImage className="text-gray-300" />
-                    )}
+                    <img
+                      src={product.mainImage}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </td>
                 <td className="p-5">
@@ -200,21 +195,30 @@ const AdminProductsPage: React.FC = () => {
                     </span>
                   )}
                 </td>
-                <td className="p-5 font-bold text-[#313b2f] text-sm">
-                  {formatPrice(product.price)}
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#313b2f]">
+                  {product.variants && product.variants.length > 0
+                    ? formatPrice(product.variants[0].price)
+                    : formatPrice(0)}
                 </td>
-                <td className="p-5 text-center">
-                  <span
-                    className={`inline-flex px-2 py-1 rounded text-xs font-bold ${
-                      product.stock > 5
-                        ? "bg-green-100 text-green-700"
-                        : product.stock > 0
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.stock} un.
-                  </span>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    {product.variants &&
+                    product.variants.reduce(
+                      (total, v) => total + (v.stock || 0),
+                      0,
+                    ) > 0 ? (
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                    )}
+                    {product.variants
+                      ? product.variants.reduce(
+                          (total, v) => total + (v.stock || 0),
+                          0,
+                        )
+                      : 0}{" "}
+                    un
+                  </div>
                 </td>
                 <td className="p-5 text-right">
                   <div className="flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">

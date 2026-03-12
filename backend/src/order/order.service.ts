@@ -7,14 +7,30 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Prisma } from '@prisma/client';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-// import { UpdateOrderDto } from './dto/update-order.dto'; // Usaremos depois para status
+import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from 'src/mail/mail.service';
+// 👉 1. IMPORTAMOS O NOSSO NOVO SERVIÇO DE INTEGRAÇÃO
+import { SevenService } from '../integrations/seven/seven.service';
 
 @Injectable()
 export class OrderService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private mailerService: MailerService,
+        private mailService: MailService,
+        // private sevenService: SevenService,
+    ) {}
 
     async create(userId: number, dto: CreateOrderDto) {
-        // 1. Buscar Endereço (e verificar se pertence ao usuário)
+        // 1. Atualiza o CPF do cliente se ele foi enviado no momento da compra
+        if (dto.cpf) {
+            await this.prisma.user.update({
+                where: { id: userId },
+                data: { cpf: dto.cpf },
+            });
+        }
+
+        // 2. Buscar Endereço
         const address = await this.prisma.address.findUnique({
             where: { id: dto.addressId },
         });
@@ -24,15 +40,20 @@ export class OrderService {
             );
         }
 
-        // 2. Buscar Produtos para pegar preço atual e validar estoque
-        // Extrai os IDs dos produtos enviados
+        // 3. Extrai IDs dos Produtos e Variações
         const productIds = dto.items.map((item) => item.productId);
+        const variantIds = dto.items
+            .filter((item) => item.variantId)
+            .map((item) => item.variantId as number);
 
         const products = await this.prisma.product.findMany({
             where: { id: { in: productIds } },
         });
+        const variants = await this.prisma.productVariant.findMany({
+            where: { id: { in: variantIds } },
+        });
 
-        // 3. Validar Produtos e Calcular Total
+        // 4. Validar Estoque e Calcular Total
         let total = 0;
         const orderItemsData: Prisma.OrderItemCreateWithoutOrderInput[] = [];
 
@@ -44,77 +65,152 @@ export class OrderService {
                     `Produto ID ${itemDto.productId} não encontrado.`,
                 );
             }
-
             if (!product.isAvailable) {
                 throw new BadRequestException(
                     `Produto "${product.name}" indisponível.`,
                 );
             }
 
-            if (product.stock < itemDto.quantity) {
-                throw new BadRequestException(
-                    `Estoque insuficiente para "${product.name}". Restam: ${product.stock}.`,
+            let unitPrice = 0;
+
+            // Se o item tem variação
+            if (itemDto.variantId) {
+                const variant = variants.find(
+                    (v) => v.id === itemDto.variantId,
                 );
-            }
+                if (!variant)
+                    throw new BadRequestException(
+                        `Variação ID ${itemDto.variantId} não encontrada.`,
+                    );
+                if (variant.stock < itemDto.quantity) {
+                    throw new BadRequestException(
+                        `Estoque insuficiente para a variação de "${product.name}". Restam: ${variant.stock}.`,
+                    );
+                }
 
-            // Calcula preço * quantidade
-            // Convertendo Decimal do Prisma para Number JS para cálculo
-            const unitPrice = Number(product.price);
-            total += unitPrice * itemDto.quantity;
+                unitPrice = Number(variant.price);
+                total += unitPrice * itemDto.quantity;
 
-            // Prepara dados para criar o OrderItem
-            orderItemsData.push({
-                quantity: itemDto.quantity,
-                price: unitPrice, // PREÇO CONGELADO NO MOMENTO DA COMPRA
-                product: {
-                    // <-- Usa o nome do relacionamento (model 'product')
-                    connect: { id: product.id }, // <-- Diz ao Prisma para conectar a um produto existente
-                },
-            });
-        }
-
-        // 4. Transação Atômica (Tudo ou Nada)
-        return this.prisma.$transaction(async (tx) => {
-            // A. Criar o Pedido
-            const order = await tx.order.create({
-                data: {
-                    userId,
-                    addressId: dto.addressId,
-                    total: total,
-                    status: 'PENDING', // Padrão
-                    items: {
-                        create: orderItemsData, // Cria os itens e vincula automaticamente
-                    },
-                },
-                include: {
-                    items: true, // Retorna os itens criados na resposta
-                },
-            });
-
-            // B. Baixar Estoque dos Produtos
-            for (const item of dto.items) {
-                await tx.product.update({
-                    where: { id: item.productId },
-                    data: {
-                        stock: {
-                            decrement: item.quantity, // Subtrai a quantidade vendida
-                        },
-                    },
+                orderItemsData.push({
+                    quantity: itemDto.quantity,
+                    price: unitPrice,
+                    product: { connect: { id: product.id } },
+                    variant: { connect: { id: variant.id } }, // <-- Salva a variação
                 });
             }
+            // Se NÃO tem variação
+            else {
+                if (product.stock < itemDto.quantity) {
+                    throw new BadRequestException(
+                        `Estoque insuficiente para "${product.name}". Restam: ${product.stock}.`,
+                    );
+                }
 
-            return order;
-        });
+                unitPrice = Number(product.price);
+                total += unitPrice * itemDto.quantity;
+
+                orderItemsData.push({
+                    quantity: itemDto.quantity,
+                    price: unitPrice,
+                    product: { connect: { id: product.id } },
+                });
+            }
+        }
+
+        // 5. Transação (AQUI O PEDIDO É CRIADO DE FATO NO BANCO DE DADOS)
+        const order = await this.prisma.$transaction(
+            async (tx) => {
+                const newOrder = await tx.order.create({
+                    data: {
+                        userId,
+                        addressId: dto.addressId,
+                        total: total,
+                        status: 'PENDING',
+                        items: { create: orderItemsData },
+                    },
+                    include: { items: true },
+                });
+
+                // Baixar Estoque corretamente após a compra
+                for (const item of dto.items) {
+                    if (item.variantId) {
+                        await tx.productVariant.update({
+                            where: { id: item.variantId },
+                            data: { stock: { decrement: item.quantity } },
+                        });
+                    } else {
+                        await tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } },
+                        });
+                    }
+                }
+
+                return newOrder;
+            },
+            {
+                maxWait: 10000,
+                timeout: 15000,
+            },
+        );
+
+        // 6. ENVIAR O E-MAIL
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+            });
+
+            if (user) {
+                await this.mailerService.sendMail({
+                    to: user.email,
+                    subject: `🛒 Pedido #${order.id} recebido com sucesso! - Inphantil`,
+                    html: `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #313b2f; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaea; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #ffd639; margin: 0; font-size: 28px;">Oba! Pedido Recebido 🎉</h1>
+              </div>
+              <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${user.name}</strong>!</p>
+              <p style="font-size: 16px; line-height: 1.6;">Que alegria ter você aqui! Os seus produtos já estão no nosso radar. O seu pedido <strong>#${order.id}</strong> foi gerado com sucesso no nosso sistema.</p>
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #ffd639;">
+                <h3 style="margin-top: 0; color: #313b2f; font-size: 16px;">O que acontece agora?</h3>
+                <ul style="margin-bottom: 0; padding-left: 20px; font-size: 15px; line-height: 1.6; color: #555;">
+                  <li><strong>Se escolheu Pix:</strong> O seu pedido só será confirmado após o pagamento do QR Code gerado no final da compra. A aprovação é imediata!</li>
+                  <li><strong>Se escolheu Cartão:</strong> O seu pagamento está em análise pela administradora. Se estiver tudo certo, começaremos a preparar a sua encomenda em breve.</li>
+                </ul>
+              </div>
+              <p style="font-size: 16px; line-height: 1.6; text-align: center;">Pode acompanhar o status da sua encomenda a qualquer momento clicando no botão abaixo:</p>
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/meus-pedidos" 
+                   style="background-color: #313b2f; color: #ffd639; padding: 14px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block;">
+                  Ver Meus Pedidos
+                </a>
+              </div>
+              <p style="font-size: 16px; color: #888; text-align: center; border-top: 1px solid #eaeaea; padding-top: 20px;">
+                Feito com carinho, <br/>
+                <strong style="color: #313b2f;">Equipe Inphantil</strong>
+              </p>
+            </div>
+          `,
+                });
+                console.log(
+                    `E-mail de confirmação enviado com sucesso para ${user.email}`,
+                );
+            }
+        } catch (error) {
+            console.error('Erro ao enviar o e-mail de confirmação:', error);
+        }
+
+        return order;
     }
 
     async findAll(userId: number) {
         return this.prisma.order.findMany({
-            where: { userId }, // Apenas pedidos do usuário
+            where: { userId },
             include: {
                 items: {
-                    include: { product: true }, // Inclui detalhes do produto no item
+                    include: { product: true, variant: true },
                 },
-                address: true, // Inclui detalhes do endereço
+                address: true,
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -124,17 +220,12 @@ export class OrderService {
         const order = await this.prisma.order.findUnique({
             where: { id },
             include: {
-                items: { include: { product: true } },
+                items: { include: { product: true, variant: true } },
                 address: true,
             },
         });
 
-        if (!order) throw new NotFoundException('Pedido não encontrado.');
-
-        // Regra de Segurança: Só o dono (ou Admin) pode ver
-        // (Aqui simplificado para o dono)
-        if (order.userId !== userId) {
-            // Em um cenário real, ADMIN poderia ver. Aqui bloqueamos.
+        if (!order || order.userId !== userId) {
             throw new NotFoundException('Pedido não encontrado.');
         }
 
@@ -144,9 +235,9 @@ export class OrderService {
     async findAllAdmin() {
         return this.prisma.order.findMany({
             include: {
-                user: true, // Inclui dados do usuário que fez o pedido
+                user: true,
                 items: {
-                    include: { product: true },
+                    include: { product: true, variant: true },
                 },
                 address: true,
             },
@@ -154,33 +245,67 @@ export class OrderService {
         });
     }
 
-    /**
-     * Atualiza o status de um pedido específico
-     */
     async updateStatus(id: number, updateDto: UpdateOrderStatusDto) {
+        // 1. Puxa o status antigo antes de atualizar
         const order = await this.prisma.order.findUnique({
             where: { id },
-            select: { status: true }, // Seleciona apenas o status para a verificação inicial
+            select: { status: true },
         });
 
         if (!order) {
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
         }
 
-        return this.prisma.order.update({
+        // 👉 3. AQUI FIZEMOS UM AJUSTE: Precisamos incluir os dados completos pro Seven!
+        const updatedOrder = await this.prisma.order.update({
             where: { id },
-            data: {
-                status: updateDto.status, // Novo status (válido pelo DTO)
-            },
+            data: { status: updateDto.status },
             include: {
                 user: true,
-                items: true,
+                address: true, // Adicionado para enviar o CEP pro Seven
+                items: { include: { variant: true } }, // Adicionado para enviar o SKU pro Seven
             },
         });
+
+        // 4. GATILHO MÁGICO: Dispara o e-mail E o ERP se o status mudou para PAGO ('PAID')
+        if (
+            order.status !== 'PAID' &&
+            updateDto.status === 'PAID' &&
+            updatedOrder.user
+        ) {
+            // Gatilho do E-mail
+            this.mailService
+                .sendPaymentApprovedEmail(
+                    updatedOrder,
+                    updatedOrder.user.email,
+                    updatedOrder.user.name,
+                )
+                .catch((error) => {
+                    console.error(
+                        `Erro ao disparar e-mail de pagamento do pedido ${id}:`,
+                        error,
+                    );
+                });
+
+            // 👉 5. GATILHO DO ERP SEVEN (Disparado em background)
+            // this.sevenService
+            //     .enviarPedidoParaOSeven(
+            //         updatedOrder,
+            //         updatedOrder.user,
+            //         updatedOrder.address,
+            //     )
+            //     .catch((err) => {
+            //         console.error(
+            //             `Erro crítico na integração com o Seven do pedido ${id}:`,
+            //             err,
+            //         );
+            //     });
+        }
+
+        return updatedOrder;
     }
 
     async remove(id: number) {
-        // 1. Busca o pedido com os itens para saber o que devolver ao estoque
         const order = await this.prisma.order.findUnique({
             where: { id },
             include: { items: true },
@@ -190,24 +315,22 @@ export class OrderService {
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
         }
 
-        // 2. Transação: Restaura Estoque + Deleta Pedido
         return this.prisma.$transaction(async (tx) => {
-            // A. Devolve a quantidade de cada item para o produto correspondente
             for (const item of order.items) {
-                await tx.product.update({
-                    where: { id: item.productId },
-                    data: {
-                        stock: {
-                            increment: item.quantity, // Soma de volta ao estoque
-                        },
-                    },
-                });
+                if (item.variantId) {
+                    await tx.productVariant.update({
+                        where: { id: item.variantId },
+                        data: { stock: { increment: item.quantity } },
+                    });
+                } else {
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: { stock: { increment: item.quantity } },
+                    });
+                }
             }
 
-            // B. Deleta o pedido (os OrderItems são deletados automaticamente por causa do onDelete: Cascade no Schema)
-            return tx.order.delete({
-                where: { id },
-            });
+            return tx.order.delete({ where: { id } });
         });
     }
 }

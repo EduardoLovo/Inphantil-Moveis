@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core'; // ⬅️ Importe o APP_GUARD
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config'; // Importe
+import { ConfigModule, ConfigService } from '@nestjs/config'; // Importe
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { LogModule } from './log/log.module';
@@ -23,6 +23,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { UsersModule } from './users/users.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { ShippingQuoteModule } from './shipping-quote/shipping-quote.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
     imports: [
@@ -31,20 +32,24 @@ import { ShippingQuoteModule } from './shipping-quote/shipping-quote.module';
             // Adicione esta linha
             isGlobal: true, // Torna as configs globais
         }),
-        MailerModule.forRoot({
-            transport: {
-                host: process.env.MAIL_HOST,
-                port: Number(process.env.MAIL_PORT),
-                secure: false, // true para 465, false para outras portas
-                auth: {
-                    user: process.env.MAIL_USER,
-                    pass: process.env.MAIL_PASS,
+        MailerModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+                transport: {
+                    host: config.get('SMTP_HOST'),
+                    port: config.get('SMTP_PORT'),
+                    secure: true, // true para a porta 465 do Zoho
+                    auth: {
+                        user: config.get('SMTP_USER'),
+                        pass: config.get('SMTP_PASS'),
+                    },
                 },
-            },
-            defaults: {
-                from:
-                    process.env.MAIL_FROM || '"No Reply" <noreply@example.com>',
-            },
+                defaults: {
+                    // IMPORTANTE: O Zoho exige que o "from" seja EXATAMENTE o mesmo do SMTP_USER
+                    from: `"Inphantil Móveis" <${config.get('SMTP_USER')}>`,
+                },
+            }),
         }),
         PrismaModule,
         AuthModule,
@@ -63,6 +68,7 @@ import { ShippingQuoteModule } from './shipping-quote/shipping-quote.module';
         UsersModule,
         ProxyModule,
         ShippingQuoteModule,
+        PaymentModule,
     ],
     controllers: [AppController],
     providers: [

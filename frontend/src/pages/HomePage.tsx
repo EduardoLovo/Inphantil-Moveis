@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   FaCamera,
@@ -184,7 +184,19 @@ const HomePage = () => {
     visible: { opacity: 1, transition: { duration: 1 } },
   };
 
-  const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 4);
+  const featuredVariants = useMemo(() => {
+    const featured: any[] = [];
+    products.forEach((product) => {
+      if (product.variants && product.variants.length > 0) {
+        product.variants.forEach((variant) => {
+          if (variant.isFeatured) {
+            featured.push({ product, variant });
+          }
+        });
+      }
+    });
+    return featured;
+  }, [products]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -201,7 +213,7 @@ const HomePage = () => {
             <motion.img
               src="https://i.pinimg.com/736x/b2/e8/af/b2e8af76c335439ed983de05fa17a7bc.jpg"
               alt="Camas Montessorianas"
-              className="w-full h-full object-cover object-center md:object-[0_-650px]"
+              className="w-full h-full object-cover object-center md:object-[0_-800px]"
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 1.5 }}
@@ -251,60 +263,92 @@ const HomePage = () => {
 
           {/* --- PRODUTOS EM DESTAQUE --- */}
           <motion.section
-            className="max-w-7xl mx-auto py-16 px-6 text-center"
+            className="info-section p-8 max-w-7xl mx-auto w-full"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
             variants={slideInLeft}
           >
-            <h2 className="text-[#313b2f] text-3xl font-bold mb-4 ">
-              Nossos Produtos
+            <h2 className="text-3xl font-bold text-[#313b2f] mb-2 text-center">
+              Nossos Destaques
             </h2>
-            <p className="text-[#313b2f] text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-              Veja nossos produtos mais vendidos e encontre o item perfeito para
-              o seu lar.
+            <p className="text-gray-500 mb-8 text-center">
+              Veja os modelos e cores mais amados pelos nossos clientes.
             </p>
 
-            {featuredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                {featuredProducts.map((product) => (
-                  <Link
-                    key={product.id}
-                    to={`/products/${product.id}`}
-                    className="block group h-full"
-                  >
-                    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col justify-between">
-                      <div className="mb-4 overflow-hidden rounded-lg h-48">
-                        <img
-                          src={product.mainImage}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+            {featuredVariants.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 text-left">
+                {featuredVariants.map(({ product, variant }) => {
+                  // Tenta pegar a foto da variação; se não tiver, usa a foto base do produto
+                  let displayImage = product.mainImage;
+                  if (variant.images && variant.images.length > 0) {
+                    displayImage = variant.images[0].url;
+                  } else if ((variant as any).imageUrl) {
+                    displayImage = (variant as any).imageUrl;
+                  }
+
+                  return (
+                    <Link
+                      key={`${product.id}-${variant.id}`}
+                      // A MÁGICA: O Link já joga os parâmetros de cor e tamanho na URL da página de detalhes
+                      to={`/products/${product.id}?color=${encodeURIComponent(variant.color)}&size=${encodeURIComponent(variant.size)}`}
+                      className="block group h-full"
+                    >
+                      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col justify-between">
+                        <div className="mb-4 overflow-hidden rounded-lg h-48 bg-gray-50">
+                          {displayImage ? (
+                            <img
+                              src={displayImage}
+                              alt={`${product.name} - ${variant.color}`}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                              Sem Imagem
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-semibold text-[#313b2f] mb-1 line-clamp-2">
+                            {product.name}
+                          </h3>
+
+                          {/* Mini Tag com a cor e tamanho do destaque */}
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200">
+                              <span className="font-bold">Cor:</span>{" "}
+                              {variant.color}
+                            </span>
+                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200">
+                              <span className="font-bold">Tam:</span>{" "}
+                              {variant.size}
+                            </span>
+                          </div>
+
+                          <p className="text-xl font-bold text-[#ffd639] drop-shadow-sm">
+                            {formatPrice(variant.price)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2 ">
-                          {product.name}
-                        </h3>
-                        <p className="text-xl font-bold text-[#d66f56]">
-                          {formatPrice(product.price)}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
-              <p className="italic text-gray-500 my-10">
+              <p className="italic text-gray-500 my-10 text-center">
                 Carregando destaques...
               </p>
             )}
 
-            <Link
-              to="/products"
-              className="inline-flex items-center justify-center px-8 py-3 bg-[#313b2f] text-[#cbcfd1] font-bold rounded-full hover:bg-gray-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-            >
-              Ver Catálogo Completo
-            </Link>
+            <div className="flex justify-center mt-6">
+              <Link
+                to="/products"
+                className="inline-flex items-center justify-center px-8 py-3 bg-[#313b2f] text-white font-bold rounded-full hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+              >
+                Ver Catálogo Completo
+              </Link>
+            </div>
           </motion.section>
 
           <hr className="border-gray-200 max-w-5xl mx-auto" />
@@ -456,23 +500,6 @@ const HomePage = () => {
               </a>
             </p>
           </motion.section>
-
-          {/* --- VÍDEO IFRAME --- */}
-          <div className="flex justify-center pb-12 px-4">
-            <div className="rounded-xl overflow-hidden shadow-xl border-4 border-white">
-              <iframe
-                width="260"
-                height="460"
-                src="https://res.cloudinary.com/dtghitaah/video/upload/v1765914375/WhatsApp_Video_2025-12-11_at_08.10.34_wu55ow.mp4"
-                title="Alinhamento de Cama Phant"
-                frameBorder="0"
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                className="block"
-              ></iframe>
-            </div>
-          </div>
         </main>
 
         {/* --- MODAL DE GALERIA RENDERIZADO --- */}

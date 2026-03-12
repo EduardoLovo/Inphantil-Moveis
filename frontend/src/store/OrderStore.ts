@@ -1,93 +1,109 @@
-import { create } from 'zustand';
-import { api } from '../services/api';
-import type { Order, OrderStatus } from '../types/order';
-import axios from 'axios';
+import { create } from "zustand";
+import { api } from "../services/api";
+import type { Order, OrderStatus } from "../types/order";
+import axios from "axios";
 
 interface OrderState {
-    orders: Order[];
-    isLoading: boolean;
-    error: string | null;
+  orders: Order[];
+  isLoading: boolean;
+  error: string | null;
 
-    fetchAllOrders: () => Promise<void>;
-    fetchMyOrders: () => Promise<void>;
-    updateOrderStatus: (
-        orderId: number,
-        newStatus: OrderStatus
-    ) => Promise<void>;
-    deleteOrder: (id: number) => Promise<void>;
+  fetchAllOrders: () => Promise<void>;
+  fetchMyOrders: () => Promise<void>;
+  updateOrderStatus: (orderId: number, newStatus: OrderStatus) => Promise<void>;
+  deleteOrder: (id: number) => Promise<void>;
+
+  createOrder: (orderData: {
+    addressId: number;
+    items: any[];
+    cpf: string;
+  }) => Promise<Order>;
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
-    orders: [],
-    isLoading: false,
-    error: null,
+  orders: [],
+  isLoading: false,
+  error: null,
 
-    fetchAllOrders: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            // Rota administrativa que lista TUDO
-            const response = await api.get('/orders/admin/all');
-            console.log('Teste de pedidos');
+  // --- NOVA FUNÇÃO DE CRIAR PEDIDO ---
+  createOrder: async (orderData) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Chama o NestJS para criar o pedido no banco (Prisma)
+      const response = await api.post("/orders", orderData);
 
-            set({ orders: response.data, isLoading: false });
-        } catch (error) {
-            const msg = axios.isAxiosError(error)
-                ? error.response?.data?.message || 'Erro ao carregar pedidos.'
-                : 'Erro de conexão.';
-            set({ isLoading: false, error: msg });
-        }
-    },
+      // Adiciona o novo pedido à lista local
+      set((state) => ({
+        orders: [response.data, ...state.orders],
+        isLoading: false,
+      }));
 
-    fetchMyOrders: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            // Chama a rota GET /orders (que já filtra pelo usuário no backend)
-            const response = await api.get('/orders');
-            set({ orders: response.data, isLoading: false });
-        } catch (error) {
-            const msg = axios.isAxiosError(error)
-                ? error.response?.data?.message ||
-                  'Erro ao carregar seus pedidos.'
-                : 'Erro de conexão.';
-            set({ isLoading: false, error: msg });
-        }
-    },
+      return response.data; // Retorna o pedido criado para usarmos o ID no Checkout!
+    } catch (error) {
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Erro ao criar pedido."
+        : "Erro de conexão ao criar pedido.";
+      set({ isLoading: false, error: msg });
+      throw new Error(msg);
+    }
+  },
+  // -----------------------------------
 
-    updateOrderStatus: async (orderId, newStatus) => {
-        try {
-            const response = await api.patch(`/orders/${orderId}/status`, {
-                status: newStatus,
-            });
-            const updatedOrder = response.data;
+  fetchAllOrders: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.get("/orders/admin/all");
+      set({ orders: response.data, isLoading: false });
+    } catch (error) {
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Erro ao carregar pedidos."
+        : "Erro de conexão.";
+      set({ isLoading: false, error: msg });
+    }
+  },
 
-            // Atualiza a lista localmente
-            set((state) => ({
-                orders: state.orders.map((order) =>
-                    order.id === orderId
-                        ? { ...order, status: updatedOrder.status }
-                        : order
-                ),
-            }));
-            alert(`Status do pedido #${orderId} atualizado para ${newStatus}!`);
-        } catch (error) {
-            console.error(error);
-            alert('Erro ao atualizar status.');
-        }
-    },
+  fetchMyOrders: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.get("/orders");
+      set({ orders: response.data, isLoading: false });
+    } catch (error) {
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Erro ao carregar seus pedidos."
+        : "Erro de conexão.";
+      set({ isLoading: false, error: msg });
+    }
+  },
 
-    deleteOrder: async (id) => {
-        try {
-            await api.delete(`/orders/${id}`);
+  updateOrderStatus: async (orderId, newStatus) => {
+    try {
+      const response = await api.patch(`/orders/${orderId}/status`, {
+        status: newStatus,
+      });
+      const updatedOrder = response.data;
 
-            // Remove o pedido da lista localmente para atualizar a tela sem recarregar
-            set((state) => ({
-                orders: state.orders.filter((order) => order.id !== id),
-            }));
+      set((state) => ({
+        orders: state.orders.map((order) =>
+          order.id === orderId
+            ? { ...order, status: updatedOrder.status }
+            : order,
+        ),
+      }));
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao atualizar status.");
+    }
+  },
 
-            alert('Pedido excluído com sucesso!');
-        } catch (error) {
-            console.error(error);
-            alert('Erro ao excluir pedido.');
-        }
-    },
+  deleteOrder: async (id) => {
+    try {
+      await api.delete(`/orders/${id}`);
+      set((state) => ({
+        orders: state.orders.filter((order) => order.id !== id),
+      }));
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao excluir pedido.");
+    }
+  },
 }));

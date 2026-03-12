@@ -68,8 +68,8 @@ const AdminOrdersPage: React.FC = () => {
 
     // Dados do Pedido e Cliente
     doc.setFontSize(12);
-    doc.text(`Cliente: ${order.user.name}`, 20, 50);
-    doc.text(`Email: ${order.user.email}`, 20, 60);
+    doc.text(`Cliente: ${order.user?.name || "Cliente Desconhecido"}`, 20, 50);
+    doc.text(`Email: ${order.user?.email || "Sem email"}`, 20, 60);
     doc.text(
       `Data do Pedido: ${new Date(order.createdAt).toLocaleDateString("pt-BR")}`,
       20,
@@ -88,12 +88,29 @@ const AdminOrdersPage: React.FC = () => {
     doc.setFontSize(12);
     let yPos = 110;
 
-    order.items.forEach((item: any) => {
-      const itemText = `${item.quantity}x ${item.product.name}`;
-      // splitTextToSize quebra o texto se for muito longo
+    order.items?.forEach((item: any) => {
+      const itemName = item.product?.name || "Produto não encontrado";
+
+      // FORMATAÇÃO DA VARIANTE PARA O PDF
+      let variantText = "";
+      if (item.variant) {
+        const details = [];
+        if (item.variant.color && item.variant.color !== "Cor Única") {
+          details.push(`Cor: ${item.variant.color}`);
+        }
+        if (item.variant.size) {
+          details.push(`Tam: ${item.variant.size}`);
+        }
+        if (details.length > 0) {
+          variantText = ` (${details.join(" | ")})`;
+        }
+      }
+
+      const itemText = `${item.quantity}x ${itemName}${variantText}`;
+
       const splitText = doc.splitTextToSize(itemText, 170);
       doc.text(splitText, 20, yPos);
-      yPos += 7 * splitText.length + 5; // Ajusta altura dinamicamente
+      yPos += 7 * splitText.length + 3;
     });
 
     // Total e Rodapé
@@ -106,7 +123,6 @@ const AdminOrdersPage: React.FC = () => {
       align: "center",
     });
 
-    // Salvar arquivo
     doc.save(`pedido_${order.id}_producao.pdf`);
   };
 
@@ -152,7 +168,6 @@ const AdminOrdersPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
         <div>
           <h1 className="flex items-center gap-3 text-3xl font-bold text-[#313b2f]">
@@ -181,7 +196,6 @@ const AdminOrdersPage: React.FC = () => {
             key={order.id}
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 relative overflow-hidden"
           >
-            {/* Faixa lateral colorida baseada no status */}
             <div
               className={`absolute left-0 top-0 bottom-0 w-1 ${STATUS_STYLES[order.status]?.split(" ")[0].replace("bg-", "bg-")}`}
             />
@@ -205,7 +219,9 @@ const AdminOrdersPage: React.FC = () => {
             <div className="pl-3 space-y-3 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <FaUser className="text-gray-400" />
-                <span className="font-medium">{order.user.name}</span>
+                <span className="font-medium">
+                  {order.user?.name || "Cliente Excluído"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <FaClock className="text-gray-400" />
@@ -220,11 +236,21 @@ const AdminOrdersPage: React.FC = () => {
                 <p className="text-xs font-bold text-gray-500 uppercase mb-2">
                   Itens:
                 </p>
-                <ul className="list-disc pl-4 space-y-1">
-                  {order.items.map((item) => (
+                <ul className="list-disc pl-4 space-y-2">
+                  {order.items?.map((item) => (
                     <li key={item.id} className="text-xs">
-                      <span className="font-bold">{item.quantity}x</span>{" "}
-                      {item.product.name}
+                      <div>
+                        <span className="font-bold">{item.quantity}x</span>{" "}
+                        {item.product?.name || "Produto Indisponível"}
+                      </div>
+                      {/* MOSTRANDO VARIAÇÃO NO MOBILE */}
+                      {item.variant && (
+                        <div className="text-[10px] text-gray-500 mt-0.5 ml-4">
+                          {item.variant.color !== "Cor Única" &&
+                            `Cor: ${item.variant.color} | `}{" "}
+                          Tam: {item.variant.size}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -297,20 +323,30 @@ const AdminOrdersPage: React.FC = () => {
                 </td>
                 <td className="p-5">
                   <div className="font-bold text-[#313b2f] text-sm">
-                    {order.user.name}
+                    {order.user?.name || "Cliente Excluído"}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {order.user.email}
+                    {order.user?.email || "Email indisponível"}
                   </div>
                 </td>
                 <td className="p-5">
-                  <ul className="list-disc pl-4 space-y-1">
-                    {order.items.map((item) => (
+                  <ul className="list-disc pl-4 space-y-2">
+                    {order.items?.map((item) => (
                       <li key={item.id} className="text-sm text-gray-700">
-                        <span className="font-bold text-gray-900">
-                          {item.quantity}x
-                        </span>{" "}
-                        {item.product.name}
+                        <div>
+                          <span className="font-bold text-gray-900">
+                            {item.quantity}x
+                          </span>{" "}
+                          {item.product?.name || "Produto Excluído"}
+                        </div>
+                        {/* MOSTRANDO VARIAÇÃO NO DESKTOP */}
+                        {item.variant && (
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {item.variant.color !== "Cor Única" &&
+                              `Cor: ${item.variant.color} | `}{" "}
+                            Tam: {item.variant.size}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -341,7 +377,6 @@ const AdminOrdersPage: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      {/* Seta customizada */}
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                         <svg
                           className="h-3 w-3 fill-current"

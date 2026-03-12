@@ -21,19 +21,20 @@ model User {
   fone      String?
   password  String?
   googleId  String?  @unique 
-  avatar    String?  // Opcional: para salvar a foto do Google
+  avatar    String?  
   role      Role     @default(USER)
+  cpf       String? @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   resetPasswordToken   String?   @unique
   resetPasswordExpires DateTime?
 
-  addresses Address[]
-  orders    Order[]
-  authLogs  AuthLog[]
+  addresses       Address[]
+  orders          Order[]
+  authLogs        AuthLog[]
   contactMessages ContactMessage[] 
-  shippingQuotes ShippingQuote[]
+  shippingQuotes  ShippingQuote[]
 }
 
 model Address {
@@ -59,11 +60,11 @@ model Address {
 
 model AuthLog {
   id        Int      @id @default(autoincrement())
-  email     String // O email que foi tentado (sucesso ou falha)
-  success   Boolean // Se a tentativa foi bem-sucedida ou não
-  message   String // Descrição da falha (ex: 'Email não encontrado', 'Senha inválida')
-  ipAddress String? // Opcional: IP do cliente que fez a requisição
-  userAgent String? // Opcional: User-Agent do cliente (navegador, etc.)
+  email     String 
+  success   Boolean 
+  message   String 
+  ipAddress String? 
+  userAgent String? 
   createdAt DateTime @default(now())
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
@@ -80,8 +81,8 @@ model Category {
 model ProductImage {
   id        Int     @id @default(autoincrement())
   url       String
-  key       String? // ID do Cloudinary para deletar lá depois
-  alt       String? // Texto para SEO (ex: "Cama montessoriana rosa")
+  key       String?
+  alt       String?
   productId Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
@@ -100,40 +101,70 @@ model Product {
   price Decimal @db.Decimal(10, 2)
   stock Int     @default(0)
 
-  size  ItemSize? 
-  color String? @db.VarChar(50)
-
   isAvailable Boolean @default(true)
-  isFeatured  Boolean @default(false)
+  isFeatured  Boolean @default(false) 
 
   mainImage String?
-  images ProductImage[] 
+  images    ProductImage[] 
 
   categoryId Int?
-  category   Category?   @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+  
+  // RELAÇÃO COM AS VARIAÇÕES
+  variants   ProductVariant[]
+}
+
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  color      String  @db.VarChar(50)
+  size       String  @db.VarChar(50)
+  complement String?
+  price      Decimal @db.Decimal(10, 2)
+  stock      Int     @default(0)
+  sku        String? @unique @db.VarChar(50)
+  
+  isFeatured Boolean @default(false) 
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  images    VariantImage[] 
   orderItems OrderItem[]
 }
 
-// 1. Enum para gerenciar o status do pedido
-enum OrderStatus {
-  PENDING // Aguardando Pagamento
-  PAID // Pago
-  IN_PRODUCTION // Em Produção (Útil para móveis/personalizados)
-  SHIPPED // Enviado
-  DELIVERED // Entregue
-  CANCELED // Cancelado
+model VariantImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 }
 
-// 2. Modelo do Pedido Principal
+enum OrderStatus {
+  PENDING 
+  PAID 
+  IN_PRODUCTION 
+  SHIPPED 
+  DELIVERED 
+  CANCELED 
+}
+
 model Order {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  total  Decimal     @db.Decimal(10, 2) // Valor total do pedido
+  total  Decimal     @db.Decimal(10, 2) 
   status OrderStatus @default(PENDING)
 
-  // Relações
+  paymentMethod String?     @db.VarChar(50) 
+  shippingFee   Decimal     @default(0) @db.Decimal(10, 2) 
+  invoiceUrl    String?
+
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
@@ -143,22 +174,21 @@ model Order {
   items OrderItem[]
 }
 
-// 3. Modelo dos Itens do Pedido
 model OrderItem {
   id Int @id @default(autoincrement())
 
-  quantity Int // Quantidade comprada
-  price    Decimal @db.Decimal(10, 2) // Preço unitário NO MOMENTO DA COMPRA (congelado)
+  quantity Int 
+  price    Decimal @db.Decimal(10, 2) 
 
-  // Relações
   orderId Int
   order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   productId Int
   product   Product @relation(fields: [productId], references: [id])
+  
+  variantId Int?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
-
-// =-=--=-=-=-=-==-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-==-=-=
 
 enum VisualItemType {
   APLIQUE
@@ -205,16 +235,16 @@ model VisualItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  // Informações Básicas
+  
   name     String?  @db.VarChar(150)
-  code     String  @unique @db.VarChar(50)
+  code     String   @unique @db.VarChar(50)
   imageUrl String?
-  // Campo Discriminador
+  
   type VisualItemType
-  // Características
+  
   color ItemColor?
   size  ItemSize?
-  // Dados de Demonstração e Organização
+  
   inStock    Boolean @default(true) 
   sequence   Int? 
   quantity   Int? 
@@ -222,85 +252,78 @@ model VisualItem {
   isTapete Boolean @default(false)
 }
 
-// ... (outros modelos)
-
 model ContactMessage {
   id        Int      @id @default(autoincrement())
   name      String
   email     String
   subject   String
   message   String   @db.Text
-  read      Boolean  @default(false) // Para marcar se você já leu
+  read      Boolean  @default(false) 
   createdAt DateTime @default(now())
-  userId    Int?     // Pode ser nulo (visitante)
+  userId    Int?     
   user      User?    @relation(fields: [userId], references: [id])
 }
 
-// Modelo para os Ambientes (Quartos decorados/Inspirações)
 model Environment {
   id        Int      @id @default(autoincrement())
   title     String   @db.VarChar(150)
-  cover     String   // URL da imagem de capa (aparece no card)
+  cover     String   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  images    EnvironmentImage[] // Relação com as fotos da galeria interna
+  images    EnvironmentImage[] 
 }
 
 model EnvironmentImage {
   id            Int         @id @default(autoincrement())
   url           String
-  key           String?     // Opcional: ID do Cloudinary para deleção futura
+  key           String?     
   environmentId Int
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
 }
 
 model SiteAccess {
   id        Int      @id @default(autoincrement())
-  path      String   @db.VarChar(200) // Qual página foi acessada
-  ip        String?  // IP do visitante (opcional, para contar únicos)
+  path      String   @db.VarChar(200) 
+  ip        String?  
   createdAt DateTime @default(now())
 }
 
 model ShippingQuote {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) // Data da solicitação
+  createdAt DateTime @default(now()) 
   updatedAt DateTime @updatedAt
   
-  // -- Dados da Solicitação (Preenchido pela Vendedora) --
-  quoteDetails    String?   @db.Text // Detalhes do orçamento/produtos
+  quoteDetails    String?   @db.Text 
   customerName    String?   @db.VarChar(150)
-  customerCpf     String?   @db.VarChar(14) // Com pontuação
+  customerCpf     String?   @db.VarChar(14) 
   customerZipCode String?   @db.VarChar(10)
-  customerAddress String?   @db.VarChar(255) // Rua, Bairro, Número
-  customerCity    String?   @db.VarChar(100) // Vindo do ViaCEP
-  customerState   String?   @db.VarChar(2)   // Vindo do ViaCEP (UF)
+  customerAddress String?   @db.VarChar(255) 
+  customerCity    String?   @db.VarChar(100) 
+  customerState   String?   @db.VarChar(2)   
 
-  // Quem solicitou
   createdById Int
   createdBy   User @relation(fields: [createdById], references: [id])
 
-  // -- Status --
   isRequested     Boolean     @default(false)
   isConcluded     Boolean     @default(false)
   adminNotes      String?     @db.Text
-  concludedAt     DateTime? // Data em que foi respondido/finalizado
+  concludedAt     DateTime? 
 
-  // -- Dados da Cotação (Preenchido pela Logística/Admin) --
-  carrierName       String?     @db.VarChar(150) // Transportadora
+  carrierName       String?     @db.VarChar(150) 
   deliveryDeadline  String?     @db.VarChar(50)
-  volumeQuantity    Int?        // Quantidade de volumes
-  shippingValue     Decimal?    @db.Decimal(10, 2) // Valor do frete
-  weight            String?     @db.VarChar(50) // Ex: "15kg"
-  orderValue        Decimal?    @db.Decimal(10, 2) // Valor da Nota/Pedido
+  volumeQuantity    Int?        
+  shippingValue     Decimal?    @db.Decimal(10, 2) 
+  weight            String?     @db.VarChar(50) 
+  orderValue        Decimal?    @db.Decimal(10, 2) 
   bedSize           String?     @db.VarChar(100)
   
   hasWallProtector  Boolean     @default(false)
-  wallProtectorSize String?   // Tamanho do protetor (se houver)
+  wallProtectorSize String?   
   
   hasRug            Boolean     @default(false)
-  rugSize           String?     @db.VarChar(100) // Tamanho do tapete (texto livre, ex: "1.50x2.00")
+  rugSize           String?     @db.VarChar(100) 
   
   hasAccessories    Boolean     @default(false)
-  accessoryQuantity Int?        // Quantidade de acessórios
+  accessoryQuantity Int?        
 }

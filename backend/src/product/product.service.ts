@@ -7,86 +7,97 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductService {
     constructor(private prisma: PrismaService) {}
 
-    // Função utilitária para garantir que os campos numéricos sejam tratados corretamente
     private parseProductData(dto: CreateProductDto | UpdateProductDto) {
         const data: any = { ...dto };
-
-        // Converte Price e Stock para o tipo Number se existirem
-        if (data.price !== undefined) {
-            data.price = Number(data.price);
-        }
-        if (data.stock !== undefined) {
-            data.stock = Number(data.stock);
-        }
-        if (data.categoryId !== undefined) {
+        if (data.price !== undefined) data.price = Number(data.price);
+        if (data.stock !== undefined) data.stock = Number(data.stock);
+        if (data.categoryId !== undefined)
             data.categoryId = Number(data.categoryId);
-        }
-
-        // Converte slug se o nome for fornecido e o slug não
         if (data.name && !data.slug) {
-            // Simple slug generation: lowercase, replace spaces with hyphens (idealmente, usar uma lib)
             data.slug = data.name
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-*|-*$/g, '');
         }
-
         return data;
     }
 
-    // 1. Criar Produto
     async create(createProductDto: CreateProductDto) {
-        // Separa as imagens do resto dos dados
-        const { images, ...rest } = this.parseProductData(createProductDto);
+        const { images, variants, ...rest } =
+            this.parseProductData(createProductDto);
 
         return this.prisma.product.create({
             data: {
                 ...rest,
+                // Cria imagens do produto base
                 images: {
                     create:
                         images && Array.isArray(images)
                             ? images.map((url: string) => ({ url }))
                             : [],
                 },
+                // Cria Variações e suas Imagens
+                variants: {
+                    create: variants
+                        ? variants.map((v: any) => ({
+                              color: v.color,
+                              size: v.size,
+                              complement: v.complement,
+                              price: Number(v.price),
+                              stock: Number(v.stock),
+                              sku: v.sku,
+                              isFeatured: v.isFeatured,
+                              images: {
+                                  create: v.images
+                                      ? v.images.map((img: any) => ({
+                                            url: img.url,
+                                        }))
+                                      : [],
+                              },
+                          }))
+                        : [],
+                },
             },
-            include: { images: true }, // Retorna o produto com as imagens criadas
+            include: { images: true, variants: { include: { images: true } } },
         });
     }
 
-    // 2. Listar Todos (Inclui a categoria para contexto)
     async findAll() {
         return this.prisma.product.findMany({
             include: {
-                category: true, // Inclui os dados da categoria relacionada
-                images: true, // <--- IMPORTANTE: Incluir as imagens na busca
+                category: true,
+                images: true,
+                variants: { include: { images: true } },
             },
-            orderBy: {
-                createdAt: 'desc',
-            },
+            orderBy: { createdAt: 'desc' },
         });
     }
 
-    // 3. Buscar por ID
     async findOne(id: number) {
         const product = await this.prisma.product.findUnique({
             where: { id },
             include: {
-                category: true, // Inclui os dados da categoria
-                images: true, // <--- IMPORTANTE: Incluir as imagens
+                category: true,
+                images: true,
+                variants: { include: { images: true } },
             },
         });
-
-        if (!product) {
+        if (!product)
             throw new NotFoundException(`Produto com ID ${id} não encontrado.`);
-        }
         return product;
     }
 
-    // 4. Atualizar Produto
     async update(id: number, updateProductDto: UpdateProductDto) {
         await this.findOne(id);
+        const { images, variants, ...rest } =
+            this.parseProductData(updateProductDto);
 
-        const { images, ...rest } = this.parseProductData(updateProductDto);
+        // O jeito mais simples de atualizar Variações complexas é apagar as antigas e recriar as novas
+        if (variants) {
+            await this.prisma.productVariant.deleteMany({
+                where: { productId: id },
+            });
+        }
 
         return this.prisma.product.update({
             where: { id },
@@ -94,21 +105,37 @@ export class ProductService {
                 ...rest,
                 images: images
                     ? {
-                          deleteMany: {}, // 1. Apaga todas as imagens antigas deste produto
+                          deleteMany: {},
                           create: images.map((url: string) => ({ url })),
                       }
                     : undefined,
+                variants: variants
+                    ? {
+                          create: variants.map((v: any) => ({
+                              color: v.color,
+                              size: v.size,
+                              complement: v.complement,
+                              price: Number(v.price),
+                              stock: Number(v.stock),
+                              sku: v.sku,
+                              isFeatured: v.isFeatured,
+                              images: {
+                                  create: v.images
+                                      ? v.images.map((img: any) => ({
+                                            url: img.url,
+                                        }))
+                                      : [],
+                              },
+                          })),
+                      }
+                    : undefined,
             },
-            include: { images: true },
+            include: { images: true, variants: { include: { images: true } } },
         });
     }
 
-    // 5. Remover Produto
     async remove(id: number) {
-        await this.findOne(id); // Verifica se existe e lança 404
-
-        return this.prisma.product.delete({
-            where: { id },
-        });
+        await this.findOne(id);
+        return this.prisma.product.delete({ where: { id } });
     }
 }

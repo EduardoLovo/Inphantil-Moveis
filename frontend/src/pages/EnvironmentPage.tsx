@@ -161,7 +161,7 @@ const EnvironmentPage: React.FC = () => {
         {selectedEnv ? (
           <div className="animate-in fade-in duration-500">
             {/* HERO / CAPA */}
-            <div className="relative h-64 md:h-96 w-full group overflow-hidden">
+            <div className="relative h-64 md:h-40 w-full group overflow-hidden">
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url(${selectedEnv.cover})` }}

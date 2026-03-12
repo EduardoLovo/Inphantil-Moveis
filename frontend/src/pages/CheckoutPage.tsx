@@ -1,30 +1,50 @@
 import React, { useEffect, useState } from "react";
 import { useCartStore } from "../store/CartStore";
-import { api } from "../services/api";
+import { api, processCreditCardPayment } from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import {
   FaMapMarkerAlt,
   FaCheckCircle,
   FaSpinner,
   FaTrash,
-  FaArrowLeft,
   FaPlus,
-  FaBoxOpen,
+  FaCreditCard,
+  FaQrcode,
 } from "react-icons/fa";
 import type { Address } from "../types/address";
 import AddressForm from "../components/AddressForm";
-import axios from "axios";
+import { useOrderStore } from "../store/OrderStore";
+import { useAuthStore } from "../store/AuthStore";
 
 const CheckoutPage: React.FC = () => {
   const { items, getTotal, clearCart } = useCartStore();
+  const { createOrder } = useOrderStore();
   const navigate = useNavigate();
 
+  // Estados de Pagamento
+  const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix">(
+    "credit",
+  );
+
+  // Dados do Cartão
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpMonth, setCardExpMonth] = useState("");
+  const [cardExpYear, setCardExpYear] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [installments, setInstallments] = useState("1");
+
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const { user } = useAuthStore();
+
+  const [cpf, setCpf] = useState(user?.cpf || "");
+  // Estados de Endereço e UX
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showAddressModal, setShowAddressModal] = useState(false);
 
@@ -51,10 +71,12 @@ const CheckoutPage: React.FC = () => {
 
   useEffect(() => {
     fetchAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDeleteAddress = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
+
     if (window.confirm("Tem certeza que deseja excluir este endereço?")) {
       try {
         await api.delete(`/addresses/${id}`);
@@ -63,13 +85,21 @@ const CheckoutPage: React.FC = () => {
         }
         fetchAddresses();
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          alert(error.response.data.message);
-        } else {
-          alert("Erro ao excluir endereço.");
-        }
+        alert("Erro ao excluir endereço.");
       }
     }
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Tira tudo que não é número
+    if (value.length > 11) value = value.slice(0, 11); // Limita a 11 números
+
+    // Aplica a máscara: 000.000.000-00
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+    setCpf(value);
   };
 
   const handleAddressSuccess = () => {
@@ -77,218 +107,469 @@ const CheckoutPage: React.FC = () => {
     fetchAddresses();
   };
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddressId) {
-      setError("Por favor, selecione um endereço de entrega.");
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
+  const handleCheckout = async () => {
+    setPaymentError("");
+    setIsProcessingPayment(true);
 
     try {
-      const payload = {
+      if (!selectedAddressId) {
+        throw new Error("Por favor, selecione um endereço de entrega.");
+      }
+      if (!cpf || cpf.length < 14) {
+        throw new Error("Por favor, preencha um CPF válido para continuarmos.");
+      }
+      // 1. CRIAR O PEDIDO NO BANCO PRIMEIRO (AGORA É REAL!)
+      // Formatamos os itens do carrinho para o formato que o backend espera (productId e quantity)
+      const orderPayload = {
         addressId: selectedAddressId,
         items: items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
         })),
+        cpf: cpf,
       };
 
-      await api.post("/orders", payload);
-      clearCart();
-      alert("Pedido realizado com sucesso!");
-      navigate("/dashboard");
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || "Erro ao finalizar pedido.");
+      // Chama a API do backend para salvar no banco
+      const newOrder = await createOrder(orderPayload);
+
+      // O backend Prisma pode retornar Decimal como string, então garantimos que seja número
+      const orderId = newOrder.id;
+      const totalAmount = Number(newOrder.total);
+
+      // 2. PROCESSAR PAGAMENTO DEPENDENDO DO MÉTODO ESCOLHIDO
+      if (paymentMethod === "credit") {
+        const paymentResponse = await processCreditCardPayment({
+          orderId: String(orderId),
+          amount: totalAmount,
+          cardData: {
+            holderName: cardName,
+            number: cardNumber.replace(/\D/g, ""),
+            expMonth: cardExpMonth,
+            expYear: cardExpYear,
+            cvv: cardCvv,
+            installments: installments,
+          },
+        });
+
+        if (paymentResponse.success) {
+          clearCart();
+          // MUDANÇA AQUI: Enviamos os dados para a próxima página
+          navigate("/pos-compra", {
+            state: {
+              isSuccess: true,
+              method: paymentMethod,
+              orderId: orderId,
+              transactionId: paymentResponse.transactionId,
+            },
+          });
+        }
+      } else if (paymentMethod === "pix") {
+        // CHAMA A ROTA REAL DO PIX NO SEU BACKEND
+        const pixResponse = await api.post("/payment/pix", {
+          orderId: String(orderId),
+          amount: totalAmount,
+        });
+
+        const pixData = pixResponse.data;
+
+        if (pixData && pixData.returnCode === "00") {
+          // A Rede devolve o "Copia e Cola" no campo 'qrCode' e um link com a imagem no array de links
+          const qrCodeImageLink = pixData.links?.find(
+            (l: any) => l.rel === "qrCode",
+          )?.href;
+
+          clearCart();
+          navigate("/pos-compra", {
+            state: {
+              isSuccess: true,
+              method: "pix",
+              orderId: orderId,
+              qrCodeUrl:
+                qrCodeImageLink ||
+                "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg", // Fallback
+              pixCode: pixData.qrCode, // O código Copia e Cola real da Rede
+            },
+          });
+        } else {
+          throw new Error("Não foi possível gerar o código Pix neste momento.");
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      setPaymentError(
+        error.response?.data?.message ||
+          error.message ||
+          "Erro ao processar o pagamento. Verifique os dados.",
+      );
     } finally {
-      setSubmitting(false);
+      setIsProcessingPayment(false);
     }
   };
 
   const formatPrice = (val: number) =>
-    val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    Number(val).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <div className="bg-gray-100 p-6 rounded-full mb-6">
-          <FaBoxOpen className="text-4xl text-gray-400" />
+      <div className="w-full max-w-[1400px] mx-auto px-4 py-8 md:pt-32 pb-20 min-h-[70vh] flex flex-col items-center justify-center">
+        <div className="bg-gray-50 p-12 rounded-2xl border border-dashed border-gray-300 text-center w-full max-w-2xl">
+          <h2 className="text-2xl font-bold text-gray-700 mb-4">
+            Seu carrinho está vazio.
+          </h2>
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-[#313b2f] text-white font-bold rounded-full hover:bg-[#ffd639] hover:text-[#313b2f] transition-all shadow-md"
+          >
+            Voltar ao Catálogo
+          </Link>
         </div>
-        <h2 className="text-2xl font-bold text-[#313b2f] mb-2">
-          Seu carrinho está vazio.
-        </h2>
-        <p className="text-gray-500 mb-6">
-          Adicione itens ao carrinho para finalizar a compra.
-        </p>
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#ffd639] text-[#313b2f] font-bold rounded-lg hover:bg-[#e6c235] transition-colors shadow-sm"
-        >
-          <FaArrowLeft /> Voltar ao Catálogo
-        </Link>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto px-4 py-8 md:pt-32 pb-20">
-      <h1 className="text-3xl font-bold text-[#313b2f] mb-8 border-b border-gray-100 pb-4">
+    <div className="w-full max-w-[1400px] mx-auto px-4 py-8 md:pt-32 pb-20 min-h-[70vh]">
+      {/* 🛑 OVERLAY DE CARREGAMENTO MODERNO 🛑 */}
+      {isProcessingPayment && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/70 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-[#313b2f] p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm mx-4 text-center transform transition-all animate-in zoom-in-95 duration-300 border border-[#ffd639]/20">
+            {/* Ícone girando com cor de destaque */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-[#ffd639] blur-xl opacity-20 rounded-full animate-pulse"></div>
+              <FaSpinner className="relative animate-spin text-6xl text-[#ffd639]" />
+            </div>
+
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
+              Processando o pagamento...
+            </h2>
+
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Estamos a finalizar o seu pedido de forma segura. <br />
+              <span className="font-bold text-[#ffd639]">
+                Por favor, não feche nem recarregue esta página.
+              </span>{" "}
+              🔒
+            </p>
+          </div>
+        </div>
+      )}
+      <h1 className="text-3xl font-bold text-[#313b2f] mb-8">
         Finalizar Compra
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* ESQUERDA: ENDEREÇOS */}
+        {/* --- COLUNA ESQUERDA: ENDEREÇOS --- */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2">
-              <FaMapMarkerAlt className="text-[#ffd639]" /> Endereço de Entrega
-            </h2>
-            <button
-              onClick={() => setShowAddressModal(true)}
-              className="flex items-center gap-1 text-sm font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <FaPlus /> Novo
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-8 text-gray-500 animate-pulse">
-              <FaSpinner className="animate-spin text-2xl mr-2" /> Carregando
-              endereços...
-            </div>
-          ) : addresses.length === 0 ? (
-            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-8 text-center">
-              <p className="text-gray-500 mb-4">
-                Você não tem endereços cadastrados.
-              </p>
+          <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-gray-100 gap-4">
+              <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2">
+                <FaMapMarkerAlt className="text-[#ffd639]" /> Endereço de
+                Entrega
+              </h2>
               <button
+                className="flex items-center gap-2 text-sm font-bold text-[#007bff] bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
                 onClick={() => setShowAddressModal(true)}
-                className="px-6 py-2 bg-[#313b2f] text-white rounded-lg font-bold hover:bg-gray-800 transition-colors"
               >
-                Cadastrar Endereço
+                <FaPlus size={12} /> Novo Endereço
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {addresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  onClick={() => setSelectedAddressId(addr.id)}
-                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
-                    selectedAddressId === addr.id
-                      ? "border-[#ffd639] bg-yellow-50/30 ring-1 ring-[#ffd639]"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
+
+            {loading ? (
+              <div className="flex items-center justify-center py-10 text-gray-400">
+                <FaSpinner className="animate-spin text-3xl text-[#ffd639]" />
+              </div>
+            ) : addresses.length === 0 ? (
+              <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <p className="text-gray-500 mb-4">
+                  Você não tem endereços cadastrados.
+                </p>
+                <button
+                  className="bg-[#313b2f] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#ffd639] hover:text-[#313b2f] transition-colors"
+                  onClick={() => setShowAddressModal(true)}
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <strong className="text-[#313b2f] font-bold">
-                      {addr.recipientName}
-                    </strong>
-                    <button
-                      onClick={(e) => handleDeleteAddress(e, addr.id)}
-                      className="text-gray-400 hover:text-red-500 p-1 transition-colors"
-                      title="Excluir"
-                    >
-                      <FaTrash size={14} />
-                    </button>
+                  Cadastrar Endereço
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {addresses.map((addr) => (
+                  <div
+                    key={addr.id}
+                    onClick={() => setSelectedAddressId(addr.id)}
+                    className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedAddressId === addr.id
+                        ? "border-[#ffd639] bg-yellow-50/30 shadow-md"
+                        : "border-gray-100 bg-white hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <strong className="text-[#313b2f] font-bold block pr-8">
+                        {addr.recipientName}
+                      </strong>
+                      <button
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        onClick={(e) => handleDeleteAddress(e, addr.id)}
+                        title="Excluir endereço"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>
+                        {addr.street}, {addr.number}{" "}
+                        {addr.complement && `- ${addr.complement}`}
+                      </p>
+                      <p>
+                        {addr.neighborhood} - {addr.city}/{addr.state}
+                      </p>
+                      <p className="font-mono text-gray-500 mt-2">
+                        CEP: {addr.zipCode}
+                      </p>
+                    </div>
+
+                    {addr.isDefault && (
+                      <span className="absolute bottom-4 right-4 text-[10px] uppercase font-bold bg-[#313b2f] text-white px-2 py-1 rounded">
+                        Padrão
+                      </span>
+                    )}
+
+                    {selectedAddressId === addr.id && (
+                      <div className="absolute -top-3 -right-3 bg-green-500 text-white p-1 rounded-full shadow-md">
+                        <FaCheckCircle size={16} />
+                      </div>
+                    )}
                   </div>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>
-                      {addr.street}, {addr.number} {addr.complement}
-                    </p>
-                    <p>
-                      {addr.neighborhood} - {addr.city}/{addr.state}
-                    </p>
-                    <p>CEP: {addr.zipCode}</p>
-                  </div>
-                  {addr.isDefault && (
-                    <span className="inline-block mt-3 px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded">
-                      Padrão
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* DIREITA: RESUMO */}
+        {/* --- COLUNA DIREITA: RESUMO DO PEDIDO E PAGAMENTO --- */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg lg:sticky lg:top-32">
+          <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-lg lg:sticky lg:top-32">
             <h2 className="text-xl font-bold text-[#313b2f] mb-6 pb-4 border-b border-gray-100">
               Resumo do Pedido
             </h2>
 
-            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-4 mb-6 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    <span className="font-bold text-[#313b2f]">
+                <div
+                  key={item.cartItemId}
+                  className="flex justify-between items-start gap-4 text-sm"
+                >
+                  <div className="flex-1">
+                    <span className="font-bold text-gray-800">
                       {item.quantity}x
                     </span>{" "}
-                    {item.name}
-                  </span>
-                  <span className="font-medium text-gray-800">
+                    <span className="text-gray-600 font-medium">
+                      {item.name}
+                    </span>
+                    {item.selectedVariant && (
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {item.selectedVariant.color !== "Cor Única" &&
+                          `Cor: ${item.selectedVariant.color} | `}
+                        Tam: {item.selectedVariant.size}
+                      </div>
+                    )}
+                  </div>
+                  <span className="font-bold text-[#313b2f]">
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-dashed border-gray-200 pt-4 mt-4 space-y-2">
-              <div className="flex justify-between items-center text-lg font-bold text-[#313b2f]">
-                <span>Total</span>
+            <div className="space-y-3 pt-4 border-t border-dashed border-gray-200 mb-8">
+              <div className="flex justify-between text-gray-500 text-sm">
+                <span>Subtotal</span>
                 <span>{formatPrice(getTotal())}</span>
+              </div>
+              <div className="flex justify-between text-gray-500 text-sm">
+                <span>Frete</span>
+                <span className="text-green-600 font-medium">Grátis</span>
+              </div>
+              <div className="flex justify-between items-end pt-4 border-t border-gray-100 mt-4">
+                <span className="font-bold text-lg text-[#313b2f]">Total</span>
+                <span className="font-bold text-3xl text-[#313b2f]">
+                  {formatPrice(getTotal())}
+                </span>
               </div>
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100 flex items-start gap-2">
-                <FaCheckCircle className="mt-0.5 flex-shrink-0" />
-                <span>{error}</span>
+              <div className="p-3 mb-4 bg-red-50 text-red-600 border border-red-100 rounded-lg text-sm font-medium text-center">
+                {error}
               </div>
             )}
 
+            {/* SELEÇÃO DE MÉTODO DE PAGAMENTO */}
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-[#313b2f] mb-4">
+                Método de Pagamento
+              </h3>
+
+              {!user?.cpf && (
+                <div className="mb-6 animate-in fade-in duration-300">
+                  <h3 className="text-lg font-bold text-[#313b2f] mb-3">
+                    Dados Pessoais
+                  </h3>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-600">
+                      CPF (Obrigatório para a Nota Fiscal)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="000.000.000-00"
+                      value={cpf}
+                      onChange={handleCpfChange}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all font-mono"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setPaymentMethod("credit")}
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                    paymentMethod === "credit"
+                      ? "border-[#ffd639] bg-yellow-50 text-[#313b2f]"
+                      : "border-gray-100 text-gray-400 hover:border-gray-200"
+                  }`}
+                >
+                  <FaCreditCard className="mb-1 text-xl" />
+                  <span className="text-xs font-bold">Crédito</span>
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("pix")}
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                    paymentMethod === "pix"
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-gray-100 text-gray-400 hover:border-gray-200"
+                  }`}
+                >
+                  <FaQrcode className="mb-1 text-xl" />
+                  <span className="text-xs font-bold">Pix</span>
+                </button>
+              </div>
+            </div>
+
+            {paymentError && (
+              <div className="p-3 mb-4 bg-red-50 text-red-600 border border-red-100 rounded-lg text-sm font-medium text-center">
+                {paymentError}
+              </div>
+            )}
+
+            {/* FORMULÁRIOS DE PAGAMENTO (Condicionais) */}
+            {paymentMethod === "credit" && (
+              <div className="space-y-3 mb-6 animate-in fade-in duration-300">
+                <input
+                  type="text"
+                  placeholder="Nome impresso no cartão"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                  maxLength={50}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  placeholder="Número do Cartão"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  maxLength={19}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                />
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Mês (Ex: 12)"
+                    value={cardExpMonth}
+                    onChange={(e) => setCardExpMonth(e.target.value)}
+                    maxLength={2}
+                    className="w-1/3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Ano (Ex: 2029)"
+                    value={cardExpYear}
+                    onChange={(e) => setCardExpYear(e.target.value)}
+                    maxLength={4}
+                    className="w-1/3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                  />
+                  <input
+                    type="text"
+                    placeholder="CVV"
+                    value={cardCvv}
+                    onChange={(e) => setCardCvv(e.target.value)}
+                    maxLength={4}
+                    className="w-1/3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                <div className="mt-3">
+                  <select
+                    value={installments}
+                    onChange={(e) => setInstallments(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all font-medium text-gray-700"
+                  >
+                    {/* Gera um array de 1 a 10 e cria as opções automaticamente */}
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <option key={num} value={num}>
+                        {num}x de {formatPrice(getTotal() / num)} (Sem juros)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {paymentMethod === "pix" && (
+              <div className="bg-green-50 p-5 rounded-xl border border-green-200 text-center mb-6 animate-in fade-in duration-300">
+                <FaQrcode className="mx-auto text-4xl text-green-600 mb-3" />
+                <p className="text-green-800 font-bold mb-1">
+                  Aprovação imediata!
+                </p>
+                <p className="text-sm text-green-700">
+                  O QR Code e o código "Copia e Cola" serão gerados na próxima
+                  tela assim que você finalizar o pedido.
+                </p>
+              </div>
+            )}
+
+            {/* BOTÃO FINALIZAR */}
             <button
-              onClick={handlePlaceOrder}
-              disabled={submitting || !selectedAddressId}
-              className="w-full mt-6 py-4 bg-[#ffd639] text-[#313b2f] font-bold rounded-xl hover:bg-[#e6c235] hover:-translate-y-1 shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleCheckout}
+              disabled={isProcessingPayment || !selectedAddressId}
+              className="w-full py-4 bg-[#ffd639] text-[#313b2f] font-bold rounded-xl hover:bg-[#e6c235] hover:-translate-y-1 shadow-md transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
-              {submitting ? (
+              {isProcessingPayment ? (
                 <>
                   <FaSpinner className="animate-spin" /> Processando...
                 </>
               ) : (
                 <>
-                  <FaCheckCircle /> Confirmar Pedido
+                  <FaCheckCircle /> Finalizar Compra
                 </>
               )}
             </button>
+            {!selectedAddressId && (
+              <p className="text-xs text-red-500 text-center mt-3">
+                Selecione um endereço para continuar.
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* MODAL DE ENDEREÇO */}
+      {/* --- MODAL DE NOVO ENDEREÇO --- */}
       {showAddressModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-gray-800">Novo Endereço</h3>
-              <button
-                onClick={() => setShowAddressModal(false)}
-                className="text-gray-400 hover:text-gray-600 font-bold text-xl"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="p-6">
-              <AddressForm
-                onSuccess={handleAddressSuccess}
-                onCancel={() => setShowAddressModal(false)}
-              />
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+            <AddressForm
+              onSuccess={handleAddressSuccess}
+              onCancel={() => setShowAddressModal(false)}
+            />
           </div>
         </div>
       )}
