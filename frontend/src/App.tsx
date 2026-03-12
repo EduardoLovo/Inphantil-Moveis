@@ -55,7 +55,7 @@ import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
 import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
-// import UnderConstructionPage from "./pages/UnderConstructionPage";
+import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LencoisPage from "./pages/catalogs/LencoisPage";
 import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
@@ -89,7 +89,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* <Route path="/products" element={<UnderConstructionPage />} /> */}
+        <Route path="/products" element={<UnderConstructionPage />} />
         {/* <Route path="/checkout" element={<UnderConstructionPage />} /> */}
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
@@ -119,7 +119,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
           <Route path="/profile/edit" element={<EditProfilePage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
           <Route path="/pos-compra" element={<PosCompraPage />} />
           <Route path="/meus-pedidos" element={<MyOrdersPage />} />
           <Route path="/pedidos/:id" element={<DetalhesPedidoPage />} />
