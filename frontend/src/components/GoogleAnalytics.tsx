@@ -1,29 +1,45 @@
-import { useEffect, useRef } from "react";
+// frontend/src/components/GoogleAnalytics.tsx
+
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ReactGA from "react-ga4";
 
 const GoogleAnalytics = () => {
   const location = useLocation();
-  const isInitialized = useRef(false); // Guarda o status de inicialização
+  // Estado que diz se os cookies já foram aceitos no localStorage
+  const [cookiesAccepted, setCookiesAccepted] = useState(
+    localStorage.getItem("cookies_aceitos") === "true",
+  );
 
+  // Fica "ouvindo" caso o usuário clique em "Aceitar" durante essa visita
   useEffect(() => {
+    const handleCookieAccept = () => setCookiesAccepted(true);
+    window.addEventListener("cookiesAccepted", handleCookieAccept);
+
+    return () =>
+      window.removeEventListener("cookiesAccepted", handleCookieAccept);
+  }, []);
+
+  // Só dispara o rastreamento se cookiesAccepted for true
+  useEffect(() => {
+    if (!cookiesAccepted) return; // Barra o GA de funcionar se não aceitou
+
     const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
-    // 1. Inicializa apenas SE tiver o ID e SE ainda não foi inicializado
-    if (gaId && !isInitialized.current) {
-      ReactGA.initialize(gaId);
-      isInitialized.current = true; // Marca como inicializado
-    }
+    if (gaId) {
+      // Verifica se já foi inicializado
+      if (!(window as any).ga) {
+        ReactGA.initialize(gaId);
+      }
 
-    // 2. Só envia o pageview se o GA estiver inicializado
-    if (isInitialized.current) {
+      // Envia o "pageview" para a rota atual
       ReactGA.send({
         hitType: "pageview",
         page: location.pathname + location.search,
         title: document.title,
       });
     }
-  }, [location]);
+  }, [location, cookiesAccepted]); // Executa quando a rota muda OU quando o usuário aceita
 
   return null;
 };

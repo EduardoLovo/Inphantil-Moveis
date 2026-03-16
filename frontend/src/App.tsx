@@ -66,6 +66,7 @@ import PosCompraInformationPage from "./pages/PosCompraInformationPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import DetalhesPedidoPage from "./pages/OrderDetailPage";
 import { AdminReportsPage } from "./pages/AdminReportsPage";
+import CookieConsent from "./components/CookieConsent";
 
 function App() {
   const location = useLocation();
@@ -75,9 +76,9 @@ function App() {
     location.pathname.startsWith("/calculadora");
   return (
     <>
+      <GoogleAnalytics />
       <VersionCheck />
       <InternalAnalytics />
-      <GoogleAnalytics />
       <ScrollToTop />
       <div className="md:hidden">
         <Header />
@@ -215,6 +216,7 @@ function App() {
         <Route path="/restock-apliques" element={<RestockApliquesPage />} />
       </Routes>
       {!isAdminRoute && <Footer />}
+      <CookieConsent />
     </>
   );
 }
