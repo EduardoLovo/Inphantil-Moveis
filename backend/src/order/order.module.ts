@@ -3,11 +3,13 @@ import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { MailModule } from 'src/mail/mail.module';
+import { HttpModule } from '@nestjs/axios';
+import { SevenService } from 'src/integrations/seven/seven.service';
 
 @Module({
-    imports: [PrismaModule, MailModule], // Importe o Prisma
+    imports: [PrismaModule, MailModule, HttpModule], // Importe o Prisma
     controllers: [OrderController],
-    providers: [OrderService],
+    providers: [OrderService, SevenService],
     exports: [OrderService],
 })
 export class OrderModule {}

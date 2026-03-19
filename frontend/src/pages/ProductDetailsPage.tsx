@@ -352,6 +352,8 @@ const ProductDetailsPage = () => {
   const isOutOfStock = isFullySelected && currentStock <= 0;
   const canPurchase = isFullySelected && !isOutOfStock;
 
+  console.log(product);
+
   return (
     <div className="w-full max-w-[1200px] mx-auto px-4 py-8 md:pt-32 pb-20">
       <Toaster />

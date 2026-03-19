@@ -125,7 +125,7 @@ model ProductVariant {
   complement String?
   price      Decimal @db.Decimal(10, 2)
   stock      Int     @default(0)
-  sku        String? @unique @db.VarChar(50)
+  sku        String? @db.VarChar(50)
   
   isFeatured Boolean @default(false) 
 

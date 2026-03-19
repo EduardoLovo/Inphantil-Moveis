@@ -18,7 +18,7 @@ export class OrderService {
         private prisma: PrismaService,
         private mailerService: MailerService,
         private mailService: MailService,
-        // private sevenService: SevenService,
+        private sevenService: SevenService,
     ) {}
 
     async create(userId: number, dto: CreateOrderDto) {
@@ -288,18 +288,19 @@ export class OrderService {
                 });
 
             // 👉 5. GATILHO DO ERP SEVEN (Disparado em background)
-            // this.sevenService
-            //     .enviarPedidoParaOSeven(
-            //         updatedOrder,
-            //         updatedOrder.user,
-            //         updatedOrder.address,
-            //     )
-            //     .catch((err) => {
-            //         console.error(
-            //             `Erro crítico na integração com o Seven do pedido ${id}:`,
-            //             err,
-            //         );
-            //     });
+            this.sevenService
+                .enviarPedidoParaOSeven(
+                    updatedOrder,
+                    updatedOrder.user,
+                    updatedOrder.address,
+                )
+                .catch((err: any) => {
+                    // 👈 Só adicionar o ': any' aqui!
+                    console.error(
+                        `Erro crítico na integração com o Seven do pedido ${id}:`,
+                        err,
+                    );
+                });
         }
 
         return updatedOrder;

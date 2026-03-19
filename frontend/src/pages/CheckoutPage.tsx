@@ -125,6 +125,7 @@ const CheckoutPage: React.FC = () => {
         items: items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
+          variantId: item.selectedVariant ? item.selectedVariant.id : null,
         })),
         cpf: cpf,
       };
