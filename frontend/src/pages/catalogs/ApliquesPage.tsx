@@ -288,12 +288,14 @@ const ApliquesPage: React.FC = () => {
     const termo = busca.toLowerCase().trim();
 
     const filtrados = apllyIcons.filter((item) => {
-      // REGRA: Se estoque for false E quantidade for 0 (ou nula), NÃO MOSTRAR
+      // Verifica se a quantidade é zero ou nula
       const hasZeroQuantity =
         item.quantity === 0 ||
         item.quantity === null ||
         item.quantity === undefined;
-      if (item.inStock === false && hasZeroQuantity) {
+
+      // NOVA REGRA: Oculta APENAS se não for staff (!isStaff)
+      if (!isStaff && item.inStock === false && hasZeroQuantity) {
         return false;
       }
 
@@ -305,7 +307,7 @@ const ApliquesPage: React.FC = () => {
     return [...filtrados].sort((a, b) =>
       (a.code || "").localeCompare(b.code || ""),
     );
-  }, [apllyIcons, busca]);
+  }, [apllyIcons, busca, isStaff]); // <-- MUITO IMPORTANTE: adicionei isStaff aqui no final!
 
   const handleCardClick = (item: VisualItem) => {
     if (canEdit) {
