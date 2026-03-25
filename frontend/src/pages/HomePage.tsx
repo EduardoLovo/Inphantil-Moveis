@@ -17,7 +17,7 @@ import "swiper/css/pagination";
 
 import { useProductStore } from "../store/ProductStore";
 import { api } from "../services/api";
-
+import home from "../assets/home.jpeg";
 const LOGO_IMAGE = "/logo.svg";
 
 // Tipos
@@ -211,9 +211,9 @@ const HomePage = () => {
           >
             {/* Imagem de Fundo (Ajuste de posição para mobile/desktop) */}
             <motion.img
-              src="https://i.pinimg.com/736x/b2/e8/af/b2e8af76c335439ed983de05fa17a7bc.jpg"
+              src={home}
               alt="Camas Montessorianas"
-              className="w-full h-full object-cover object-center md:object-[0_-800px]"
+              className="w-full h-full object-cover object-center md:object-[0_-0px]"
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 1.5 }}
