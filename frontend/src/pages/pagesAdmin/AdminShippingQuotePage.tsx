@@ -296,6 +296,7 @@ Por gentileza, preciso de uma cotação com as seguintes informações:
 CNPJ: 037616830001-98
 Dados do destinatário : ${selectedQuote.customerName} - CPF: ${selectedQuote.customerCpf}
 CEP: ${selectedQuote.customerZipCode}
+Cidade: ${selectedQuote.customerCity} - Estado: ${selectedQuote.customerState}
 Valor Pedido: ${valorPedidoFormatado}
 ${volumesText}Peso Total: ${formData.weight || ""}
 Qual o prazo de Entrega?`;
