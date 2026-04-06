@@ -158,13 +158,15 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  total  Decimal     @db.Decimal(10, 2) 
-  shippingCost Decimal     @default(0) @db.Decimal(10, 2)
-  status OrderStatus @default(PENDING)
+  total        Decimal @db.Decimal(10, 2) 
+  shippingCost Decimal @default(0) @db.Decimal(10, 2)
+  status       OrderStatus @default(PENDING)
 
-  paymentMethod String?     @db.VarChar(50) 
-  shippingFee   Decimal     @default(0) @db.Decimal(10, 2) 
+  paymentMethod String? @db.VarChar(50) 
+  shippingFee   Decimal @default(0) @db.Decimal(10, 2) 
   invoiceUrl    String?
+
+  tid           String? @unique // 👉 NOVO: Guarda o ID da Transação da Rede!
 
   userId Int
   user   User @relation(fields: [userId], references: [id])

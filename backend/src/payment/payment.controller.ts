@@ -113,60 +113,105 @@ export class PaymentController {
         const secureAmount = Number(order.total); // Pega o valor real do banco
         // =========================================================
 
-        return this.paymentService.createPixTransaction(
+        const pixResult = await this.paymentService.createPixTransaction(
             body.orderId,
-            secureAmount, // <-- Envia para a Rede o valor 100% seguro!
+            secureAmount,
         );
+
+        // 2. Salva o TID no banco de dados do pedido!
+        if (pixResult && pixResult.tid) {
+            await this.orderService.updateTid(
+                Number(body.orderId),
+                pixResult.tid,
+            );
+        }
+
+        // 3. Devolve pro React mostrar o QR Code
+        return pixResult;
     }
 
     // =========================================================
-    // 🔔 WEBHOOK: RECEBE AVISOS DA REDE (PIX PAGO, BOLETO, ETC)
+    // 🔔 WEBHOOK: RECEBE AVISOS DA REDE (PIX PAGO, CARTÃO, ETC)
     // =========================================================
     @Post('webhook')
-    async redeWebhook(
-        @Body() payload: any,
-        @Query('token') token: string, // <-- ISSO AQUI LÊ A SENHA DA URL!
-    ) {
-        // 🔒 BLINDAGEM DO WEBHOOK: Verifica se a senha bate
-        const minhaSenhaSecreta = process.env.WEBHOOK_SECRET_TOKEN; // Mesma senha que você colocou na Rede
+    async redeWebhook(@Body() payload: any, @Query('token') token: string) {
+        // 🔒 BLINDAGEM DO WEBHOOK: Verifica a senha da URL
+        const minhaSenhaSecreta = process.env.WEBHOOK_SECRET_TOKEN;
 
         if (token !== minhaSenhaSecreta) {
             console.warn(
                 '🚨 Tentativa de invasão no Webhook! Token inválido:',
                 token,
             );
-            // Retornamos OK só para despistar o hacker, mas não fazemos nada no banco!
-            return { received: true };
+            return { received: true }; // Retorna OK para despistar
         }
 
-        // Extraímos o número do pedido (reference) e o status do pagamento
-        const { reference, status } = payload;
-
-        if (!reference) {
-            return { received: true, message: 'Payload ignorado' };
-        }
+        console.log('📦 PAYLOAD RECEBIDO DA REDE:', payload);
 
         try {
-            if (status === 'Approved' || status === 'Paid') {
-                await this.orderService.updateStatus(Number(reference), {
-                    status: OrderStatus.PAID,
-                });
-                console.log(
-                    `✅ Pedido ${reference} atualizado para PAGO via Webhook!`,
-                );
-            } else if (status === 'Canceled' || status === 'Denied') {
-                await this.orderService.updateStatus(Number(reference), {
-                    status: OrderStatus.CANCELED,
-                });
-                console.log(`❌ Pedido ${reference} CANCELADO via Webhook.`);
+            // 👉 CENÁRIO 1: É UM AVISO DE PIX (Páginas 74 e 75 do Manual)
+            // 👉 CENÁRIO 1: É UM AVISO DE PIX
+            const eventos = payload.events || [];
+
+            if (eventos.includes('PV.UPDATE_TRANSACTION_PIX')) {
+                const tidDaRede = payload.data?.id;
+
+                if (tidDaRede) {
+                    // Busca o pedido no banco usando o TID
+                    const order = await this.orderService.findByTid(tidDaRede);
+
+                    if (order) {
+                        // Achei! Atualiza para pago!
+                        await this.orderService.updateStatus(order.id, {
+                            status: OrderStatus.PAID,
+                        });
+                        console.log(
+                            `✅ Pix do Pedido ${order.id} (TID: ${tidDaRede}) foi PAGO!`,
+                        );
+                    } else {
+                        console.warn(
+                            `⚠️ TID ${tidDaRede} recebido, mas nenhum pedido encontrado.`,
+                        );
+                    }
+                    return { received: true };
+                }
             }
 
-            return { received: true };
+            // 👉 CENÁRIO 2: É UM CANCELAMENTO DE PIX
+            if (eventos.includes('PV.REFUND_PIX')) {
+                console.log(
+                    `❌ Pix do TID ${payload.data?.id || payload.id} foi devolvido.`,
+                );
+                // Implementar cancelamento pelo TID
+                return { received: true };
+            }
+
+            // 👉 CENÁRIO 3: FLUXO NORMAL (Cartão de Crédito - se a Rede usar o padrão antigo)
+            const { reference, status } = payload;
+
+            if (reference) {
+                if (status === 'Approved' || status === 'Paid') {
+                    await this.orderService.updateStatus(Number(reference), {
+                        status: OrderStatus.PAID,
+                    });
+                    console.log(
+                        `✅ Pedido ${reference} PAGO via Webhook de Cartão!`,
+                    );
+                } else if (status === 'Canceled' || status === 'Denied') {
+                    await this.orderService.updateStatus(Number(reference), {
+                        status: OrderStatus.CANCELED,
+                    });
+                    console.log(
+                        `❌ Pedido ${reference} CANCELADO via Webhook de Cartão.`,
+                    );
+                }
+                return { received: true };
+            }
+
+            // Se chegou até aqui, é um evento que não precisamos tratar
+            return { received: true, message: 'Evento não monitorado' };
         } catch (error) {
-            console.error(
-                `Erro ao processar webhook do pedido ${reference}:`,
-                error,
-            );
+            console.error(`Erro ao processar webhook da Rede:`, error);
             return { received: true, error: 'Erro interno ao processar' };
         }
     }

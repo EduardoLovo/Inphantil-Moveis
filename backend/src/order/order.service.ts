@@ -348,6 +348,20 @@ export class OrderService {
         return updatedOrder;
     }
 
+    // 👉 Salva o TID gerado pela Rede no pedido
+    async updateTid(id: number, tid: string) {
+        return this.prisma.order.update({
+            where: { id },
+            data: { tid },
+        });
+    }
+
+    // 👉 Busca quem é o dono desse TID quando o Webhook chamar
+    async findByTid(tid: string) {
+        return this.prisma.order.findUnique({
+            where: { tid },
+        });
+    }
     async remove(id: number) {
         const order = await this.prisma.order.findUnique({
             where: { id },
