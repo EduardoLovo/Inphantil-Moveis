@@ -1,3 +1,4 @@
+import { SevenService } from 'src/integrations/seven/seven.service';
 import {
     Controller,
     Get,
@@ -29,7 +30,10 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 @UseGuards(AuthGuard('jwt')) // Obrigatório estar logado
 @ApiBearerAuth()
 export class OrderController {
-    constructor(private readonly orderService: OrderService) {}
+    constructor(
+        private readonly orderService: OrderService,
+        private readonly sevenService: SevenService,
+    ) {}
 
     @Post()
     @ApiOperation({ summary: 'Criar um novo pedido' })
@@ -89,5 +93,12 @@ export class OrderController {
     })
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.orderService.remove(id);
+    }
+
+    // Não esqueça de importar o SevenService no construtor do controller se ele não estiver lá!
+    @Get(':id/nota-fiscal')
+    async baixarNF(@Param('id') id: string) {
+        // Converte o ID da URL para número (ou mantém string, dependendo de como você salva)
+        return this.sevenService.baixarNotaFiscal(id);
     }
 }

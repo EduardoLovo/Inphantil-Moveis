@@ -24,12 +24,12 @@ import EnvironmentPage from "./pages/EnvironmentPage";
 // ROTAS PUBLICAS
 import ContactPage from "./pages/ContactPage";
 // ROTAS LOGADO
-// import CartPage from "./pages/CartPage";
-// import CheckoutPage from "./pages/CheckoutPage";
-// import ProductsPage from "./pages/ProductsPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import ProductsPage from "./pages/ProductsPage";
 import PosCompraPage from "./pages/PosCompraPage";
 // ROTAS LOJA
-// import ProductDetailsPage from "./pages/ProductDetailsPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import InternalAnalytics from "./components/InternalAnalytics";
 import VersionCheck from "./components/VersionCheck";
 // ROTAS ADMIN
@@ -55,7 +55,7 @@ import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
 import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
-import UnderConstructionPage from "./pages/UnderConstructionPage";
+// import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LencoisPage from "./pages/catalogs/LencoisPage";
 import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
@@ -67,6 +67,7 @@ import MyOrdersPage from "./pages/MyOrdersPage";
 import DetalhesPedidoPage from "./pages/OrderDetailPage";
 import { AdminReportsPage } from "./pages/AdminReportsPage";
 import CookieConsent from "./components/CookieConsent";
+import ProtetorDeParedeProductPage from "./pages/ProtetorDeParede";
 
 function App() {
   const location = useLocation();
@@ -90,7 +91,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/products" element={<UnderConstructionPage />} />
+        {/* <Route path="/products" element={<UnderConstructionPage />} /> */}
         {/* <Route path="/checkout" element={<UnderConstructionPage />} /> */}
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
@@ -110,17 +111,21 @@ function App() {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        {/* <Route path="/products/:id" element={<ProductDetailsPage />} /> */}
+        <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        {/* <Route path="/products" element={<ProductsPage />} /> */}
-        {/* <Route path="/cart" element={<CartPage />} /> */}
+        <Route path="/loja-teste" element={<ProductsPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route
+          path="/monte-seu-protetor"
+          element={<ProtetorDeParedeProductPage />}
+        />
 
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
           <Route path="/profile/edit" element={<EditProfilePage />} />
-          {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/pos-compra" element={<PosCompraPage />} />
           <Route path="/meus-pedidos" element={<MyOrdersPage />} />
           <Route path="/pedidos/:id" element={<DetalhesPedidoPage />} />

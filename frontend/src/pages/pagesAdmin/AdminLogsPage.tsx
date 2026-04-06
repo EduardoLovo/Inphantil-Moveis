@@ -8,10 +8,12 @@ import {
   FaHistory,
   FaCheckCircle,
   FaTimesCircle,
+  FaTrash, // <-- Importei o ícone de lixeira
 } from "react-icons/fa";
 
 const AdminLogsPage: React.FC = () => {
-  const { logs, isLoading, error, fetchLogs } = useLogStore();
+  // Adicionei o clearLogs aqui (você precisará criar no LogStore)
+  const { logs, isLoading, error, fetchLogs, clearLogs } = useLogStore();
   const { user } = useAuthStore();
 
   // Check de permissão: Apenas DEV pode estar nesta página
@@ -20,11 +22,26 @@ const AdminLogsPage: React.FC = () => {
   }
 
   useEffect(() => {
-    // Carrega logs apenas se ainda não tiver carregado (opcional, pode remover o if para recarregar sempre)
     if (logs.length === 0) {
       fetchLogs();
     }
   }, [fetchLogs, logs.length]);
+
+  // Função para lidar com o clique do botão
+  const handleClearLogs = async () => {
+    const confirmed = window.confirm(
+      "Tem certeza que deseja apagar TODOS os logs de acesso? Esta ação não pode ser desfeita.",
+    );
+
+    if (confirmed) {
+      if (clearLogs) {
+        await clearLogs();
+        await fetchLogs(); // Recarrega a lista (que deve vir vazia agora)
+      } else {
+        alert("A função clearLogs ainda não foi implementada no seu LogStore!");
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -48,8 +65,22 @@ const AdminLogsPage: React.FC = () => {
             DEV).
           </p>
         </div>
-        <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 self-start">
-          <FaHistory /> {logs.length} Registros
+
+        {/* Agrupei o contador e o botão nesta div */}
+        <div className="flex flex-wrap items-center gap-3 self-start">
+          <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2">
+            <FaHistory /> {logs.length} Registros
+          </div>
+
+          {/* BOTÃO DE APAGAR TUDO */}
+          {logs.length > 0 && (
+            <button
+              onClick={handleClearLogs}
+              className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <FaTrash /> Limpar Logs
+            </button>
+          )}
         </div>
       </header>
 
@@ -60,6 +91,7 @@ const AdminLogsPage: React.FC = () => {
         </div>
       )}
 
+      {/* ... (resto da tabela continua igualzinho) ... */}
       <div className=" bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">

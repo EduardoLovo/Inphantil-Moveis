@@ -18,4 +18,11 @@ export class LogService {
             take: 100, // Limita para não carregar demais (pega os 100 últimos)
         });
     }
+
+    async deleteAllAuthLogs() {
+        const result = await this.prisma.authLog.deleteMany();
+        return {
+            message: `${result.count} logs de acesso foram apagados com sucesso!`,
+        };
+    }
 }

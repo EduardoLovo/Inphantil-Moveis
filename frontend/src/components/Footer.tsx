@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
             </li>
             <li>
               <Link
-                to="/products"
+                to="/loja"
                 className="text-sm hover:text-[#fefe85] transition-colors duration-200 block"
               >
                 Catálogo Completo

@@ -9,8 +9,28 @@ import { Prisma } from '@prisma/client';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MailService } from 'src/mail/mail.service';
-// 👉 1. IMPORTAMOS O NOSSO NOVO SERVIÇO DE INTEGRAÇÃO
 import { SevenService } from '../integrations/seven/seven.service';
+
+const normalizeString = (str: string) =>
+    str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+const CAPITALS: Record<string, string> = {
+    MS: 'campo grande',
+    MT: 'cuiaba',
+    GO: 'goiania',
+    MA: 'sao luis',
+    PI: 'teresina',
+    CE: 'fortaleza',
+    RN: 'natal',
+    PB: 'joao pessoa',
+    PE: 'recife',
+    AL: 'maceio',
+    SE: 'aracaju',
+};
 
 @Injectable()
 export class OrderService {
@@ -22,7 +42,6 @@ export class OrderService {
     ) {}
 
     async create(userId: number, dto: CreateOrderDto) {
-        // 1. Atualiza o CPF do cliente se ele foi enviado no momento da compra
         if (dto.cpf) {
             await this.prisma.user.update({
                 where: { id: userId },
@@ -30,7 +49,6 @@ export class OrderService {
             });
         }
 
-        // 2. Buscar Endereço
         const address = await this.prisma.address.findUnique({
             where: { id: dto.addressId },
         });
@@ -40,7 +58,6 @@ export class OrderService {
             );
         }
 
-        // 3. Extrai IDs dos Produtos e Variações
         const productIds = dto.items.map((item) => item.productId);
         const variantIds = dto.items
             .filter((item) => item.variantId)
@@ -53,27 +70,24 @@ export class OrderService {
             where: { id: { in: variantIds } },
         });
 
-        // 4. Validar Estoque e Calcular Total
-        let total = 0;
+        let totalProdutos = 0;
         const orderItemsData: Prisma.OrderItemCreateWithoutOrderInput[] = [];
 
         for (const itemDto of dto.items) {
             const product = products.find((p) => p.id === itemDto.productId);
 
-            if (!product) {
+            if (!product)
                 throw new BadRequestException(
                     `Produto ID ${itemDto.productId} não encontrado.`,
                 );
-            }
-            if (!product.isAvailable) {
+            if (!product.isAvailable)
                 throw new BadRequestException(
                     `Produto "${product.name}" indisponível.`,
                 );
-            }
 
             let unitPrice = 0;
+            const itemCustomData = (itemDto as any).customData; // Pega o JSON de personalização
 
-            // Se o item tem variação
             if (itemDto.variantId) {
                 const variant = variants.find(
                     (v) => v.id === itemDto.variantId,
@@ -84,54 +98,130 @@ export class OrderService {
                     );
                 if (variant.stock < itemDto.quantity) {
                     throw new BadRequestException(
-                        `Estoque insuficiente para a variação de "${product.name}". Restam: ${variant.stock}.`,
+                        `Estoque insuficiente para "${product.name}". Restam: ${variant.stock}.`,
                     );
                 }
 
                 unitPrice = Number(variant.price);
-                total += unitPrice * itemDto.quantity;
+                totalProdutos += unitPrice * itemDto.quantity;
 
                 orderItemsData.push({
                     quantity: itemDto.quantity,
                     price: unitPrice,
                     product: { connect: { id: product.id } },
-                    variant: { connect: { id: variant.id } }, // <-- Salva a variação
+                    variant: { connect: { id: variant.id } },
+                    customData: itemCustomData ? itemCustomData : undefined, // 👉 SALVA AS CORES SE EXISTIREM
                 });
-            }
-            // Se NÃO tem variação
-            else {
+            } else {
                 if (product.stock < itemDto.quantity) {
                     throw new BadRequestException(
                         `Estoque insuficiente para "${product.name}". Restam: ${product.stock}.`,
                     );
                 }
 
-                unitPrice = Number(product.price);
-                total += unitPrice * itemDto.quantity;
+                // =========================================================
+                // 🛡️ BLINDAGEM DE PREÇO: CÁLCULO SEGURO DO PRODUTO 34
+                // =========================================================
+                if (product.id === 34 && itemCustomData) {
+                    let precoDoTamanho = 0;
+                    const tamanhoStr = itemCustomData.tamanho?.toLowerCase();
+
+                    // Tabela de preços internalizada no backend (segura)
+                    if (tamanhoStr === 'berço' || tamanhoStr === 'berco')
+                        precoDoTamanho = 100;
+                    else if (tamanhoStr === 'junior') precoDoTamanho = 200;
+                    else if (tamanhoStr === 'solteiro') precoDoTamanho = 300;
+                    else if (
+                        tamanhoStr === 'solteirão' ||
+                        tamanhoStr === 'solteirao'
+                    )
+                        precoDoTamanho = 400;
+                    else if (tamanhoStr === 'viúva' || tamanhoStr === 'viuva')
+                        precoDoTamanho = 500;
+                    else if (tamanhoStr === 'casal') precoDoTamanho = 600;
+                    else if (tamanhoStr === 'queen') precoDoTamanho = 700;
+                    else if (tamanhoStr === 'king') precoDoTamanho = 800;
+
+                    const valorLed = itemCustomData.kitLed === 'Sim' ? 50 : 0;
+
+                    // O Servidor calcula o preço real ignorando o que o front mandou
+                    unitPrice =
+                        precoDoTamanho > 0
+                            ? precoDoTamanho + valorLed
+                            : Number(product.price);
+                } else {
+                    unitPrice = Number(product.price);
+                }
+                // =========================================================
+
+                totalProdutos += unitPrice * itemDto.quantity;
 
                 orderItemsData.push({
                     quantity: itemDto.quantity,
                     price: unitPrice,
                     product: { connect: { id: product.id } },
+                    customData: itemCustomData ? itemCustomData : undefined, // 👉 SALVA AS CORES NO BANCO DE DADOS
                 });
             }
         }
 
-        // 5. Transação (AQUI O PEDIDO É CRIADO DE FATO NO BANCO DE DADOS)
+        // --- CÁLCULO DO FRETE (Mantido original) ---
+        let shippingPercentage = 0;
+        let requiresQuote = false;
+        const uf = address.state.trim().toUpperCase();
+        const city = normalizeString(address.city || '');
+
+        const ALWAYS_QUOTE = ['RO', 'AC', 'PA', 'AM', 'RR', 'AP', 'TO', 'DF'];
+        if (ALWAYS_QUOTE.includes(uf)) {
+            requiresQuote = true;
+        } else {
+            const isCapital = (stateUf: string) => {
+                const capital = CAPITALS[stateUf];
+                return capital ? city === capital : false;
+            };
+
+            if (['MS', 'MT', 'GO'].includes(uf)) {
+                if (isCapital(uf)) shippingPercentage = 13;
+                else requiresQuote = true;
+            } else if (
+                ['MA', 'PI', 'CE', 'RN', 'PB', 'PE', 'AL', 'SE'].includes(uf)
+            ) {
+                if (isCapital(uf)) shippingPercentage = 15;
+                else requiresQuote = true;
+            } else if (uf === 'SC') {
+                shippingPercentage = 12;
+            } else if (['PR', 'SP'].includes(uf)) {
+                shippingPercentage = 10;
+            } else if (uf === 'RJ') {
+                shippingPercentage = 15;
+            } else if (['RS', 'ES', 'MG'].includes(uf)) {
+                shippingPercentage = 13;
+            } else if (uf === 'BA') {
+                shippingPercentage = 13;
+            } else {
+                requiresQuote = true;
+            }
+        }
+
+        const calculatedShippingCost = requiresQuote
+            ? 0
+            : (totalProdutos * shippingPercentage) / 100;
+        const finalTotal = totalProdutos + calculatedShippingCost;
+
         const order = await this.prisma.$transaction(
             async (tx) => {
                 const newOrder = await tx.order.create({
                     data: {
                         userId,
                         addressId: dto.addressId,
-                        total: total,
+                        total: finalTotal,
+                        shippingCost: calculatedShippingCost,
                         status: 'PENDING',
                         items: { create: orderItemsData },
                     },
                     include: { items: true },
                 });
 
-                // Baixar Estoque corretamente após a compra
                 for (const item of dto.items) {
                     if (item.variantId) {
                         await tx.productVariant.update({
@@ -145,56 +235,20 @@ export class OrderService {
                         });
                     }
                 }
-
                 return newOrder;
             },
-            {
-                maxWait: 10000,
-                timeout: 15000,
-            },
+            { maxWait: 10000, timeout: 15000 },
         );
 
-        // 6. ENVIAR O E-MAIL
         try {
             const user = await this.prisma.user.findUnique({
                 where: { id: userId },
             });
-
             if (user) {
                 await this.mailerService.sendMail({
                     to: user.email,
                     subject: `🛒 Pedido #${order.id} recebido com sucesso! - Inphantil`,
-                    html: `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #313b2f; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaea; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #ffd639; margin: 0; font-size: 28px;">Oba! Pedido Recebido 🎉</h1>
-              </div>
-              <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${user.name}</strong>!</p>
-              <p style="font-size: 16px; line-height: 1.6;">Que alegria ter você aqui! Os seus produtos já estão no nosso radar. O seu pedido <strong>#${order.id}</strong> foi gerado com sucesso no nosso sistema.</p>
-              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #ffd639;">
-                <h3 style="margin-top: 0; color: #313b2f; font-size: 16px;">O que acontece agora?</h3>
-                <ul style="margin-bottom: 0; padding-left: 20px; font-size: 15px; line-height: 1.6; color: #555;">
-                  <li><strong>Se escolheu Pix:</strong> O seu pedido só será confirmado após o pagamento do QR Code gerado no final da compra. A aprovação é imediata!</li>
-                  <li><strong>Se escolheu Cartão:</strong> O seu pagamento está em análise pela administradora. Se estiver tudo certo, começaremos a preparar a sua encomenda em breve.</li>
-                </ul>
-              </div>
-              <p style="font-size: 16px; line-height: 1.6; text-align: center;">Pode acompanhar o status da sua encomenda a qualquer momento clicando no botão abaixo:</p>
-              <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/meus-pedidos" 
-                   style="background-color: #313b2f; color: #ffd639; padding: 14px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block;">
-                  Ver Meus Pedidos
-                </a>
-              </div>
-              <p style="font-size: 16px; color: #888; text-align: center; border-top: 1px solid #eaeaea; padding-top: 20px;">
-                Feito com carinho, <br/>
-                <strong style="color: #313b2f;">Equipe Inphantil</strong>
-              </p>
-            </div>
-          `,
                 });
-                console.log(
-                    `E-mail de confirmação enviado com sucesso para ${user.email}`,
-                );
             }
         } catch (error) {
             console.error('Erro ao enviar o e-mail de confirmação:', error);
@@ -207,9 +261,7 @@ export class OrderService {
         return this.prisma.order.findMany({
             where: { userId },
             include: {
-                items: {
-                    include: { product: true, variant: true },
-                },
+                items: { include: { product: true, variant: true } },
                 address: true,
             },
             orderBy: { createdAt: 'desc' },
@@ -224,11 +276,8 @@ export class OrderService {
                 address: true,
             },
         });
-
-        if (!order || order.userId !== userId) {
+        if (!order || order.userId !== userId)
             throw new NotFoundException('Pedido não encontrado.');
-        }
-
         return order;
     }
 
@@ -236,9 +285,7 @@ export class OrderService {
         return this.prisma.order.findMany({
             include: {
                 user: true,
-                items: {
-                    include: { product: true, variant: true },
-                },
+                items: { include: { product: true, variant: true } },
                 address: true,
             },
             orderBy: { createdAt: 'desc' },
@@ -246,61 +293,56 @@ export class OrderService {
     }
 
     async updateStatus(id: number, updateDto: UpdateOrderStatusDto) {
-        // 1. Puxa o status antigo antes de atualizar
         const order = await this.prisma.order.findUnique({
             where: { id },
             select: { status: true },
         });
 
-        if (!order) {
+        if (!order)
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
-        }
 
-        // 👉 3. AQUI FIZEMOS UM AJUSTE: Precisamos incluir os dados completos pro Seven!
         const updatedOrder = await this.prisma.order.update({
             where: { id },
             data: { status: updateDto.status },
             include: {
                 user: true,
-                address: true, // Adicionado para enviar o CEP pro Seven
-                items: { include: { variant: true } }, // Adicionado para enviar o SKU pro Seven
+                address: true,
+                items: { include: { variant: true, product: true } }, // 👈 Perfeito, garante o SKU
             },
         });
 
-        // 4. GATILHO MÁGICO: Dispara o e-mail E o ERP se o status mudou para PAGO ('PAID')
         if (
             order.status !== 'PAID' &&
             updateDto.status === 'PAID' &&
             updatedOrder.user
         ) {
-            // Gatilho do E-mail
+            // 1. Envia o E-mail de confirmação
             this.mailService
                 .sendPaymentApprovedEmail(
                     updatedOrder,
                     updatedOrder.user.email,
                     updatedOrder.user.name,
                 )
-                .catch((error) => {
+                .catch((error) =>
                     console.error(
                         `Erro ao disparar e-mail de pagamento do pedido ${id}:`,
                         error,
-                    );
-                });
+                    ),
+                );
 
-            // 👉 5. GATILHO DO ERP SEVEN (Disparado em background)
+            // 2. Avisa o ERP Seven (a formatação das observações já acontece lá dentro do service)
             this.sevenService
                 .enviarPedidoParaOSeven(
                     updatedOrder,
                     updatedOrder.user,
                     updatedOrder.address,
                 )
-                .catch((err: any) => {
-                    // 👈 Só adicionar o ': any' aqui!
+                .catch((err: any) =>
                     console.error(
                         `Erro crítico na integração com o Seven do pedido ${id}:`,
                         err,
-                    );
-                });
+                    ),
+                );
         }
 
         return updatedOrder;
@@ -311,10 +353,8 @@ export class OrderService {
             where: { id },
             include: { items: true },
         });
-
-        if (!order) {
+        if (!order)
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
-        }
 
         return this.prisma.$transaction(async (tx) => {
             for (const item of order.items) {
@@ -330,7 +370,6 @@ export class OrderService {
                     });
                 }
             }
-
             return tx.order.delete({ where: { id } });
         });
     }

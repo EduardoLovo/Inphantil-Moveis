@@ -4,8 +4,10 @@ import type { Product, ProductVariant } from "../types/products";
 
 export interface CartItem extends Product {
   cartItemId: string; // NOVO: ID único no carrinho (ex: "produto1-variante5")
+  productId: number; // ID base do produto
   quantity: number;
   selectedVariant?: ProductVariant; // NOVO: Guarda os dados da variação escolhida
+  customData?: any;
 }
 
 interface CartState {
@@ -54,6 +56,7 @@ export const useCartStore = create<CartState>()(
               ...currentItems,
               {
                 ...product,
+                productId: product.id,
                 price: priceToUse, // Sobrescreve o preço para o valor da variação
                 cartItemId,
                 selectedVariant: variant,

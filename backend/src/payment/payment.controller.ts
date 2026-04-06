@@ -6,29 +6,50 @@ import {
     HttpException,
     HttpStatus,
     BadRequestException,
+    Request,
+    Query, // <-- Importamos o Request para pegar quem é o usuário logado
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreateCreditCardPaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OrderService } from '../order/order.service'; // <-- Importar o OrderService
-import { OrderStatus } from '@prisma/client'; // <-- Importar o Enum do Prisma
+import { OrderService } from '../order/order.service';
+import { OrderStatus } from '@prisma/client';
 
 @Controller('payment')
 export class PaymentController {
     constructor(
         private readonly paymentService: PaymentService,
-        private readonly orderService: OrderService, // <-- Injetar o OrderService aqui
+        private readonly orderService: OrderService,
     ) {}
 
     @UseGuards(JwtAuthGuard)
     @Post('credit-card')
-    async payWithCreditCard(@Body() paymentData: CreateCreditCardPaymentDto) {
+    async payWithCreditCard(
+        @Request() req: any, // <-- Pega os dados do usuário autenticado
+        @Body() paymentData: CreateCreditCardPaymentDto,
+    ) {
         try {
-            // 1. Envia os dados para a API da Rede
+            // =========================================================
+            // 🛡️ BLINDAGEM DE VALOR: BUSCANDO A VERDADE NO BANCO
+            // =========================================================
+            // O req.user.id (ou sub) vem do seu token JWT
+            const userId = req.user.id || req.user.sub;
+
+            // Busca o pedido no banco de dados para garantir que é dele e pegar o valor real
+            const order = await this.orderService.findOne(
+                Number(paymentData.orderId),
+                userId,
+            );
+
+            // Valor oficial calculado pelo servidor (impossível de ser hackeado pelo navegador)
+            const secureAmount = Number(order.total);
+            // =========================================================
+
+            // 1. Envia os dados para a API da Rede usando o VALOR SEGURO
             const result =
                 await this.paymentService.createCreditCardTransaction(
                     paymentData.orderId,
-                    paymentData.amount,
+                    secureAmount, // <-- Passamos o secureAmount no lugar do paymentData.amount
                     paymentData.cardData,
                 );
 
@@ -37,12 +58,9 @@ export class PaymentController {
 
             if (isSuccess) {
                 // 3. Se aprovado, atualiza o status no Prisma!
-                // Como o ID no Prisma é Int e no DTO vem como String, usamos Number()
                 await this.orderService.updateStatus(
                     Number(paymentData.orderId),
-                    {
-                        status: OrderStatus.PAID,
-                    },
+                    { status: OrderStatus.PAID },
                 );
             }
 
@@ -70,16 +88,86 @@ export class PaymentController {
         }
     }
 
+    @UseGuards(JwtAuthGuard) // <-- BLINDAGEM: Exige que o usuário esteja logado para gerar Pix
     @Post('pix')
-    async createPixPayment(@Body() body: { orderId: string; amount: number }) {
-        if (!body.orderId || !body.amount) {
+    async createPixPayment(
+        @Request() req: any, // <-- Pega o usuário logado
+        @Body() body: { orderId: string; amount?: number }, // amount agora é opcional, pois vamos ignorá-lo
+    ) {
+        if (!body.orderId) {
             throw new BadRequestException(
-                'ID do pedido e valor são obrigatórios para gerar o Pix.',
+                'ID do pedido é obrigatório para gerar o Pix.',
             );
         }
+
+        // =========================================================
+        // 🛡️ BLINDAGEM DE VALOR PIX
+        // =========================================================
+        const userId = req.user.id || req.user.sub;
+
+        // Garante que o pedido existe e pertence a este usuário
+        const order = await this.orderService.findOne(
+            Number(body.orderId),
+            userId,
+        );
+        const secureAmount = Number(order.total); // Pega o valor real do banco
+        // =========================================================
+
         return this.paymentService.createPixTransaction(
             body.orderId,
-            body.amount,
+            secureAmount, // <-- Envia para a Rede o valor 100% seguro!
         );
+    }
+
+    // =========================================================
+    // 🔔 WEBHOOK: RECEBE AVISOS DA REDE (PIX PAGO, BOLETO, ETC)
+    // =========================================================
+    @Post('webhook')
+    async redeWebhook(
+        @Body() payload: any,
+        @Query('token') token: string, // <-- ISSO AQUI LÊ A SENHA DA URL!
+    ) {
+        // 🔒 BLINDAGEM DO WEBHOOK: Verifica se a senha bate
+        const minhaSenhaSecreta = process.env.WEBHOOK_SECRET_TOKEN; // Mesma senha que você colocou na Rede
+
+        if (token !== minhaSenhaSecreta) {
+            console.warn(
+                '🚨 Tentativa de invasão no Webhook! Token inválido:',
+                token,
+            );
+            // Retornamos OK só para despistar o hacker, mas não fazemos nada no banco!
+            return { received: true };
+        }
+
+        // Extraímos o número do pedido (reference) e o status do pagamento
+        const { reference, status } = payload;
+
+        if (!reference) {
+            return { received: true, message: 'Payload ignorado' };
+        }
+
+        try {
+            if (status === 'Approved' || status === 'Paid') {
+                await this.orderService.updateStatus(Number(reference), {
+                    status: OrderStatus.PAID,
+                });
+                console.log(
+                    `✅ Pedido ${reference} atualizado para PAGO via Webhook!`,
+                );
+            } else if (status === 'Canceled' || status === 'Denied') {
+                await this.orderService.updateStatus(Number(reference), {
+                    status: OrderStatus.CANCELED,
+                });
+                console.log(`❌ Pedido ${reference} CANCELADO via Webhook.`);
+            }
+
+            return { received: true };
+        } catch (error) {
+            console.error(
+                `Erro ao processar webhook do pedido ${reference}:`,
+                error,
+            );
+            return { received: true, error: 'Erro interno ao processar' };
+        }
     }
 }

@@ -94,7 +94,7 @@ const Header = () => {
               Início
             </Link>
             <Link
-              to="/products"
+              to="/loja"
               className="text-gray-200 hover:text-[#ffffbc] font-medium transition-colors"
             >
               Loja

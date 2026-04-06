@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useProductStore } from "../../store/ProductStore";
 import { useCategoryStore } from "../../store/CategoryStore";
 import {
-  FaSave,
+  // FaSave,
   FaArrowLeft,
   FaTrash,
   FaPlus,
@@ -20,6 +20,8 @@ import {
   FaPlusCircle,
   FaMagic,
   FaCheckDouble,
+  FaSearch,
+  FaSave, // <-- Importação do ícone de busca adicionada
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import FullScreenLoader from "../../components/FullScreenLoader";
@@ -112,7 +114,7 @@ const CAMA_COLORS = [
 ];
 
 const LENCOL_COLORS = [
-  "AZ3",
+  "AZUL",
   "AZUL BEBÊ",
   "BEGE",
   "BRANCO",
@@ -150,7 +152,9 @@ interface VariantForm {
 const EditProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getProductById, updateProduct, isLoading } = useProductStore();
+  const { getProductById, updateProduct } = useProductStore();
+  const [isSaving, setIsSaving] = useState(false);
+
   const { categories, fetchCategories } = useCategoryStore();
 
   const [name, setName] = useState("");
@@ -160,6 +164,9 @@ const EditProductPage: React.FC = () => {
   const [loadingInitial, setLoadingInitial] = useState(true);
 
   const [variants, setVariants] = useState<VariantForm[]>([]);
+
+  // <-- NOVO ESTADO PARA O FILTRO DE VARIAÇÕES -->
+  const [variantFilter, setVariantFilter] = useState("");
 
   // Estados do Gerador em Lote (Batch)
   const [batchSize, setBatchSize] = useState("");
@@ -386,6 +393,7 @@ const EditProductPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
     if (!categoryId) {
       toast.error("Por favor, selecione uma categoria.");
@@ -477,11 +485,32 @@ const EditProductPage: React.FC = () => {
     return parseFloat(cleanString) || 0;
   };
 
+  // <-- NOVA LÓGICA DE FILTRAGEM -->
+  // Filtra as variantes com base no que o usuário digitar
+  const filteredVariants = variants.filter((v) => {
+    if (!variantFilter) return true;
+
+    // Substitui hifens por espaços para melhorar a busca (Ex: cz6-az10 vira cz6 az10)
+    const searchString =
+      `${v.color} ${v.size} ${v.complement} ${v.sku} ${v.price}`
+        .replace(/-/g, " ")
+        .toLowerCase();
+
+    // Pega cada termo digitado no filtro (Ex: "CZ6 sem colchao" => ["cz6", "sem", "colchao"])
+    const searchTerms = variantFilter
+      .replace(/-/g, " ")
+      .toLowerCase()
+      .split(/\s+/);
+
+    // Retorna true APENAS se a variante contiver TODOS os termos digitados
+    return searchTerms.every((term) => searchString.includes(term));
+  });
+
   return (
     <div className="w-full max-w-5xl mx-auto p-4 md:p-8 pt-24 pb-20">
       <Toaster />
       <FullScreenLoader
-        isLoading={isLoading}
+        isLoading={isSaving}
         title="A guardar alterações..."
         message={
           <>
@@ -626,7 +655,7 @@ const EditProductPage: React.FC = () => {
                     <FaDollarSign className="text-gray-400" /> Preço (R$)
                   </label>
                   <input
-                    type="text" // ERA number, AGORA É text!
+                    type="text"
                     value={batchPrice}
                     onChange={(e) =>
                       setBatchPrice(formatCurrencyInput(e.target.value))
@@ -721,237 +750,287 @@ const EditProductPage: React.FC = () => {
             </span>
           </div>
 
-          <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-            {variants.map((variant, index) => (
-              <div
-                key={variant.id}
-                className="p-5 border-2 border-gray-100 rounded-xl bg-gray-50 relative group"
+          {/* BARRA DE PESQUISA DE VARIAÇÕES */}
+          {variants.length > 0 && (
+            <div className="mb-6 relative">
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Filtrar por cor (Ex: CZ6), tamanho, ou complemento..."
+                value={variantFilter}
+                onChange={(e) => setVariantFilter(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ffd639] focus:bg-white outline-none transition-all text-sm"
+              />
+            </div>
+          )}
+
+          {/* Feedback caso o filtro não encontre nada */}
+          {filteredVariants.length === 0 && variants.length > 0 && (
+            <div className="text-center py-10 bg-gray-50 border border-dashed border-gray-200 rounded-xl mb-6">
+              <p className="text-gray-500 font-medium">
+                Nenhuma variação encontrada para "{variantFilter}".
+              </p>
+              <button
+                type="button"
+                onClick={() => setVariantFilter("")}
+                className="text-sm text-[#007bff] hover:underline mt-2 font-bold"
               >
-                <button
-                  type="button"
-                  onClick={() => handleRemoveVariant(variant.id)}
-                  className="absolute -top-3 -right-3 bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
-                  title="Remover Variação"
+                Limpar Filtro
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+            {/* AGORA USAMOS A LISTA FILTRADA AO INVÉS DA LISTA COMPLETA */}
+            {filteredVariants.map((variant) => {
+              // Pegamos o índice original na lista completa para a numeração visual não mudar!
+              const originalIndex = variants.findIndex(
+                (v) => v.id === variant.id,
+              );
+
+              return (
+                <div
+                  key={variant.id}
+                  className="p-5 border-2 border-gray-100 rounded-xl bg-gray-50 relative group"
                 >
-                  <FaTrash size={12} />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveVariant(variant.id)}
+                    className="absolute -top-3 -right-3 bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
+                    title="Remover Variação"
+                  >
+                    <FaTrash size={12} />
+                  </button>
 
-                <h3 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider flex items-center gap-2">
-                  Variação #{index + 1}
-                  {variant.id.includes(".") && (
-                    <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">
-                      NOVA
-                    </span>
-                  )}
-                  {variant.isFeatured && (
-                    <FaStar className="text-yellow-400" title="Em Destaque" />
-                  )}
-                </h3>
+                  <h3 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider flex items-center gap-2">
+                    Variação #{originalIndex + 1}
+                    {variant.id.includes(".") && (
+                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">
+                        NOVA
+                      </span>
+                    )}
+                    {variant.isFeatured && (
+                      <FaStar className="text-yellow-400" title="Em Destaque" />
+                    )}
+                  </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-                  {!isProtetor && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                    {!isProtetor && (
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                          <FaPalette className="text-gray-400" /> Cor
+                        </label>
+                        <select
+                          value={variant.color}
+                          onChange={(e) =>
+                            handleVariantChange(
+                              variant.id,
+                              "color",
+                              e.target.value,
+                            )
+                          }
+                          required={isColorRequired}
+                          disabled={!categoryId}
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
+                        >
+                          <option value="">
+                            {categoryId
+                              ? "Selecione..."
+                              : "Escolha a categoria antes"}
+                          </option>
+                          {isCama &&
+                            CAMA_COLORS.map((color) => (
+                              <option key={color.id} value={color.id}>
+                                Ext: {color.Externo} / Int: {color.Interno}
+                              </option>
+                            ))}
+                          {isLencol &&
+                            LENCOL_COLORS.map((color) => (
+                              <option key={color} value={color}>
+                                {color}
+                              </option>
+                            ))}
+                          {!isCama &&
+                            !isLencol &&
+                            !isProtetor &&
+                            categoryId && (
+                              <option value="Unica">Cor Única</option>
+                            )}
+                        </select>
+                      </div>
+                    )}
+
                     <div>
                       <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                        <FaPalette className="text-gray-400" /> Cor
+                        <FaRuler className="text-gray-400" /> Tamanho
                       </label>
                       <select
-                        value={variant.color}
+                        value={variant.size}
                         onChange={(e) =>
                           handleVariantChange(
                             variant.id,
-                            "color",
+                            "size",
                             e.target.value,
                           )
                         }
-                        required={isColorRequired}
-                        disabled={!categoryId}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
+                        required
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
                       >
-                        <option value="">
-                          {categoryId
-                            ? "Selecione..."
-                            : "Escolha a categoria antes"}
-                        </option>
-                        {isCama &&
-                          CAMA_COLORS.map((color) => (
-                            <option key={color.id} value={color.id}>
-                              Ext: {color.Externo} / Int: {color.Interno}
-                            </option>
-                          ))}
-                        {isLencol &&
-                          LENCOL_COLORS.map((color) => (
-                            <option key={color} value={color}>
-                              {color}
-                            </option>
-                          ))}
-                        {!isCama && !isLencol && !isProtetor && categoryId && (
-                          <option value="Unica">Cor Única</option>
-                        )}
+                        <option value="">Selecione...</option>
+                        {ITEM_SIZES.map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
                       </select>
                     </div>
-                  )}
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaRuler className="text-gray-400" /> Tamanho
-                    </label>
-                    <select
-                      value={variant.size}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "size", e.target.value)
-                      }
-                      required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    >
-                      <option value="">Selecione...</option>
-                      {ITEM_SIZES.map((size) => (
-                        <option key={size} value={size}>
-                          {size}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaPlusCircle className="text-gray-400" /> Opção Extra
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.complement}
-                      onChange={(e) =>
-                        handleVariantChange(
-                          variant.id,
-                          "complement",
-                          e.target.value,
-                        )
-                      }
-                      placeholder="Ex: Com Colchão"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaDollarSign className="text-gray-400" /> Preço (R$)
-                    </label>
-                    <input
-                      type="text" // ERA number, AGORA É text!
-                      value={variant.price}
-                      onChange={(e) =>
-                        handleVariantChange(
-                          variant.id,
-                          "price",
-                          formatCurrencyInput(e.target.value),
-                        )
-                      }
-                      required
-                      placeholder="0,00"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaLayerGroup className="text-gray-400" /> Estoque
-                    </label>
-                    <input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "stock", e.target.value)
-                      }
-                      required
-                      placeholder="Qtd"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2 md:col-span-2">
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaBarcode className="text-gray-400" /> SKU{" "}
-                      <span className="text-gray-400 font-normal">
-                        (Opcional)
-                      </span>
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.sku}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "sku", e.target.value)
-                      }
-                      placeholder="Ex: CAMA-SOLT"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  {/* CHECKBOX DE DESTAQUE DA VARIAÇÃO */}
-                  <div className="flex items-end pb-2 md:col-span-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <FaPlusCircle className="text-gray-400" /> Opção Extra
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={variant.isFeatured}
+                        type="text"
+                        value={variant.complement}
                         onChange={(e) =>
                           handleVariantChange(
                             variant.id,
-                            "isFeatured",
-                            e.target.checked,
+                            "complement",
+                            e.target.value,
                           )
                         }
-                        className="w-5 h-5 text-[#ffd639] bg-white border-gray-300 rounded focus:ring-[#ffd639]"
+                        placeholder="Ex: Com Colchão"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
                       />
-                      <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
-                        Variante em Destaque{" "}
-                        <FaStar className="text-gray-300" />
-                      </span>
-                    </label>
-                  </div>
+                    </div>
 
-                  <div className="sm:col-span-2 md:col-span-5 border-t border-gray-200 pt-3 mt-1">
-                    <label className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
-                      <FaImage className="text-gray-400" /> Imagens da Variante
-                    </label>
-                    <div className="space-y-2">
-                      {variant.imageUrls.map((url, imgIdx) => (
-                        <div key={imgIdx} className="flex gap-2">
-                          <input
-                            type="text"
-                            value={url}
-                            onChange={(e) =>
-                              handleVariantImageChange(
-                                variant.id,
-                                imgIdx,
-                                e.target.value,
-                              )
-                            }
-                            placeholder="https://..."
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none bg-white"
-                          />
-                          {variant.imageUrls.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveVariantImage(variant.id, imgIdx)
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <FaDollarSign className="text-gray-400" /> Preço (R$)
+                      </label>
+                      <input
+                        type="text"
+                        value={variant.price}
+                        onChange={(e) =>
+                          handleVariantChange(
+                            variant.id,
+                            "price",
+                            formatCurrencyInput(e.target.value),
+                          )
+                        }
+                        required
+                        placeholder="0,00"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <FaLayerGroup className="text-gray-400" /> Estoque
+                      </label>
+                      <input
+                        type="number"
+                        value={variant.stock}
+                        onChange={(e) =>
+                          handleVariantChange(
+                            variant.id,
+                            "stock",
+                            e.target.value,
+                          )
+                        }
+                        required
+                        placeholder="Qtd"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 md:col-span-2">
+                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <FaBarcode className="text-gray-400" /> SKU{" "}
+                        <span className="text-gray-400 font-normal">
+                          (Opcional)
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        value={variant.sku}
+                        onChange={(e) =>
+                          handleVariantChange(variant.id, "sku", e.target.value)
+                        }
+                        placeholder="Ex: CAMA-SOLT"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                      />
+                    </div>
+
+                    {/* CHECKBOX DE DESTAQUE DA VARIAÇÃO */}
+                    <div className="flex items-end pb-2 md:col-span-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={variant.isFeatured}
+                          onChange={(e) =>
+                            handleVariantChange(
+                              variant.id,
+                              "isFeatured",
+                              e.target.checked,
+                            )
+                          }
+                          className="w-5 h-5 text-[#ffd639] bg-white border-gray-300 rounded focus:ring-[#ffd639]"
+                        />
+                        <span className="text-sm font-bold text-gray-700 flex items-center gap-1">
+                          Variante em Destaque{" "}
+                          <FaStar className="text-gray-300" />
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="sm:col-span-2 md:col-span-5 border-t border-gray-200 pt-3 mt-1">
+                      <label className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+                        <FaImage className="text-gray-400" /> Imagens da
+                        Variante
+                      </label>
+                      <div className="space-y-2">
+                        {variant.imageUrls.map((url, imgIdx) => (
+                          <div key={imgIdx} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={url}
+                              onChange={(e) =>
+                                handleVariantImageChange(
+                                  variant.id,
+                                  imgIdx,
+                                  e.target.value,
+                                )
                               }
-                              className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => handleAddVariantImage(variant.id)}
-                        className="text-xs text-[#007bff] font-bold hover:underline mt-1"
-                      >
-                        + Adicionar outra foto a esta variação
-                      </button>
+                              placeholder="https://..."
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none bg-white"
+                            />
+                            {variant.imageUrls.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveVariantImage(variant.id, imgIdx)
+                                }
+                                className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => handleAddVariantImage(variant.id)}
+                          className="text-xs text-[#007bff] font-bold hover:underline mt-1"
+                        >
+                          + Adicionar outra foto a esta variação
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <button
               type="button"
@@ -965,10 +1044,10 @@ const EditProductPage: React.FC = () => {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isSaving}
           className="w-full py-4 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isLoading ? (
+          {isSaving ? (
             <>
               <FaSpinner className="animate-spin" /> Atualizando...
             </>

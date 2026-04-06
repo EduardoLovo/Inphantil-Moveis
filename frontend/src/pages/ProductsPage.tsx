@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useProductStore } from "../store/ProductStore";
 import { useAuthStore } from "../store/AuthStore";
 import { useCartStore } from "../store/CartStore";
@@ -12,8 +12,14 @@ import {
   FaTag,
   FaExclamationCircle,
   FaSearchPlus,
+  FaPalette, // <-- NOVO ÍCONE ADICIONADO
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
+
+const PRODUCT_ORDER = ["cama phant", "lençol", "lencol", "protetor"];
+
+// 💡 ID DO PRODUTO ESPECIAL: Defina aqui o ID do Protetor de Parede
+const ID_VARIANTE_PROTETOR = 19160;
 
 const ProductsPage = () => {
   const { products, isLoading, error, fetchProducts } = useProductStore();
@@ -27,14 +33,43 @@ const ProductsPage = () => {
     }
   }, [fetchProducts, products.length]);
 
+  const sortedProducts = useMemo(() => {
+    if (!products) return [];
+
+    return [...products].sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+
+      const findIndex = (name: string) => {
+        return PRODUCT_ORDER.findIndex((keyword) => name.includes(keyword));
+      };
+
+      const indexA = findIndex(nameA);
+      const indexB = findIndex(nameB);
+
+      const posA = indexA !== -1 ? indexA : 999;
+      const posB = indexB !== -1 ? indexB : 999;
+
+      if (posA === posB) {
+        return nameA.localeCompare(nameB);
+      }
+
+      return posA - posB;
+    });
+  }, [products]);
+
   const handleAddToCart = (product: Product) => {
-    // Se o produto TEM variantes, obrigamos o cliente a ir na página de detalhes escolher a cor/tamanho
+    // 💡 NOVA LÓGICA: Se for o Protetor Personalizável, manda para a rota nova!
+    if (product.id === ID_VARIANTE_PROTETOR) {
+      navigate("/monte-seu-protetor"); // <-- Coloque aqui a rota que você criou no App.tsx
+      return;
+    }
+
     if (product.variants && product.variants.length > 0) {
       navigate(`/products/${product.id}`);
       return;
     }
 
-    // Se não tem (produto simples antigo), adiciona direto
     addItem(product);
     toast.success(`${product.name} adicionado ao carrinho!`, {
       position: "bottom-right",
@@ -60,10 +95,8 @@ const ProductsPage = () => {
     });
   };
 
-  // Funções Auxiliares de Variação
   const getProductPrice = (product: Product) => {
     if (product.variants && product.variants.length > 0) {
-      // Pega o menor preço dentre as variantes para exibir "A partir de"
       const lowestPrice = Math.min(
         ...product.variants.map((v: ProductVariant) => v.price),
       );
@@ -81,7 +114,6 @@ const ProductsPage = () => {
 
   const getProductStock = (product: Product) => {
     if (product.variants && product.variants.length > 0) {
-      // Soma o estoque de todas as cores
       return product.variants.reduce(
         (total: number, v: ProductVariant) => total + (v.stock || 0),
         0,
@@ -92,7 +124,6 @@ const ProductsPage = () => {
 
   const canEdit = user && (user.role === "ADMIN" || user.role === "DEV");
 
-  // Loading State
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500 animate-pulse">
@@ -104,7 +135,6 @@ const ProductsPage = () => {
     );
   }
 
-  // Error State
   if (error) {
     return (
       <div className="w-full max-w-4xl mx-auto p-8 mt-20 text-center">
@@ -121,7 +151,6 @@ const ProductsPage = () => {
     <div className="w-full max-w-[1400px] mx-auto px-4 py-8 md:pt-32 pb-20">
       <Toaster />
 
-      {/* Header */}
       <div className="flex flex-col md:flex-row items-end justify-between gap-4 mb-10 border-b border-gray-100 pb-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-[#313b2f] flex items-center gap-3">
@@ -143,28 +172,32 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* Grid de Produtos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => {
+        {sortedProducts.map((product) => {
           const totalStock = getProductStock(product);
           const hasVariants = product.variants && product.variants.length > 0;
+
+          // 💡 DEFINIÇÃO DA ROTA: Se for o 34, o link vai para a página nova
+          const isCustomProduct = product.variants?.some(
+            (v) => v.id === ID_VARIANTE_PROTETOR,
+          );
+          const productLink = isCustomProduct
+            ? "/monte-seu-protetor" // <-- Altere se a sua rota no App.tsx for diferente
+            : `/products/${product.id}`;
 
           return (
             <div
               key={product.id}
               className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full"
             >
-              {/* Imagem */}
-              <div className="relative aspect-square overflow-hidden bg-gray-50">
-                <Link
-                  to={`/products/${product.id}`}
-                  className="block w-full h-full"
-                >
+              <div className="relative overflow-hidden bg-gray-50">
+                {/* 💡 LINK DA IMAGEM ATUALIZADO */}
+                <Link to={productLink} className="block w-full h-full">
                   {product.mainImage ? (
                     <img
                       src={product.mainImage}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
                   ) : (
@@ -174,7 +207,6 @@ const ProductsPage = () => {
                   )}
                 </Link>
 
-                {/* Badge de Esgotado */}
                 {(!product.isAvailable || totalStock <= 0) && (
                   <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
                     <span className="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg transform -rotate-12">
@@ -183,7 +215,6 @@ const ProductsPage = () => {
                   </div>
                 )}
 
-                {/* Badge de Categoria */}
                 {product.category && (
                   <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#313b2f] text-xs font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
                     <FaTag className="text-[#ffd639]" /> {product.category.name}
@@ -191,11 +222,11 @@ const ProductsPage = () => {
                 )}
               </div>
 
-              {/* Conteúdo */}
               <div className="p-5 flex flex-col flex-1">
                 <div className="flex-1">
+                  {/* 💡 LINK DO TÍTULO ATUALIZADO */}
                   <Link
-                    to={`/products/${product.id}`}
+                    to={productLink}
                     className="hover:text-[#ffd639] transition-colors"
                   >
                     <h3 className="font-bold text-lg text-[#313b2f] mb-1 line-clamp-2">
@@ -213,19 +244,23 @@ const ProductsPage = () => {
                   </div>
                 </div>
 
-                {/* Ações */}
                 <div className="mt-5 space-y-3">
                   <button
                     className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 ${
-                      hasVariants
+                      hasVariants || isCustomProduct
                         ? "bg-white text-[#313b2f] border-2 border-[#313b2f] hover:bg-gray-50"
                         : "bg-[#313b2f] text-white hover:bg-[#ffd639] hover:text-[#313b2f]"
                     }`}
                     onClick={() => handleAddToCart(product)}
                     disabled={!product.isAvailable || totalStock <= 0}
                   >
+                    {/* 💡 LÓGICA DO TEXTO DO BOTÃO ATUALIZADA */}
                     {!product.isAvailable || totalStock <= 0 ? (
                       "Indisponível"
+                    ) : isCustomProduct ? (
+                      <>
+                        <FaPalette /> Personalizar
+                      </>
                     ) : hasVariants ? (
                       <>
                         <FaSearchPlus /> Ver Opções
@@ -252,8 +287,7 @@ const ProductsPage = () => {
         })}
       </div>
 
-      {/* Empty State */}
-      {products.length === 0 && (
+      {sortedProducts.length === 0 && (
         <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 mt-8">
           <FaBoxOpen className="text-6xl text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-500">

@@ -1,157 +1,154 @@
-import React, { useState } from "react";
-import { useLocation, Link, Navigate } from "react-router-dom";
-import {
-  FaCheckCircle,
-  FaQrcode,
-  FaCopy,
-  FaBoxOpen,
-  FaArrowRight,
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { api } from "../services/api"; // Sua configuração do Axios
+import { FaCheckCircle, FaSpinner, FaCopy } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
 
 const PosCompraPage: React.FC = () => {
   const location = useLocation();
-  const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
+  const state = location.state as any;
 
-  // Recupera os dados que enviámos lá do CheckoutPage
-  const state = location.state as {
-    isSuccess?: boolean;
-    method?: "credit" | "debit" | "pix";
-    orderId?: string | number;
-    transactionId?: string;
-    qrCodeUrl?: string;
-    pixCode?: string;
-  };
+  // Se a pessoa tentou entrar nessa página digitando a URL direto, mandamos pro Início
+  useEffect(() => {
+    if (!state || !state.orderId) {
+      navigate("/");
+    }
+  }, [state, navigate]);
 
-  // Se a pessoa tentou aceder a esta página diretamente sem comprar nada, mandamos para a Home
-  if (!state || !state.isSuccess) {
-    return <Navigate to="/" replace />;
-  }
+  const [orderStatus, setOrderStatus] = useState<string>("PENDING");
+  const [isChecking, setIsChecking] = useState(false);
 
-  const isPix = state.method === "pix";
+  // =========================================================
+  // ⏱️ A MÁGICA DO POLLING (VERIFICANDO O PAGAMENTO)
+  // =========================================================
+  // =========================================================
+  // ⏱️ A MÁGICA DO POLLING (VERIFICANDO O PAGAMENTO)
+  // =========================================================
+  useEffect(() => {
+    // Se não for Pix ou já estiver pago, não precisa fazer o cronômetro
+    if (state?.method !== "pix" || orderStatus === "PAID") return;
+
+    const checkPaymentStatus = async () => {
+      try {
+        setIsChecking(true);
+        // Bate na sua rota do backend que retorna os dados do pedido
+        const response = await api.get(`/orders/${state.orderId}`);
+        const currentStatus = response.data.status;
+
+        if (currentStatus === "PAID") {
+          setOrderStatus("PAID");
+          toast.success("Pagamento confirmado! 🎉");
+        }
+      } catch (error: any) {
+        // Ignora o erro silenciosamente se for o 429 (Rate Limit do servidor pedindo pra esperar)
+        if (error.response?.status !== 429) {
+          console.error("Erro ao verificar status do pedido:", error);
+        }
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    // 👉 AUMENTAMOS PARA 10 SEGUNDOS (10000ms) para não sobrecarregar o seu servidor
+    const intervalId = setInterval(checkPaymentStatus, 10000);
+
+    // Quando o usuário sair da página ou o pedido for pago, nós "destruímos" o cronômetro
+    return () => clearInterval(intervalId);
+  }, [state?.orderId, state?.method, orderStatus]);
+  // =========================================================
 
   const handleCopyPix = () => {
-    if (state.pixCode) {
+    if (state?.pixCode) {
       navigator.clipboard.writeText(state.pixCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
+      toast.success("Código Copia e Cola copiado!");
     }
   };
 
+  if (!state) return null;
+
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-20 px-4 bg-gray-50">
-      <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-500">
-        {/* CABEÇALHO DE SUCESSO (Muda de cor dependendo do método) */}
-        <div
-          className={`p-8 text-center ${isPix ? "bg-green-500" : "bg-[#ffd639]"}`}
-        >
-          <div className="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg mb-4 animate-bounce">
-            {isPix ? (
-              <FaQrcode className="text-4xl text-green-500" />
-            ) : (
-              <FaCheckCircle className="text-4xl text-[#313b2f]" />
-            )}
+    <div className="w-full max-w-3xl mx-auto px-4 py-16 md:pt-32 min-h-[70vh] flex flex-col items-center">
+      <Toaster />
+
+      {/* TELA DE SUCESSO DEFINITIVO (CARTÃO OU PIX PAGO) */}
+      {state.method === "credit" || orderStatus === "PAID" ? (
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-green-100 shadow-xl text-center w-full animate-in zoom-in duration-500">
+          <div className="w-24 h-24 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-6">
+            <FaCheckCircle className="text-5xl text-green-500" />
           </div>
-          <h1
-            className={`text-3xl font-bold ${isPix ? "text-white" : "text-[#313b2f]"}`}
-          >
-            {isPix ? "Pedido Gerado!" : "Pagamento Aprovado!"}
+          <h1 className="text-3xl font-bold text-[#313b2f] mb-4">
+            Pagamento Confirmado!
           </h1>
-          <p
-            className={`mt-2 ${isPix ? "text-green-50" : "text-[#313b2f]/80"} font-medium`}
-          >
-            O seu pedido{" "}
-            <strong className="bg-white/30 px-2 py-1 rounded text-black">
-              #{state.orderId}
-            </strong>{" "}
-            foi processado com sucesso.
+          <p className="text-gray-600 text-lg mb-8">
+            Oba! Já recebemos o seu pagamento referente ao pedido{" "}
+            <strong>#{state.orderId}</strong>. Estamos preparando tudo com muito
+            carinho para você.
           </p>
-        </div>
-
-        {/* CORPO DO CONTEÚDO */}
-        <div className="p-8">
-          {/* TELA SE FOR PIX */}
-          {isPix && (
-            <div className="text-center space-y-6">
-              <p className="text-gray-600">
-                Escaneie o QR Code abaixo com o aplicativo do seu banco para
-                finalizar o pagamento. A aprovação é imediata!
-              </p>
-
-              <div className="p-4 bg-white border-2 border-dashed border-gray-300 rounded-2xl inline-block shadow-sm">
-                <img
-                  src={state.qrCodeUrl}
-                  alt="QR Code Pix"
-                  className="w-48 h-48 mx-auto"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-bold text-gray-500 uppercase">
-                  Ou copie o código Pix
-                </p>
-                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                  <input
-                    type="text"
-                    readOnly
-                    value={state.pixCode}
-                    className="flex-1 bg-transparent text-sm text-gray-500 outline-none px-2 truncate"
-                  />
-                  <button
-                    onClick={handleCopyPix}
-                    className={`p-3 rounded-lg text-white font-bold transition-all flex items-center gap-2 ${
-                      copied
-                        ? "bg-green-500"
-                        : "bg-[#313b2f] hover:bg-[#1a2019]"
-                    }`}
-                  >
-                    {copied ? <FaCheckCircle /> : <FaCopy />}
-                    {copied ? "Copiado!" : "Copiar"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TELA SE FOR CARTÃO */}
-          {!isPix && (
-            <div className="text-center space-y-6">
-              <p className="text-gray-600 text-lg">
-                Tudo certo com o seu pagamento! Já estamos a preparar a sua
-                encomenda com muito carinho.
-              </p>
-
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 flex flex-col items-center gap-3">
-                <FaBoxOpen className="text-5xl text-gray-300" />
-                <p className="text-sm text-gray-500">
-                  Você receberá as atualizações de envio no seu e-mail
-                  cadastrado.
-                </p>
-                {state.transactionId && (
-                  <p className="text-xs text-gray-400 mt-2 font-mono">
-                    ID da Transação: {state.transactionId}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* BOTÕES DE AÇÃO COMUNS */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/meus-pedidos"
-              className="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all text-center flex items-center justify-center gap-2"
+              className="px-8 py-3 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] transition-all shadow-md"
             >
-              Ver meus pedidos
+              Acompanhar Pedido
             </Link>
             <Link
-              to="/products"
-              className="px-6 py-3 rounded-xl bg-[#313b2f] text-white font-bold hover:bg-[#ffd639] hover:text-[#313b2f] transition-all shadow-md text-center flex items-center justify-center gap-2"
+              to="/loja"
+              className="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-all"
             >
-              Continuar Comprando <FaArrowRight />
+              Voltar para a Loja
             </Link>
           </div>
         </div>
-      </div>
+      ) : (
+        /* TELA DE ESPERA DO PIX (QR CODE) */
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-gray-100 shadow-xl text-center w-full animate-in fade-in duration-500">
+          <h1 className="text-2xl font-bold text-[#313b2f] mb-2">
+            Aguardando Pagamento...
+          </h1>
+          <p className="text-gray-500 mb-8">
+            Abra o app do seu banco e escaneie o QR Code ou use a opção Pix
+            Copia e Cola.
+          </p>
+
+          <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 inline-block mb-6 relative">
+            <img
+              src={state.qrCodeUrl}
+              alt="QR Code do Pix"
+              className="w-48 h-48 mx-auto mix-blend-multiply"
+            />
+            {/* Efeitinho de "Escaneando" enquanto espera */}
+            <div className="absolute inset-0 border-2 border-[#ffd639] rounded-2xl animate-pulse opacity-50 pointer-events-none"></div>
+          </div>
+
+          <div className="max-w-md mx-auto mb-8">
+            <p className="text-sm font-bold text-gray-600 mb-2 text-left">
+              Pix Copia e Cola:
+            </p>
+            <div className="flex">
+              <input
+                type="text"
+                readOnly
+                value={state.pixCode}
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-l-xl px-4 py-3 text-sm text-gray-500 outline-none truncate"
+              />
+              <button
+                onClick={handleCopyPix}
+                className="bg-[#313b2f] text-white px-6 py-3 rounded-r-xl hover:bg-[#ffd639] hover:text-[#313b2f] transition-colors flex items-center gap-2 font-bold"
+              >
+                <FaCopy /> Copiar
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 text-orange-500 font-medium bg-orange-50 py-3 px-6 rounded-xl ">
+            <FaSpinner
+              className={`text-xl ${isChecking ? "animate-spin" : ""}`}
+            />
+            Aguardando a confirmação do banco...
+          </div>
+        </div>
+      )}
     </div>
   );
 };

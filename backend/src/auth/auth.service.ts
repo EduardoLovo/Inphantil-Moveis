@@ -31,6 +31,16 @@ export class AuthService {
             throw new BadRequestException('Captcha token é obrigatório.');
         }
 
+        if (
+            process.env.NODE_ENV !== 'production' &&
+            token === 'postman-inphantil-bypass-2026'
+        ) {
+            console.log(
+                '⚠️ AVISO: Login validado usando a Chave Mestra do Postman!',
+            );
+            return true; // Bypass aprovado, ignoramos o Google!
+        }
+
         const secretKey = process.env.RECAPTCHA_SECRET_KEY;
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
 
@@ -211,6 +221,17 @@ export class AuthService {
             });
             if (existing && existing.id !== userId) {
                 throw new ConflictException('Email já está em uso.');
+            }
+        }
+
+        if (data.cpf) {
+            const existingCpf = await this.prisma.user.findUnique({
+                where: { cpf: data.cpf },
+            });
+            if (existingCpf && existingCpf.id !== userId) {
+                throw new ConflictException(
+                    'Este CPF já está cadastrado em outra conta.',
+                );
             }
         }
 

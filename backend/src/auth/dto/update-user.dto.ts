@@ -15,6 +15,10 @@ export class UpdateUserDto {
 
     @IsOptional()
     @IsString()
+    cpf?: string;
+
+    @IsOptional()
+    @IsString()
     @MinLength(6)
     password?: string;
 }

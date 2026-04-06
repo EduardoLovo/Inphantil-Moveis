@@ -264,8 +264,8 @@ const AdminProtetoresDeParedePage = () => {
                             text-[#0c0c0c] text-xs font-bold
                             ${
                               selectedColor === cor.hex
-                                ? "text-[#747474] shadow-none ring-2 ring-gray-400 scale-95"
-                                : "shadow-[0_0_10px_rgba(0,0,0,0.44)] hover:shadow-none hover:scale-105"
+                                ? "text-[#fcfcfc] shadow-[0_0_10px_rgba(50,50,50,0.84)] border- border-blue-500  ring-2  scale-95"
+                                : "shadow-[0_0_10px_rgba(0,50,0,0.44)] hover:shadow-none hover:scale-105"
                             }
                         `}
             style={{ backgroundColor: cor.hex }}
@@ -281,11 +281,11 @@ const AdminProtetoresDeParedePage = () => {
         ref={divRef}
         className={`
                     w-full flex flex-col items-center justify-center p-4 bg-white rounded-xl mb-6
-                    ${isPaintingMode ? 'cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}
+                    ${isPaintingMode ? "cursor-pointer" : ""}
                 `}
       >
         <div
-          className={`w-full max-w-4xl ${isPaintingMode ? '[&_svg]:cursor-[url("/images/cursor.png")_0_24,crosshair]' : ""}`}
+          className={`w-full max-w-4xl ${isPaintingMode ? "cursor-pointer" : ""}`}
         >
           {renderDesenho()}
         </div>

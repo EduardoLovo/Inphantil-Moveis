@@ -319,6 +319,7 @@ const AdminCreateProductPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
     if (!categoryId) {
       toast.error("Por favor, selecione uma categoria.");
@@ -369,8 +370,6 @@ const AdminCreateProductPage: React.FC = () => {
     };
 
     try {
-      setIsSaving(true);
-
       await createProduct(productData);
       toast.success("Produto criado com sucesso!");
       setTimeout(() => navigate("/admin/products"), 1500);

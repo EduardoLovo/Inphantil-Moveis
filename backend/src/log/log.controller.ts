@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, UseGuards } from '@nestjs/common';
 import { LogService } from './log.service';
 import {
     ApiTags,
@@ -25,5 +25,14 @@ export class LogController {
     @ApiResponse({ status: 403, description: 'Proibido (Sem permissão)' })
     findAllAuthLogs() {
         return this.logService.findAllAuthLogs();
+    }
+
+    // NOVA ROTA PARA APAGAR TUDO
+    @Delete('auth/clear-all')
+    @Roles(Role.ADMIN, Role.DEV)
+    @ApiOperation({ summary: 'Apagar TODOS os logs de autenticação do banco' })
+    @ApiResponse({ status: 200, description: 'Todos os logs foram apagados' })
+    deleteAllAuthLogs() {
+        return this.logService.deleteAllAuthLogs();
     }
 }

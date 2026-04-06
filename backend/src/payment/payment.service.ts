@@ -16,6 +16,7 @@ export class PaymentService {
 
         const pv = process.env.REDE_PV || 'teste';
         const token = process.env.REDE_TOKEN || 'teste';
+
         this.credentialsBase64 = Buffer.from(`${pv}:${token}`).toString(
             'base64',
         );
@@ -40,8 +41,6 @@ export class PaymentService {
             kind: 'credit',
             installments: parseInt(cardData.installments) || 1,
         };
-
-        console.log(payload);
 
         try {
             const response = await firstValueFrom(
@@ -84,16 +83,33 @@ export class PaymentService {
 
         const expirationDate = new Date();
         expirationDate.setHours(expirationDate.getHours() + 1);
-
         const formattedDate = expirationDate.toISOString().split('.')[0];
+
+        // 🛡️ Puxamos a senha do .env para montar a URL segura
+        const webhookToken = process.env.WEBHOOK_SECRET_TOKEN;
+        const baseUrl = process.env.API_URL;
+
+        // 🚨 Trava de segurança: Se esquecer de configurar no Render, o servidor avisa!
+        if (!baseUrl || !webhookToken) {
+            console.error(
+                '⚠️ ALERTA: API_URL ou WEBHOOK_SECRET_TOKEN não estão configurados no .env!',
+            );
+        }
 
         const payload = {
             reference: orderId,
             amount: amountInCents,
-            kind: 'pix', // A mágica acontece aqui! Dizemos à Rede que queremos um Pix
+            kind: 'pix',
             qrCode: {
-                dateTimeExpiration: formattedDate, // Ex: 2026-03-04T19:27:02
+                dateTimeExpiration: formattedDate,
             },
+            // 👉 A MÁGICA: Dizemos para a Rede enviar o aviso de pagamento direto pra cá!
+            urls: [
+                {
+                    kind: 'callback',
+                    url: `${baseUrl}/payment/webhook?token=${webhookToken}`,
+                },
+            ],
         };
 
         try {

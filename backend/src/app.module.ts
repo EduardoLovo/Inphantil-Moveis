@@ -24,9 +24,16 @@ import { UsersModule } from './users/users.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { ShippingQuoteModule } from './shipping-quote/shipping-quote.module';
 import { PaymentModule } from './payment/payment.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // <-- 1. Importar aqui
 
 @Module({
     imports: [
+        ThrottlerModule.forRoot([
+            {
+                ttl: 60000, // Tempo em milissegundos (60.000 = 1 minuto)
+                limit: 10, // Limite de requisições nesse tempo
+            },
+        ]),
         ScheduleModule.forRoot(),
         ConfigModule.forRoot({
             // Adicione esta linha
@@ -74,7 +81,7 @@ import { PaymentModule } from './payment/payment.module';
     providers: [
         {
             provide: APP_GUARD,
-            useClass: JwtAuthGuard, // ⬅️ Aplica este guarda a toda a aplicação
+            useClass: ThrottlerGuard, // ⬅️ Aplica este guarda a toda a aplicação
         },
         AppService,
     ],

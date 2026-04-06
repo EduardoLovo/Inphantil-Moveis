@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { SevenPedidoVendaRequestDTO } from './seven.dto';
 
 // 👉 1. OS MOLDES DO TYPESCRIPT (100% BLINDADOS CONTRA O PRISMA)
 export interface IntegracaoUser {
@@ -24,6 +23,7 @@ export interface IntegracaoOrderItem {
     price: any; // Aceita o Decimal do Prisma
     variant?: { sku?: string | null; color?: string | null } | null;
     product?: { sku?: string | null } | null; // Aceita Nulo!
+    customData?: any; // 👉 Aceita os dados de personalização
 }
 
 export interface IntegracaoOrder {
@@ -32,6 +32,7 @@ export interface IntegracaoOrder {
     paymentMethod: string | null; // Aceita Nulo!
     createdAt: Date | string;
     items: IntegracaoOrderItem[];
+    shippingCost?: any;
 }
 
 @Injectable()
@@ -82,6 +83,7 @@ export class SevenService {
         order: IntegracaoOrder,
         user: IntegracaoUser,
         address: IntegracaoAddress,
+        observacaoPersonalizada: string = '',
     ) {
         const url = String(process.env.SEVEN_API_URL);
 
@@ -98,13 +100,13 @@ export class SevenService {
                 valorTotalProdutos: Number(order.total),
                 valorTotalServicos: 0,
                 vlDespAcessor: 0,
-                vlFretePedidoVenda: 0,
+                vlFretePedidoVenda: Number(order.shippingCost),
                 pcFretePedidoVenda: 0,
-
                 tipoPedidoId: 1,
                 status: 'BLOQUEADO',
                 planoContaId: '3.1.1.1',
                 cfop: cfopCalculado,
+                observacao1: 'VENDA PELO SITE',
                 codEmpresa: 1,
                 formaPagamento:
                     order.paymentMethod === 'pix' ? 'A VISTA' : 'CARTAO',
@@ -171,43 +173,77 @@ export class SevenService {
                     },
                 },
 
-                produtos: order.items.map((item) => {
-                    // 1. Pegamos a cor que vem do banco (ex: "cz6-cz26")
-
+                produtos: order.items.map((item: any) => {
                     console.log(
                         `\n🔍 ESPIANDO O ITEM [${item.product?.sku || item.variant?.sku}]:`,
                         {
                             temVariante: !!item.variant,
                             corQueChegou: item.variant?.color,
+                            temCustomData: !!item.customData,
                         },
                     );
-                    console.log(item);
 
                     const corOriginal = item.variant?.color || '';
                     let obsFormatada = '';
 
-                    // 2. Se a cor tiver um traço (-), nós dividimos em duas partes
+                    // 2. Se a cor tiver um traço (-), nós dividimos em duas partes (Padrão das Camas)
                     if (corOriginal.includes('-')) {
                         const [ext, int] = corOriginal.split('-');
-                        // O .trim() tira os espaços e o .toUpperCase() deixa tudo em MAIÚSCULAS
                         obsFormatada = `Ext: ${ext.trim().toUpperCase()} - Int: ${int.trim().toUpperCase()}`;
                     } else if (corOriginal) {
-                        // Prevenção de erros: e se um dia cadastrarem uma cor sem traço? (ex: "Azul")
                         obsFormatada = `Cor: ${corOriginal.trim().toUpperCase()}`;
                     }
 
-                    // 3. Devolvemos o produto montado
+                    // 👉 2.5 LÓGICA NOVA: Formatação Perfeita com Quebra de Linha
+                    if (item.customData) {
+                        // Prevenção caso o banco devolva como string ou como objeto
+                        const custom =
+                            typeof item.customData === 'string'
+                                ? JSON.parse(item.customData)
+                                : item.customData;
+
+                        // 1. Formata as cores para "Cor1: L11, Cor2: AZ3"
+                        let coresFormatadas = 'Nenhuma';
+                        if (custom.cores) {
+                            coresFormatadas = Object.entries(custom.cores)
+                                .map(([chave, valor]) => {
+                                    // Transforma "cor1" em "Cor1"
+                                    const chaveCapitalizada =
+                                        chave.charAt(0).toUpperCase() +
+                                        chave.slice(1);
+                                    return `${chaveCapitalizada}: ${valor}`;
+                                })
+                                .join(', ');
+                        }
+
+                        // 2. Monta a frase com o \n (Quebra de Linha)
+                        const frasePersonalizada = `Modelo: ${custom.modelo}\nTamanho: ${custom.tamanho}\nKit LED: ${custom.kitLed}\nCores: ${coresFormatadas}`;
+
+                        // 3. Junta tudo (se tiver cor da cama antes, ele pula duas linhas para separar bem)
+                        obsFormatada = obsFormatada
+                            ? `${obsFormatada}\n\n${frasePersonalizada}`
+                            : frasePersonalizada;
+                    }
+
+                    let skuOficial = item.variant?.sku || item.product?.sku;
+                    if (item.customData) {
+                        skuOficial = 'PP021';
+                    }
+
+                    // 3. Fallback de segurança para os outros produtos da loja
+                    if (!skuOficial) {
+                        skuOficial = 'CM002';
+                    }
+                    // 3. Devolvemos o produto montado para o Seven
                     return {
-                        sku: String(
-                            item.variant?.sku || item.product?.sku || 'CM002',
-                        ),
+                        sku: String(skuOficial),
                         quantidade: Number(item.quantity),
                         valorTotal: Number(item.price) * Number(item.quantity),
                         valorBruto: Number(item.price) * Number(item.quantity),
                         valorLiquido:
                             Number(item.price) * Number(item.quantity),
                         percentualDesconto: 0,
-                        obsItem: obsFormatada,
+                        obsItem: obsFormatada, // 👉 O Seven vai receber a nota bonitinha linha a linha!
                     };
                 }),
 
@@ -226,8 +262,6 @@ export class SevenService {
                     telefone: '',
                 },
             };
-
-            console.log(payload);
 
             this.logger.log(
                 `Enviando pedido ${order.id} para o ERP Seven (v2)...`,
@@ -256,6 +290,52 @@ export class SevenService {
             this.logger.error(
                 `Erro ao integrar pedido ${order.id} no Seven`,
                 err.response?.data || err.message,
+            );
+        }
+    }
+
+    // 👉 NOVA FUNÇÃO PARA BAIXAR A NF
+    async baixarNotaFiscal(pedidoId: string | number) {
+        const url = String(process.env.SEVEN_API_URL);
+
+        try {
+            this.logger.log(`Solicitando NF do pedido ${pedidoId} ao Seven...`);
+
+            // 1. Pega o crachá de acesso (reaproveitando a nossa função de sucesso!)
+            const token = await this.gerarToken();
+
+            // 2. Bate na porta da NF (O '1' do seu exemplo é dinâmico agora: pedidoId)
+            const response = await firstValueFrom(
+                this.httpService.get(
+                    `${url}/resources/v1/downloadNF/linkDanfeNfe/${pedidoId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    },
+                ),
+            );
+
+            console.log(`🔍 RETORNO DA NF:`, response.data);
+            return response.data;
+        } catch (error: unknown) {
+            const err = error as any;
+
+            // 👉 Se o ERP disser que não achou (Erro 400), nós avisamos o cliente com carinho!
+            if (err.response?.status === 400) {
+                return {
+                    status: 'pendente',
+                    mensagem:
+                        'Sua Nota Fiscal ainda está sendo gerada pela nossa equipe.',
+                };
+            }
+
+            this.logger.error(
+                `Erro ao baixar NF do pedido ${pedidoId}`,
+                err.response?.data || err.message,
+            );
+            throw new Error(
+                'Falha ao comunicar com o ERP para buscar a Nota Fiscal.',
             );
         }
     }

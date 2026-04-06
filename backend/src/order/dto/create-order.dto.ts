@@ -9,6 +9,7 @@ import {
     IsOptional,
     IsString,
     Length,
+    IsNumber,
 } from 'class-validator';
 
 // 1. DTO Auxiliar para o Item do Pedido
@@ -31,6 +32,9 @@ export class CreateOrderItemDto {
     @IsInt()
     @IsPositive()
     quantity!: number;
+
+    @IsOptional()
+    customData?: any;
 }
 
 // 2. DTO Principal do Pedido
@@ -53,4 +57,8 @@ export class CreateOrderDto {
     @IsString()
     @Length(14, 14, { message: 'O CPF deve ter 14 caracteres (com a máscara)' })
     cpf?: string;
+
+    @IsOptional()
+    @IsNumber()
+    shippingCost?: number;
 }

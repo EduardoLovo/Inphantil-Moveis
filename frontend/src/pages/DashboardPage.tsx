@@ -218,6 +218,12 @@ const DashboardPage = () => {
               </div>
               <div>
                 <span className="block text-xs font-bold text-gray-400 uppercase">
+                  CPF
+                </span>
+                <span className="font-medium">{user.cpf}</span>
+              </div>
+              <div>
+                <span className="block text-xs font-bold text-gray-400 uppercase">
                   Telefone
                 </span>
                 <span className="font-medium">
@@ -387,7 +393,7 @@ const DashboardPage = () => {
             </h3>
             <div className="flex flex-wrap gap-3">
               <Link
-                to="/products"
+                to="/loja"
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-sm transition-colors"
               >
                 <FaHome /> Ir para Loja

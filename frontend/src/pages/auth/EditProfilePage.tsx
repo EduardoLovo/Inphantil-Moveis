@@ -24,6 +24,7 @@ const EditProfilePage: React.FC = () => {
     name: "",
     email: "",
     fone: "",
+    cpf: user?.cpf || "",
     password: "",
     confirmPassword: "", // Novo campo
   });
@@ -34,11 +35,26 @@ const EditProfilePage: React.FC = () => {
         name: user.name,
         email: user.email,
         fone: user.fone || "",
+        cpf: user.cpf || "",
         password: "",
         confirmPassword: "",
       });
     }
   }, [user]);
+
+  // Função adaptada para aplicar a máscara e atualizar o formData
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Tira tudo que não é número
+    if (value.length > 11) value = value.slice(0, 11); // Limita a 11 números
+
+    // Aplica a máscara: 000.000.000-00
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+    // Atualiza o estado do formulário inteiro, mantendo o resto intacto
+    setFormData({ ...formData, cpf: value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,13 +74,19 @@ const EditProfilePage: React.FC = () => {
 
       if (!payload.password) delete payload.password;
 
+      // Se o CPF estiver vazio, removemos para não dar erro de "unique" no banco com strings vazias
+      if (!payload.cpf) delete payload.cpf;
+
       await api.patch("/auth/profile", payload);
       await initialize();
 
       alert("Perfil atualizado com sucesso!");
       navigate("/dashboard");
-    } catch (error) {
-      alert("Erro ao atualizar perfil.");
+    } catch (error: any) {
+      // Pega a mensagem de erro vinda do backend (ex: CPF já cadastrado)
+      const errorMessage =
+        error.response?.data?.message || "Erro ao atualizar perfil.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -144,6 +166,26 @@ const EditProfilePage: React.FC = () => {
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all text-gray-700"
                 required
                 placeholder="(00) 00000-0000"
+              />
+            </div>
+
+            {/* CPF COM MÁSCARA */}
+            <div>
+              <label
+                htmlFor="cpf"
+                className="block text-sm font-bold text-[#313b2f] mb-1"
+              >
+                CPF
+              </label>
+              <input
+                type="text"
+                id="cpf"
+                name="cpf"
+                value={formData.cpf}
+                onChange={handleCpfChange}
+                placeholder="000.000.000-00"
+                maxLength={14}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all text-gray-700"
               />
             </div>
 

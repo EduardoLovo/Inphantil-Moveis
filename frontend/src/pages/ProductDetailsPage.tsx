@@ -14,11 +14,12 @@ import {
   FaChevronRight,
   FaTimes,
   FaSearchPlus,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import { CiShoppingCart } from "react-icons/ci";
 import toast, { Toaster } from "react-hot-toast";
 
-// Lista de Cores
+// Lista de Cores Base
 const CAMA_COLORS = [
   {
     id: "cz6-cz26",
@@ -32,7 +33,7 @@ const CAMA_COLORS = [
     Externo: "CZ6",
     Interno: "VD25",
     hexExterno: "#b4b7ba",
-    hexInterno: "#bfc6c9",
+    hexInterno: "#bfcab4",
   },
   {
     id: "cz6-r12",
@@ -106,6 +107,48 @@ const CAMA_COLORS = [
   },
 ];
 
+// --- ORDEM DOS TAMANHOS ---
+const SIZE_ORDER = [
+  "BERÇO",
+  "JUNIOR",
+  "SOLTEIRO",
+  "SOLTEIRAO",
+  "VIUVA",
+  "CASAL",
+  "QUEEN",
+  "KING",
+];
+
+// --- ORDEM DAS CORES (Camas e Lençóis) ---
+const COLOR_ORDER = [
+  // Camas
+  "b6-am14",
+  "b6-az10",
+  "b6-b8",
+  "b6-l11",
+  "b6-r12",
+  "b6-vd25",
+  "cz6-am14",
+  "cz6-az10",
+  "cz6-cz26",
+  "cz6-l11",
+  "cz6-r12",
+  "cz6-vd25",
+  // Lençóis
+  "azul",
+  "azul bebê",
+  "bege",
+  "branco",
+  "cinza",
+  "palha",
+  "prata",
+  "rosa",
+  "rosa bebê",
+  "verde",
+];
+
+const COMPLEMENT_ORDER = ["com colchão", "sem colchão"];
+
 const ProductDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -142,36 +185,64 @@ const ProductDetailsPage = () => {
   const selectedSize = searchParams.get("size");
   const selectedComplement = searchParams.get("complement");
 
-  // --- FILTROS DE DISPONIBILIDADE ---
+  // --- 1. FILTRO DE TAMANHOS (ORDENADO) ---
   const availableSizes = useMemo(() => {
     if (!product?.variants) return [];
-    return Array.from(
+
+    const uniqueSizes = Array.from(
       new Set(product.variants.map((v) => v.size).filter(Boolean)),
     );
+
+    return uniqueSizes.sort((a, b) => {
+      const indexA = SIZE_ORDER.indexOf(a.toUpperCase());
+      const indexB = SIZE_ORDER.indexOf(b.toUpperCase());
+
+      const posA = indexA !== -1 ? indexA : 999;
+      const posB = indexB !== -1 ? indexB : 999;
+
+      return posA - posB;
+    });
   }, [product?.variants]);
 
-  // 2. Puxa as opções extras baseadas no TAMANHO escolhido
+  // --- 2. FILTRO DE COMPLEMENTOS (COLCHÃO ORDENADO) ---
   const availableComplements = useMemo(() => {
     if (!product?.variants || !selectedSize) return [];
-    return Array.from(
+
+    // Extrai os complementos únicos
+    const uniqueComplements = Array.from(
       new Set(
         product.variants
           .filter((v) => v.size === selectedSize)
           .map((v) => v.complement)
           .filter(Boolean),
       ),
-    );
+    ) as string[];
+
+    // Ordena baseando-se na nossa lista COMPLEMENT_ORDER
+    return uniqueComplements.sort((a, b) => {
+      const indexA = COMPLEMENT_ORDER.indexOf(a.toLowerCase().trim());
+      const indexB = COMPLEMENT_ORDER.indexOf(b.toLowerCase().trim());
+
+      const posA = indexA !== -1 ? indexA : 999;
+      const posB = indexB !== -1 ? indexB : 999;
+
+      if (posA === posB) {
+        return a.localeCompare(b);
+      }
+
+      return posA - posB;
+    });
   }, [product?.variants, selectedSize]);
 
-  // 3. Puxa as cores baseadas no TAMANHO e COMPLEMENTO escolhidos
+  // --- 3. FILTRO DE CORES (ORDENADO) ---
   const availableColors = useMemo(() => {
     if (!product?.variants || !selectedSize) return [];
-    return Array.from(
+
+    const uniqueColors = Array.from(
       new Set(
         product.variants
           .filter((v) => {
             const matchSize = v.size === selectedSize;
-            // Se existem complementos (ex: colchão), só mostra as cores daquele complemento
             const matchComplement =
               availableComplements.length > 0
                 ? v.complement === selectedComplement
@@ -182,6 +253,16 @@ const ProductDetailsPage = () => {
           .filter(Boolean),
       ),
     );
+
+    return uniqueColors.sort((a, b) => {
+      const indexA = COLOR_ORDER.indexOf(a.toLowerCase());
+      const indexB = COLOR_ORDER.indexOf(b.toLowerCase());
+
+      const posA = indexA !== -1 ? indexA : 999;
+      const posB = indexB !== -1 ? indexB : 999;
+
+      return posA - posB;
+    });
   }, [
     product?.variants,
     selectedSize,
@@ -212,7 +293,6 @@ const ProductDetailsPage = () => {
   const handleSizeSelect = (size: string) => {
     setSearchParams((prev) => {
       prev.set("size", size);
-      // Removemos o prev.delete("complement") e prev.delete("color")
       return prev;
     });
   };
@@ -220,7 +300,6 @@ const ProductDetailsPage = () => {
   const handleComplementSelect = (complement: string) => {
     setSearchParams((prev) => {
       prev.set("complement", complement);
-      // Removemos o prev.delete("color")
       return prev;
     });
   };
@@ -232,7 +311,6 @@ const ProductDetailsPage = () => {
     });
   };
 
-  // Sempre que a variante mudar, reseta o carrossel
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [activeVariant]);
@@ -284,12 +362,9 @@ const ProductDetailsPage = () => {
     );
   };
 
-  const relatedProducts = product
-    ? products
-        .filter(
-          (p) => p.categoryId === product.categoryId && p.id !== product.id,
-        )
-        .slice(0, 4)
+  // --- TODOS OS OUTROS PRODUTOS DA LOJA ---
+  const otherProducts = product
+    ? products.filter((p) => p.id !== product.id)
     : [];
 
   const handleRelatedClick = () => {
@@ -329,7 +404,7 @@ const ProductDetailsPage = () => {
           Produto não encontrado
         </h2>
         <Link
-          to="/products"
+          to="/loja"
           className="flex items-center gap-2 px-6 py-3 bg-[#313b2f] text-white rounded-lg hover:bg-[#ffd639] hover:text-[#313b2f] transition-all font-bold"
         >
           <FaArrowLeft /> Voltar ao Catálogo
@@ -352,10 +427,8 @@ const ProductDetailsPage = () => {
   const isOutOfStock = isFullySelected && currentStock <= 0;
   const canPurchase = isFullySelected && !isOutOfStock;
 
-  console.log(product);
-
   return (
-    <div className="w-full max-w-[1200px] mx-auto px-4 py-8 md:pt-32 pb-20">
+    <div className="w-full  mx-auto px-32 py-8 md:pt-32 pb-20">
       <Toaster />
 
       {/* MODAL DE IMAGEM EM TELA CHEIA */}
@@ -394,7 +467,7 @@ const ProductDetailsPage = () => {
 
       <div className="mb-8">
         <Link
-          to="/products"
+          to="/loja"
           className="inline-flex items-center gap-2 text-gray-500 hover:text-[#313b2f] font-medium transition-colors group"
         >
           <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
@@ -404,17 +477,24 @@ const ProductDetailsPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16 items-start">
         {/* --- COLUNA ESQUERDA: GALERIA --- */}
-        <div className="flex flex-col gap-4 h-fit lg:sticky lg:top-32 z-10">
+        <div className="flex flex-col gap-4 h-fit lg:sticky lg:top-32 z-10 items-center justify-center">
           <div
-            className="w-full aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center group cursor-zoom-in"
+            className="w-[80vw] md:w-[30vw] aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center group cursor-zoom-in"
             onClick={() => setIsModalOpen(true)}
             title="Clique para ampliar"
           >
             <img
               src={displayImages[currentImageIndex]}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full  transition-transform duration-500 group-hover:scale-105"
             />
+
+            {hasVariants && !isFullySelected && (
+              <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse ">
+                <FaExclamationCircle className="text-[#313b2f]" /> Escolha um
+                tamanho e uma cor
+              </div>
+            )}
 
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               <div className="bg-white/90 p-3 rounded-full shadow-lg text-[#313b2f] transform translate-y-4 group-hover:translate-y-0 transition-all">
@@ -546,7 +626,6 @@ const ProductDetailsPage = () => {
               )}
 
               {/* 3. SELETOR DE COR */}
-              {/* Só mostra as cores se o tamanho estiver escolhido E (não houver colchão OU o colchão já estiver escolhido) */}
               {selectedSize &&
                 (availableComplements.length === 0 || selectedComplement) &&
                 availableColors.length > 0 && (
@@ -681,52 +760,42 @@ const ProductDetailsPage = () => {
         </p>
       </div>
 
-      {/* Produtos Relacionados */}
-      {relatedProducts.length > 0 && (
+      {/* Todos os Outros Produtos */}
+      {otherProducts.length > 0 && (
         <div className="mt-20 pt-10 border-t border-gray-100">
           <h2 className="text-2xl font-bold text-[#313b2f] mb-8 ">
-            Produtos Relacionados
+            Mais Produtos da Loja
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((related) => (
+            {otherProducts.map((other) => (
               <div
-                key={related.id}
+                key={other.id}
                 className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all flex flex-col"
               >
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   <Link
-                    to={`/products/${related.id}`}
+                    to={`/products/${other.id}`}
                     onClick={handleRelatedClick}
                     className="block w-full h-full"
                   >
                     <img
-                      src={
-                        related.mainImage || "https://via.placeholder.com/200"
-                      }
-                      alt={related.name}
+                      src={other.mainImage || "https://via.placeholder.com/200"}
+                      alt={other.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </Link>
-                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <button
-                      onClick={() => handleAddToCart(related)}
-                      className="w-full py-2 bg-white/90 backdrop-blur-sm text-[#313b2f] font-bold text-sm rounded-lg shadow-lg hover:bg-[#ffd639]"
-                    >
-                      Adicionar Rápido
-                    </button>
-                  </div>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <Link
-                    to={`/products/${related.id}`}
+                    to={`/products/${other.id}`}
                     onClick={handleRelatedClick}
                     className="font-bold text-[#313b2f] hover:text-[#ffd639] transition-colors mb-2 line-clamp-2"
                   >
-                    {related.name}
+                    {other.name}
                   </Link>
                   <div className="mt-auto pt-2">
                     <span className="font-bold text-lg text-[#313b2f]">
-                      {formatPrice(related.price)}
+                      {formatPrice(other.price)}
                     </span>
                   </div>
                 </div>

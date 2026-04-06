@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common'; // 1. Importe o ValidationPipe
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
+import { json, urlencoded } from 'express';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors({
@@ -11,11 +11,14 @@ async function bootstrap() {
             'https://www.inphantil.com.br', // O NOVO COM WWW
             'https://inphantil.com.br', // O NOVO SEM WWW
             'http://localhost:5173',
-            'http://192.168.0.110:5173',
         ],
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
+
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ extended: true, limit: '50mb' }));
+
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,
@@ -38,7 +41,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
 
     // 5. Configure a rota da UI do Swagger
-    // (Ex: http://localhost:3000/api)
     SwaggerModule.setup('api', app, document);
 
     await app.listen(process.env.PORT || 3000);
