@@ -68,6 +68,7 @@ import DetalhesPedidoPage from "./pages/OrderDetailPage";
 import { AdminReportsPage } from "./pages/AdminReportsPage";
 import CookieConsent from "./components/CookieConsent";
 import ProtetorDeParedeProductPage from "./pages/ProtetorDeParede";
+import PagamentoPendentePage from "./pages/PagamentoPendentePage";
 
 function App() {
   const location = useLocation();
@@ -120,7 +121,10 @@ function App() {
           path="/monte-seu-protetor"
           element={<ProtetorDeParedeProductPage />}
         />
-
+        <Route
+          path="/checkout/pagamento/:orderId"
+          element={<PagamentoPendentePage />}
+        />
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}

@@ -11,13 +11,15 @@ import {
   FaSpinner,
   FaTools,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // Não esqueça de importar o navigate
 
+// Dentro do seu componente...
 // Tipo provisório para a página ler os dados completos
 interface OrderDetail {
   id: number;
   createdAt: string;
   total: number | string;
-  shippingFee: number | string;
+  shippingCost: number | string;
   paymentMethod: string;
   status:
     | "PENDING"
@@ -31,6 +33,12 @@ interface OrderDetail {
     id: number;
     quantity: number;
     price: number | string;
+    customData?: any;
+    variant?: {
+      color?: string;
+      size?: string;
+      sku?: string;
+    };
     product: {
       name: string;
       mainImage: string;
@@ -51,6 +59,8 @@ const DetalhesPedidoPage: React.FC = () => {
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -80,16 +90,23 @@ const DetalhesPedidoPage: React.FC = () => {
   };
 
   const getPaymentMethodName = (method: string) => {
-    switch (method) {
-      case "credit":
-        return "Cartão de Crédito";
-      case "debit":
-        return "Cartão de Débito";
-      case "pix":
-        return "Pix";
-      default:
-        return "Não especificado";
+    if (!method) return "Não especificado";
+
+    // Transforma tudo em minúsculo e tira os espaços para não ter erro de digitação
+    const normalized = method.toLowerCase().trim();
+
+    if (normalized === "pix") return "Pix";
+    if (
+      normalized === "credit_card" ||
+      normalized === "creditcard" ||
+      normalized === "cartao"
+    ) {
+      return "Cartão de Crédito";
     }
+    if (normalized === "boleto") return "Boleto Bancário";
+
+    // Se vier um nome novo que a gente não mapeou, ele mostra a palavra original com a primeira letra maiúscula
+    return method.charAt(0).toUpperCase() + method.slice(1);
   };
 
   // Lógica da Barra de Progresso
@@ -132,7 +149,7 @@ const DetalhesPedidoPage: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-700 mb-4">
           {error || "Encomenda não encontrada"}
         </h2>
-        <Link to="/pedidos" className="text-[#313b2f] underline font-bold">
+        <Link to="/meus-pedidos" className="text-[#313b2f] underline font-bold">
           Voltar aos meus pedidos
         </Link>
       </div>
@@ -256,6 +273,60 @@ const DetalhesPedidoPage: React.FC = () => {
                       Qtd: {item.quantity}
                     </p>
                   </div>
+                  {/* 👉 1. MOSTRA A COR SE FOR UM PRODUTO COMUM (EX: CAMA) */}
+                  {item.variant?.color && (
+                    <p className="text-xs text-gray-600">
+                      <span className="font-bold">Cor:</span>{" "}
+                      {item.variant.color}
+                    </p>
+                  )}
+
+                  {/* 👉 2. MOSTRA OS DADOS SE FOR UM PROTETOR DE PAREDE (CUSTOM DATA) */}
+                  {item.customData && (
+                    <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      {item.customData.modelo && (
+                        <p>
+                          <span className="font-bold">Modelo:</span>{" "}
+                          {item.customData.modelo}
+                        </p>
+                      )}
+                      {item.customData.tamanho && (
+                        <p className="mt-1">
+                          <span className="font-bold">Tamanho:</span>{" "}
+                          {item.customData.tamanho}
+                        </p>
+                      )}
+                      {item.customData.kitLed && (
+                        <p className="mt-1">
+                          <span className="font-bold">Kit LED:</span>{" "}
+                          {item.customData.kitLed}
+                        </p>
+                      )}
+
+                      {/* Mapeando as cores dinâmicas do Protetor */}
+                      {item.customData.cores &&
+                        typeof item.customData.cores === "object" && (
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <span className="font-bold">Cores Escolhidas:</span>
+                            <ul className="mt-1 space-y-1">
+                              {Object.entries(item.customData.cores).map(
+                                ([parte, corEscolhida]) => (
+                                  <li
+                                    key={parte}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <span className="w-2 h-2 rounded-full bg-[#ffd639]"></span>
+                                    <span className="capitalize">{parte}:</span>{" "}
+                                    {String(corEscolhida)}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                    </div>
+                  )}
+
                   <div className="font-bold text-[#313b2f]">
                     {formatPrice(Number(item.price) * item.quantity)}
                   </div>
@@ -276,15 +347,15 @@ const DetalhesPedidoPage: React.FC = () => {
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>
-                  {formatPrice(Number(order.total) - Number(order.shippingFee))}
+                  {formatPrice(
+                    Number(order.total) - Number(order.shippingCost),
+                  )}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Frete</span>
                 <span className="text-green-600">
-                  {Number(order.shippingFee) === 0
-                    ? "Grátis"
-                    : formatPrice(order.shippingFee)}
+                  {formatPrice(order.shippingCost || 0)}{" "}
                 </span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
@@ -323,6 +394,32 @@ const DetalhesPedidoPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-8 flex flex-col gap-4">
+        {/* Se o pedido estiver aguardando pagamento, mostra o botão! */}
+        {order.status === "PENDING" && (
+          <div className="bg-orange-50 border border-orange-200 p-6 rounded-2xl flex flex-col items-center text-center gap-4">
+            <h4 className="text-orange-800 font-bold text-lg">
+              Aguardando Pagamento
+            </h4>
+            <p className="text-orange-700 text-sm">
+              Seu pedido já está reservado, mas o pagamento ainda não foi
+              concluído.
+            </p>
+            <button
+              onClick={() => navigate(`/checkout/pagamento/${order.id}`)}
+              className="w-full sm:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-md transition-colors"
+            >
+              Realizar Pagamento Agora
+            </button>
+          </div>
+        )}
+
+        {order.status === "CANCELED" && (
+          <div className="bg-red-50 text-red-800 p-4 rounded-xl text-center font-bold border border-red-200">
+            Este pedido foi cancelado (Tempo limite de pagamento expirado).
+          </div>
+        )}
       </div>
     </div>
   );

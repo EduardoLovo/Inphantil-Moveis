@@ -61,4 +61,8 @@ export class CreateOrderDto {
     @IsOptional()
     @IsNumber()
     shippingCost?: number;
+
+    @IsString()
+    @IsOptional()
+    paymentMethod?: string; //
 }

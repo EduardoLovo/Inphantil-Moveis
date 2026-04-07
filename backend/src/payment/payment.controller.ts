@@ -7,7 +7,9 @@ import {
     HttpStatus,
     BadRequestException,
     Request,
-    Query, // <-- Importamos o Request para pegar quem é o usuário logado
+    Query,
+    Param,
+    ParseIntPipe, // <-- Importamos o Request para pegar quem é o usuário logado
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreateCreditCardPaymentDto } from './dto/create-payment.dto';
@@ -128,6 +130,12 @@ export class PaymentController {
 
         // 3. Devolve pro React mostrar o QR Code
         return pixResult;
+    }
+
+    @Post('pix/:orderId')
+    async gerarNovoPix(@Param('orderId', ParseIntPipe) orderId: number) {
+        console.log(`Chegou um pedido de PIX para o ID: ${orderId}`);
+        return this.paymentService.gerarNovoPixParaPedido(orderId);
     }
 
     // =========================================================

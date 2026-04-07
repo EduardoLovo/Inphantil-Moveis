@@ -19,7 +19,7 @@ import toast, { Toaster } from "react-hot-toast";
 const PRODUCT_ORDER = ["cama phant", "lençol", "lencol", "protetor"];
 
 // 💡 ID DO PRODUTO ESPECIAL: Defina aqui o ID do Protetor de Parede
-const ID_VARIANTE_PROTETOR = 19160;
+const ID_PRODUTO_PROTETOR = 34;
 
 const ProductsPage = () => {
   const { products, isLoading, error, fetchProducts } = useProductStore();
@@ -60,7 +60,7 @@ const ProductsPage = () => {
 
   const handleAddToCart = (product: Product) => {
     // 💡 NOVA LÓGICA: Se for o Protetor Personalizável, manda para a rota nova!
-    if (product.id === ID_VARIANTE_PROTETOR) {
+    if (product.id === ID_PRODUTO_PROTETOR) {
       navigate("/monte-seu-protetor"); // <-- Coloque aqui a rota que você criou no App.tsx
       return;
     }
@@ -178,9 +178,7 @@ const ProductsPage = () => {
           const hasVariants = product.variants && product.variants.length > 0;
 
           // 💡 DEFINIÇÃO DA ROTA: Se for o 34, o link vai para a página nova
-          const isCustomProduct = product.variants?.some(
-            (v) => v.id === ID_VARIANTE_PROTETOR,
-          );
+          const isCustomProduct = product.id === 34;
           const productLink = isCustomProduct
             ? "/monte-seu-protetor" // <-- Altere se a sua rota no App.tsx for diferente
             : `/products/${product.id}`;
@@ -238,9 +236,6 @@ const ProductsPage = () => {
                     <div className="font-bold text-[#313b2f]">
                       {getProductPrice(product)}
                     </div>
-                    <p className="text-xs text-gray-400">
-                      Restam: {totalStock}
-                    </p>
                   </div>
                 </div>
 
@@ -251,10 +246,21 @@ const ProductsPage = () => {
                         ? "bg-white text-[#313b2f] border-2 border-[#313b2f] hover:bg-gray-50"
                         : "bg-[#313b2f] text-white hover:bg-[#ffd639] hover:text-[#313b2f]"
                     }`}
-                    onClick={() => handleAddToCart(product)}
+                    // 💡 LÓGICA DO CLIQUE ATUALIZADA AQUI:
+                    onClick={(e) => {
+                      e.stopPropagation(); // Impede que o clique do botão acione o clique do card inteiro
+
+                      if (isCustomProduct) {
+                        // Se você estiver usando react-router-dom, use a função navigate aqui
+                        navigate("/monte-seu-protetor");
+                      } else {
+                        // Se não for customizável, segue o fluxo normal
+                        handleAddToCart(product);
+                      }
+                    }}
                     disabled={!product.isAvailable || totalStock <= 0}
                   >
-                    {/* 💡 LÓGICA DO TEXTO DO BOTÃO ATUALIZADA */}
+                    {/* O texto do botão continua igual */}
                     {!product.isAvailable || totalStock <= 0 ? (
                       "Indisponível"
                     ) : isCustomProduct ? (

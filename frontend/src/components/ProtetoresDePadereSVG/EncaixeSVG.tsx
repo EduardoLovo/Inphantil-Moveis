@@ -17,7 +17,7 @@ export const EncaixeSVG: React.FC<Props> = ({ colors, onClick, lado }) => {
     <div className="w-full mb-8 flex flex-col items-center">
       {/* Título */}
       <h2 className="text-xl font-bold text-[#313b2f] underline decoration-[#ffd639] underline-offset-4 mb-4 capitalize text-center">
-        Lado {lado}
+        Encaixe
       </h2>
 
       <div

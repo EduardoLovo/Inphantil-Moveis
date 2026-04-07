@@ -65,6 +65,8 @@ const CheckoutPage: React.FC = () => {
   const { user } = useAuthStore();
   const [cpf, setCpf] = useState(user?.cpf || "");
 
+  const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
+
   // Estados de Endereço e UX
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
@@ -236,22 +238,30 @@ const CheckoutPage: React.FC = () => {
       if (!cpf || cpf.length < 14)
         throw new Error("Por favor, preencha um CPF válido para continuarmos.");
 
-      const orderPayload = {
-        addressId: selectedAddressId,
-        items: items.map((item) => ({
-          productId: item.id,
-          quantity: item.quantity,
-          variantId: item.selectedVariant ? item.selectedVariant.id : null,
-          customData: item.customData,
-        })),
-        cpf: cpf,
-        shippingCost: shippingCost,
-      };
+      // 👉 2. REAPROVEITA O PEDIDO SE ELE JÁ FOI CRIADO NESSA TELA
+      let orderId = createdOrderId;
 
-      const newOrder = await createOrder(orderPayload);
-      const orderId = newOrder.id;
+      if (!orderId) {
+        const orderPayload = {
+          addressId: selectedAddressId,
+          items: items.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            variantId: item.selectedVariant ? item.selectedVariant.id : null,
+            customData: item.customData,
+          })),
+          cpf: cpf,
+          shippingCost: shippingCost,
+        };
+
+        const newOrder = await createOrder(orderPayload);
+        orderId = newOrder.id;
+        setCreatedOrderId(orderId); // Salva para não duplicar se o cartão falhar!
+      }
 
       if (paymentMethod === "credit") {
+        const anoFormatado =
+          cardExpYear.length === 2 ? `20${cardExpYear}` : cardExpYear;
         const paymentResponse = await processCreditCardPayment({
           orderId: String(orderId),
           amount: finalTotal,
@@ -259,12 +269,13 @@ const CheckoutPage: React.FC = () => {
             holderName: cardName,
             number: cardNumber.replace(/\D/g, ""),
             expMonth: cardExpMonth,
-            expYear: cardExpYear,
+            expYear: anoFormatado,
             cvv: cardCvv,
             installments: installments,
           },
         });
 
+        // 👉 3. A CORREÇÃO DO ERRO INVISÍVEL ESTÁ AQUI:
         if (paymentResponse.success) {
           clearCart();
           navigate("/pos-compra", {
@@ -275,6 +286,13 @@ const CheckoutPage: React.FC = () => {
               transactionId: paymentResponse.transactionId,
             },
           });
+        } else {
+          // Se a Rede recusou (ex: success falso), joga o erro na cara do React!
+          throw new Error(
+            paymentResponse.message ||
+              paymentResponse.rawResult?.returnMessage ||
+              "Pagamento recusado pela operadora do cartão.",
+          );
         }
       } else if (paymentMethod === "pix") {
         const pixResponse = await api.post("/payment/pix", {
@@ -284,17 +302,11 @@ const CheckoutPage: React.FC = () => {
 
         const pixData = pixResponse.data;
 
-        console.log("🔍 DADOS DO PIX DA REDE:", pixData);
-
         if (pixData && pixData.returnCode === "00") {
-          // 👉 1. CAPTURANDO A IMAGEM EM BASE64
-          // Colocamos o prefixo 'data:image/png;base64,' para o HTML conseguir desenhar a foto!
           const base64Image = pixData.qrCodeResponse?.qrCodeImage;
           const qrCodeImageLink = base64Image
             ? `data:image/png;base64,${base64Image}`
             : "";
-
-          // 👉 2. CAPTURANDO O CÓDIGO COPIA E COLA
           const copiaECola = pixData.qrCodeResponse?.qrCodeData || "";
 
           clearCart();
@@ -303,11 +315,9 @@ const CheckoutPage: React.FC = () => {
               isSuccess: true,
               method: "pix",
               orderId: orderId,
-              // Manda a nossa imagem montada (ou um tapa-buraco de segurança se der erro)
               qrCodeUrl:
                 qrCodeImageLink ||
                 "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg",
-              // Manda o código oficial
               pixCode: copiaECola,
             },
           });
@@ -317,6 +327,7 @@ const CheckoutPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error(error);
+      // 👉 4. MOSTRA O ERRO NA TELA PARA O CLIENTE
       setPaymentError(
         error.response?.data?.message ||
           error.message ||
@@ -622,7 +633,7 @@ const CheckoutPage: React.FC = () => {
                     value={cardExpYear}
                     onChange={(e) => setCardExpYear(e.target.value)}
                     maxLength={4}
-                    className="w-1/3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
+                    className=" w-1/3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all"
                   />
                   <input
                     type="text"

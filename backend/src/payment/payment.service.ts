@@ -1,14 +1,24 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+    Injectable,
+    HttpException,
+    HttpStatus,
+    BadRequestException,
+    NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios'; // <-- 1. Importar o AxiosError
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
     private readonly apiUrl: string;
     private readonly credentialsBase64: string;
 
-    constructor(private readonly httpService: HttpService) {
+    constructor(
+        private readonly httpService: HttpService,
+        private readonly prisma: PrismaService,
+    ) {
         const isProd = process.env.REDE_ENVIRONMENT === 'production';
         this.apiUrl = isProd
             ? 'https://api.userede.com.br/erede/v1/transactions'
@@ -112,6 +122,8 @@ export class PaymentService {
             ],
         };
 
+        console.log('📡 URL ENVIADA PARA A REDE NO PIX:', payload.urls[0].url);
+
         try {
             const response = await firstValueFrom(
                 this.httpService.post(this.apiUrl, payload, {
@@ -135,5 +147,48 @@ export class PaymentService {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
+    }
+
+    // =========================================================
+    // 🔄 GERA NOVO PIX PARA UM PEDIDO EXISTENTE (CHAMADO PELO REACT)
+    // =========================================================
+    async gerarNovoPixParaPedido(orderId: number) {
+        // 1. Busca o pedido para saber o valor exato
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Pedido #${orderId} não encontrado.`);
+        }
+
+        if (order.status === 'PAID') {
+            throw new BadRequestException('Este pedido já está pago.');
+        }
+
+        // 2. Reaproveita a sua própria função que já fala com a e.Rede!
+        const dadosDaRede = await this.createPixTransaction(
+            String(order.id),
+            Number(order.total),
+        );
+
+        // 3. Salva o TID gerado no banco de dados para o Webhook achar depois
+        await this.prisma.order.update({
+            where: { id: order.id },
+            data: {
+                tid: dadosDaRede.tid,
+                paymentMethod: 'pix', // Atualiza a escolha do cliente
+            },
+        });
+
+        // 4. Extrai o copia e cola (a e.Rede costuma mandar no urls ou no qrCodeInString)
+        const copiaECola =
+            dadosDaRede.urls?.[0]?.url || dadosDaRede.pix?.qrCodeInString || '';
+
+        // 5. Devolve EXATAMENTE com os nomes que a PosCompraPage no React espera
+        return {
+            qrCodeUrl: `data:image/png;base64,${dadosDaRede.pix?.qrCodeInBase64 || ''}`,
+            pixCode: copiaECola,
+        };
     }
 }

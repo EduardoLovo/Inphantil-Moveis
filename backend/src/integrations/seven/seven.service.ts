@@ -238,10 +238,13 @@ export class SevenService {
                     return {
                         sku: String(skuOficial),
                         quantidade: Number(item.quantity),
+                        // O valorTotal da linha é a única coisa que deve ser multiplicada
                         valorTotal: Number(item.price) * Number(item.quantity),
-                        valorBruto: Number(item.price) * Number(item.quantity),
-                        valorLiquido:
-                            Number(item.price) * Number(item.quantity),
+
+                        // Valor Bruto e Líquido (para o Seven) é sempre o PREÇO DE 1 UNIDADE!
+                        valorBruto: Number(item.price),
+                        valorLiquido: Number(item.price),
+
                         percentualDesconto: 0,
                         obsItem: obsFormatada, // 👉 O Seven vai receber a nota bonitinha linha a linha!
                     };
@@ -262,6 +265,8 @@ export class SevenService {
                     telefone: '',
                 },
             };
+
+            console.log(payload);
 
             this.logger.log(
                 `Enviando pedido ${order.id} para o ERP Seven (v2)...`,

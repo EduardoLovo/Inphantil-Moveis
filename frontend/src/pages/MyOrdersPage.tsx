@@ -84,7 +84,7 @@ const MyOrdersPage: React.FC = () => {
             Que tal explorar nossos móveis e começar a decorar?
           </p>
           <Link
-            to="/products"
+            to="/loja"
             className="inline-flex items-center gap-2 px-8 py-3 bg-[#313b2f] text-white font-bold rounded-full hover:bg-[#ffd639] hover:text-[#313b2f] transition-all shadow-md"
           >
             Explorar Produtos

@@ -13,7 +13,10 @@ export interface CartItem extends Product {
 interface CartState {
   items: CartItem[];
   // Atualizado para aceitar a variante opcionalmente
-  addItem: (product: Product, variant?: ProductVariant) => void;
+  addItem: (
+    product: Product & { cartItemId?: string },
+    variant?: ProductVariant,
+  ) => void;
   removeItem: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -27,10 +30,15 @@ export const useCartStore = create<CartState>()(
       items: [],
 
       addItem: (product, variant) => {
-        // Cria um ID único combinando o Produto e a Variante
-        const cartItemId = variant
-          ? `${product.id}-${variant.id}`
-          : `${product.id}-base`;
+        // 1. DEFINE O ID ÚNICO
+        // Se a página já enviou um cartItemId próprio (ex: Protetor de Parede), usa ele!
+        // Se não enviou, cria o ID padrão juntando o id do Produto + id da Variante.
+        const cartItemId = product.cartItemId
+          ? product.cartItemId
+          : variant
+            ? `${product.id}-${variant.id}`
+            : `${product.id}-base`;
+
         const currentItems = get().items;
         const existingItem = currentItems.find(
           (item) => item.cartItemId === cartItemId,
@@ -46,10 +54,15 @@ export const useCartStore = create<CartState>()(
             ),
           });
         } else {
-          // Pega o preço da variação (se existir), senão pega do produto base
-          const priceToUse = variant
-            ? Number(variant.price)
-            : Number(product.price);
+          // 2. DEFINE O PREÇO
+          // Se o produto veio com um cartItemId customizado, significa que a página
+          // já calculou o preço final (ex: Protetor + LED). Então confiamos no price do product.
+          // Se for um produto comum com variante, usamos o preço da variante.
+          let priceToUse = Number(product.price);
+
+          if (variant && !product.cartItemId) {
+            priceToUse = Number(variant.price);
+          }
 
           set({
             items: [
@@ -57,8 +70,8 @@ export const useCartStore = create<CartState>()(
               {
                 ...product,
                 productId: product.id,
-                price: priceToUse, // Sobrescreve o preço para o valor da variação
-                cartItemId,
+                price: priceToUse, // Salva o preço correto
+                cartItemId: cartItemId, // Salva o ID correto
                 selectedVariant: variant,
                 quantity: 1,
               },
