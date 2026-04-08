@@ -174,15 +174,6 @@ export class SevenService {
                 },
 
                 produtos: order.items.map((item: any) => {
-                    console.log(
-                        `\n🔍 ESPIANDO O ITEM [${item.product?.sku || item.variant?.sku}]:`,
-                        {
-                            temVariante: !!item.variant,
-                            corQueChegou: item.variant?.color,
-                            temCustomData: !!item.customData,
-                        },
-                    );
-
                     const corOriginal = item.variant?.color || '';
                     let obsFormatada = '';
 

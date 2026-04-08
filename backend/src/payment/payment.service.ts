@@ -122,8 +122,6 @@ export class PaymentService {
             ],
         };
 
-        console.log('📡 URL ENVIADA PARA A REDE NO PIX:', payload.urls[0].url);
-
         try {
             const response = await firstValueFrom(
                 this.httpService.post(this.apiUrl, payload, {
@@ -166,9 +164,14 @@ export class PaymentService {
             throw new BadRequestException('Este pedido já está pago.');
         }
 
+        // 👉 DICA DE PRODUÇÃO: Para a Rede aceitar um pedido duplicado,
+        // precisamos colocar uma "marca de tempo" no ID só para o banco,
+        // mas salvamos o ID original no nosso sistema.
+        const referenceAntiBloqueio = `${order.id}-${Date.now()}`;
+
         // 2. Reaproveita a sua própria função que já fala com a e.Rede!
         const dadosDaRede = await this.createPixTransaction(
-            String(order.id),
+            referenceAntiBloqueio,
             Number(order.total),
         );
 
@@ -181,13 +184,15 @@ export class PaymentService {
             },
         });
 
-        // 4. Extrai o copia e cola (a e.Rede costuma mandar no urls ou no qrCodeInString)
-        const copiaECola =
-            dadosDaRede.urls?.[0]?.url || dadosDaRede.pix?.qrCodeInString || '';
+        // 4. Extrai o copia e cola e a imagem EXATAMENTE como a e.Rede manda!
+        const copiaECola = dadosDaRede.qrCodeResponse?.qrCodeData || '';
+        const imagemBase64 = dadosDaRede.qrCodeResponse?.qrCodeImage || '';
 
-        // 5. Devolve EXATAMENTE com os nomes que a PosCompraPage no React espera
+        // 5. Devolve para o React
         return {
-            qrCodeUrl: `data:image/png;base64,${dadosDaRede.pix?.qrCodeInBase64 || ''}`,
+            qrCodeUrl: imagemBase64
+                ? `data:image/png;base64,${imagemBase64}`
+                : '',
             pixCode: copiaECola,
         };
     }

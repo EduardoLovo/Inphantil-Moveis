@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { api } from "../services/api";
+import { useCartStore } from "../store/CartStore"; // 👈 IMPORTANTE: Adicionamos o CartStore para limpar o carrinho!
 
 const PagamentoPendentePage = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { clearCart } = useCartStore(); // 👈 Puxamos a função de limpar
 
   // Estados principais
   const [order, setOrder] = useState<any>(null);
@@ -43,6 +45,42 @@ const PagamentoPendentePage = () => {
   }, [orderId, navigate]);
 
   // =========================================================
+  // 📡 RADAR DO PIX (POLLING): Fica checando se o Webhook já avisou o banco
+  // =========================================================
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+
+    // Só liga o radar se o cliente gerou o Pix e está olhando pro QR Code
+    if (pixData && order?.id) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await api.get(`/orders/${order.id}`);
+
+          // O NestJS avisou que o Webhook mudou o status pra PAGO!
+          if (response.data.status === "PAID") {
+            clearInterval(intervalId); // Desliga o radar
+
+            toast.success("Pagamento confirmado com sucesso!");
+            clearCart(); // Limpa o carrinho
+
+            // Manda o cliente pra página de celebração!
+            navigate("/pos-compra", {
+              state: { orderId: order.id, method: "pix", isSuccess: true },
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao verificar o status do Pix:", error);
+        }
+      }, 5000); // 👈 5000 milissegundos = Pergunta pro servidor a cada 5 segundos
+    }
+
+    // Função de limpeza: se o cara sair da página, desliga o radar pra não travar o PC
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [pixData, order?.id, navigate, clearCart]);
+
+  // =========================================================
   // 🟢 GERAÇÃO DO PIX
   // =========================================================
   const handleGerarPix = async () => {
@@ -50,13 +88,22 @@ const PagamentoPendentePage = () => {
       setIsProcessing(true);
       toast.loading("Gerando QR Code...", { id: "pagamento" });
 
-      // 👉 CORREÇÃO: Removido o 'S' de payments. Agora bate certinho no seu @Controller('payment')
       const response = await api.post(`/payment/pix/${order.id}`);
+      const pixDataFromApi = response.data;
 
-      // Salva os dados para mostrar na tela (Base64 da imagem e o Copia e Cola)
+      // 👉 CORREÇÃO DEFINITIVA: O servidor já manda o link e o código prontos!
+      const qrCodeImageLink = pixDataFromApi.qrCodeUrl;
+      const copiaECola = pixDataFromApi.pixCode;
+
+      // Trava de segurança: Se vier vazio, barramos.
+      if (!qrCodeImageLink) {
+        throw new Error("A Rede não retornou a imagem do QR Code.");
+      }
+
+      // Salva os dados processados para mostrar na tela
       setPixData({
-        qrCodeUrl: response.data.qrCodeUrl,
-        pixCode: response.data.pixCode,
+        qrCodeUrl: qrCodeImageLink,
+        pixCode: copiaECola,
       });
 
       toast.success("Pix gerado com sucesso!", { id: "pagamento" });
@@ -73,48 +120,49 @@ const PagamentoPendentePage = () => {
   // =========================================================
   // 💳 PROCESSAMENTO DO CARTÃO
   // =========================================================
-  // =========================================================
-  // 💳 PROCESSAMENTO DO CARTÃO
-  // =========================================================
   const handleProcessarCartao = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsProcessing(true);
       toast.loading("Processando pagamento...", { id: "pagamento" });
 
-      // 1. Guardamos a resposta do seu backend em uma variável
+      // 👉 CORREÇÃO DO ANO: Transforma "29" em "2029" igual no Checkout
+      const anoFormatado =
+        cardData.expYear.length === 2
+          ? `20${cardData.expYear}`
+          : cardData.expYear;
+
       const response = await api.post(`/payment/credit-card`, {
         orderId: String(order.id),
-        amount: Number(order.total), // 👈 AQUI ESTÁ A CHAVE DE ACESSO!
+        amount: Number(order.total),
         cardData: {
           holderName: cardData.holderName,
-          number: cardData.number,
+          number: cardData.number.replace(/\D/g, ""), // Limpa espaços e traços
           expMonth: cardData.expMonth,
-          expYear: cardData.expYear,
+          expYear: anoFormatado,
           cvv: cardData.cvv,
           installments: Number(cardData.installments),
         },
       });
 
-      // 👉 A CORREÇÃO ESTÁ AQUI: Verificamos se a Rede realmente aprovou!
       if (response.data && response.data.success === false) {
-        // Se a Rede recusou (ex: success: false), nós forçamos o React a ir para o bloco de ERRO (catch)
         throw new Error(
           response.data.message || "Cartão recusado pela operadora.",
         );
       }
 
-      // Se passou pela trava acima, é porque a Rede aprovou e o servidor já mudou pra PAGO e mandou pro Seven!
       toast.success("Pagamento aprovado!", { id: "pagamento" });
+
+      // 👉 CORREÇÃO DA DUPLICIDADE: Limpamos o carrinho para o cliente não comprar sem querer de novo!
+      clearCart();
 
       // Redireciona para a tela de Pós Compra
       navigate("/pos-compra", {
-        state: { orderId: order.id, method: "credit" },
+        state: { orderId: order.id, method: "credit", isSuccess: true },
       });
     } catch (error: any) {
       console.log("🚨 MOTIVO DA RECUSA DO NESTJS:", error.response?.data);
       console.error(error);
-      // Pega a mensagem exata de recusa da Rede (ou do erro que forçamos acima)
       const msgErro =
         error.message ||
         error.response?.data?.message ||
@@ -154,7 +202,7 @@ const PagamentoPendentePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-28 px-4">
       <Toaster />
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all">
         <h1 className="text-3xl font-black text-[#313b2f] mb-2 text-center">
@@ -163,7 +211,10 @@ const PagamentoPendentePage = () => {
         <p className="text-gray-500 text-center mb-8">
           Pedido #{order.id} no valor de{" "}
           <strong className="text-gray-800">
-            R$ {Number(order.total).toFixed(2).replace(".", ",")}
+            {Number(order.total).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
           </strong>
         </p>
 
@@ -182,7 +233,7 @@ const PagamentoPendentePage = () => {
             <img
               src={pixData.qrCodeUrl}
               alt="QR Code Pix"
-              className="w-56 h-56 border-4 border-gray-100 rounded-xl shadow-sm"
+              className="w-56 h-56 border-4 border-gray-100 rounded-xl shadow-sm object-contain"
             />
 
             <div className="w-full mt-2">
@@ -228,7 +279,10 @@ const PagamentoPendentePage = () => {
                 type="text"
                 value={cardData.holderName}
                 onChange={(e) =>
-                  setCardData({ ...cardData, holderName: e.target.value })
+                  setCardData({
+                    ...cardData,
+                    holderName: e.target.value.toUpperCase(),
+                  })
                 }
                 className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500"
                 placeholder="Ex: JOAO M DA SILVA"
@@ -245,7 +299,10 @@ const PagamentoPendentePage = () => {
                 maxLength={19}
                 value={cardData.number}
                 onChange={(e) =>
-                  setCardData({ ...cardData, number: e.target.value })
+                  setCardData({
+                    ...cardData,
+                    number: e.target.value.replace(/\D/g, ""),
+                  })
                 }
                 className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500"
                 placeholder="0000 0000 0000 0000"
@@ -263,7 +320,10 @@ const PagamentoPendentePage = () => {
                   maxLength={2}
                   value={cardData.expMonth}
                   onChange={(e) =>
-                    setCardData({ ...cardData, expMonth: e.target.value })
+                    setCardData({
+                      ...cardData,
+                      expMonth: e.target.value.replace(/\D/g, ""),
+                    })
                   }
                   className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500"
                   placeholder="12"
@@ -271,7 +331,7 @@ const PagamentoPendentePage = () => {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">
-                  Ano (AAAA)
+                  Ano (Ex: 29 ou 2029)
                 </label>
                 <input
                   required
@@ -279,7 +339,10 @@ const PagamentoPendentePage = () => {
                   maxLength={4}
                   value={cardData.expYear}
                   onChange={(e) =>
-                    setCardData({ ...cardData, expYear: e.target.value })
+                    setCardData({
+                      ...cardData,
+                      expYear: e.target.value.replace(/\D/g, ""),
+                    })
                   }
                   className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500"
                   placeholder="29"
@@ -295,7 +358,10 @@ const PagamentoPendentePage = () => {
                   maxLength={4}
                   value={cardData.cvv}
                   onChange={(e) =>
-                    setCardData({ ...cardData, cvv: e.target.value })
+                    setCardData({
+                      ...cardData,
+                      cvv: e.target.value.replace(/\D/g, ""),
+                    })
                   }
                   className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500"
                   placeholder="123"
@@ -314,11 +380,16 @@ const PagamentoPendentePage = () => {
                 }
                 className="w-full p-3 border border-gray-300 rounded-xl outline-none focus:border-blue-500 bg-white"
               >
-                <option value="1">
-                  1x de R$ {Number(order.total).toFixed(2).replace(".", ",")}
-                </option>
-                <option value="2">2x sem juros</option>
-                <option value="3">3x sem juros</option>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <option key={num} value={num}>
+                    {num}x de{" "}
+                    {(Number(order.total) / num).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}{" "}
+                    {num <= 3 ? "(Sem juros)" : ""}
+                  </option>
+                ))}
               </select>
             </div>
 

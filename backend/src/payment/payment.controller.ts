@@ -154,8 +154,6 @@ export class PaymentController {
             return { received: true }; // Retorna OK para despistar
         }
 
-        console.log('📦 PAYLOAD RECEBIDO DA REDE:', payload);
-
         try {
             // 👉 CENÁRIO 1: É UM AVISO DE PIX (Páginas 74 e 75 do Manual)
             // 👉 CENÁRIO 1: É UM AVISO DE PIX
