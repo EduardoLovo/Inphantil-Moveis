@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useOrderStore } from "../../store/OrderStore";
 import { useAuthStore } from "../../store/AuthStore";
 import { Navigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import {
   FaUser,
   FaClock,
   FaFilePdf,
+  FaSearch,
 } from "react-icons/fa";
 import { OrderStatus } from "../../types/order";
 
@@ -43,17 +44,34 @@ const AdminOrdersPage: React.FC = () => {
   } = useOrderStore();
   const { user } = useAuthStore();
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const canAccess =
     user &&
     (user.role === "ADMIN" || user.role === "DEV" || user.role === "SELLER");
 
-  if (!canAccess) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   useEffect(() => {
     fetchAllOrders();
   }, [fetchAllOrders]);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const searchLower = searchTerm.toLowerCase();
+      const orderId = order.id.toString();
+      const userName = order.user?.name?.toLowerCase() || "";
+      const userEmail = order.user?.email?.toLowerCase() || "";
+
+      return (
+        orderId.includes(searchLower) ||
+        userName.includes(searchLower) ||
+        userEmail.includes(searchLower)
+      );
+    });
+  }, [orders, searchTerm]);
+
+  if (!canAccess) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleDownloadPDF = (order: any) => {
     const doc = new jsPDF();
@@ -177,8 +195,21 @@ const AdminOrdersPage: React.FC = () => {
             Gerencie e atualize o status das vendas.
           </p>
         </div>
-        <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 self-start">
-          <FaBoxOpen /> {orders.length} Pedidos
+
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative w-full sm:w-64">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por ID, nome ou email..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none text-sm transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 whitespace-nowrap self-start sm:self-auto">
+            <FaBoxOpen /> {filteredOrders.length} Pedidos
+          </div>
         </div>
       </header>
 
@@ -191,7 +222,7 @@ const AdminOrdersPage: React.FC = () => {
 
       {/* --- VERSÃO MOBILE (CARDS) --- */}
       <div className="md:hidden space-y-4">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div
             key={order.id}
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 relative overflow-hidden"
@@ -302,7 +333,7 @@ const AdminOrdersPage: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <tr
                 key={order.id}
                 className="hover:bg-yellow-50/30 transition-colors group"
@@ -410,10 +441,14 @@ const AdminOrdersPage: React.FC = () => {
         </table>
       </div>
 
-      {orders.length === 0 && (
+      {filteredOrders.length === 0 && (
         <div className="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-300 mt-4">
           <FaBoxOpen className="mx-auto text-4xl text-gray-300 mb-3" />
-          <p className="text-gray-500 font-medium">Nenhum pedido encontrado.</p>
+          <p className="text-gray-500 font-medium">
+            {searchTerm
+              ? `Nenhum pedido encontrado para "${searchTerm}"`
+              : "Nenhum pedido encontrado."}
+          </p>
         </div>
       )}
     </div>

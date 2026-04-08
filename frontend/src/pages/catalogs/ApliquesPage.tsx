@@ -58,13 +58,13 @@ const ViewModal: React.FC<{ item: VisualItem; onClose: () => void }> = ({
             </p>
           )}
 
-          {!item.inStock && (
+          {/* {!item.inStock && (
             <div className="mt-4">
               <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-xs font-bold uppercase tracking-wide border border-red-200">
                 Indisponível
               </span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
@@ -421,7 +421,7 @@ const ApliquesPage: React.FC = () => {
               {/* Badges para Staff */}
               {isStaff && (
                 <div className="mt-2">
-                  {item.inStock ? (
+                  {item.inStock || item.quantity > 0 ? (
                     <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700 border border-green-200">
                       Estoque
                     </span>
