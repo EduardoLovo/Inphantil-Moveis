@@ -124,6 +124,7 @@ const LENCOL_COLORS = [
 ];
 
 const ITEM_SIZES = [
+  "UNICO",
   "BERÇO",
   "JUNIOR",
   "SOLTEIRO",

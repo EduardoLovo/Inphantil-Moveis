@@ -161,7 +161,6 @@ const PagamentoPendentePage = () => {
         state: { orderId: order.id, method: "credit", isSuccess: true },
       });
     } catch (error: any) {
-      console.log("🚨 MOTIVO DA RECUSA DO NESTJS:", error.response?.data);
       console.error(error);
       const msgErro =
         error.message ||
@@ -387,7 +386,7 @@ const PagamentoPendentePage = () => {
                       style: "currency",
                       currency: "BRL",
                     })}{" "}
-                    {num <= 3 ? "(Sem juros)" : ""}
+                    (Sem juros)
                   </option>
                 ))}
               </select>
