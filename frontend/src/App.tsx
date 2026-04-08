@@ -24,7 +24,7 @@ import EnvironmentPage from "./pages/EnvironmentPage";
 // ROTAS PUBLICAS
 import ContactPage from "./pages/ContactPage";
 // ROTAS LOGADO
-import CartPage from "./pages/CartPage";
+// import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProductsPage from "./pages/ProductsPage";
 import PosCompraPage from "./pages/PosCompraPage";
