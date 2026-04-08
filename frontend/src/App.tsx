@@ -93,7 +93,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/loja" element={<UnderConstructionPage />} />
-        {/* <Route path="/checkout" element={<UnderConstructionPage />} /> */}
+        <Route path="/checkout" element={<UnderConstructionPage />} />
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -116,7 +116,8 @@ function App() {
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/loja-teste" element={<ProductsPage />} />
-        <Route path="/cart" element={<CartPage />} />
+        {/* <Route path="/cart" element={<CartPage />} /> */}
+        <Route path="/cart" element={<UnderConstructionPage />} />
         <Route
           path="/monte-seu-protetor"
           element={<ProtetorDeParedeProductPage />}
