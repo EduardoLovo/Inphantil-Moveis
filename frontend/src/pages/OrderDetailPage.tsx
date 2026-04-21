@@ -162,7 +162,7 @@ const DetalhesPedidoPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-in fade-in duration-500">
         <div>
           <Link
-            to="/pedidos"
+            to="/meus-pedidos"
             className="inline-flex items-center gap-2 text-gray-500 hover:text-[#313b2f] transition-colors mb-2 font-medium"
           >
             <FaArrowLeft /> Voltar

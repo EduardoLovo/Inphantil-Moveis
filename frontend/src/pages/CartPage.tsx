@@ -517,11 +517,11 @@ const CartPage: React.FC = () => {
                   >
                     {other.name}
                   </Link>
-                  <div className="mt-auto pt-2">
+                  {/* <div className="mt-auto pt-2">
                     <span className="font-bold text-lg text-[#313b2f]">
-                      {formatPrice(other.price)}
+                      {formatPrice(other.)}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}

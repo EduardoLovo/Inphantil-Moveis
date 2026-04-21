@@ -136,7 +136,7 @@ const Header = () => {
                   </div>
                   <div className="flex flex-col">
                     <Link
-                      to="/products"
+                      to="/loja"
                       className="px-6 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3"
                     >
                       <FaListUl className="text-gray-400" /> Todos Produtos
