@@ -252,6 +252,7 @@ const CheckoutPage: React.FC = () => {
           })),
           cpf: cpf,
           shippingCost: shippingCost,
+          paymentMethod: paymentMethod,
         };
 
         const newOrder = await createOrder(orderPayload);

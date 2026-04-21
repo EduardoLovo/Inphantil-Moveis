@@ -22,7 +22,8 @@ export interface IntegracaoOrderItem {
     quantity: number;
     price: any; // Aceita o Decimal do Prisma
     variant?: { sku?: string | null; color?: string | null } | null;
-    product?: { sku?: string | null } | null; // Aceita Nulo!
+    // Removido o sku de dentro do product!
+    product?: { name?: string | null } | null;
     customData?: any; // 👉 Aceita os dados de personalização
 }
 
@@ -100,13 +101,14 @@ export class SevenService {
                 valorTotalProdutos: Number(order.total),
                 valorTotalServicos: 0,
                 vlDespAcessor: 0,
+                boFreteAuto: 'NAO',
                 vlFretePedidoVenda: Number(order.shippingCost),
-                pcFretePedidoVenda: 0,
+                // pcFretePedidoVenda: 0,
                 tipoPedidoId: 1,
                 status: 'BLOQUEADO',
                 planoContaId: '3.1.1.1',
                 cfop: cfopCalculado,
-                observacao1: 'VENDA PELO SITE',
+                observacao1: `VENDA PELO SITE - PEDIDO #${order.id}`,
                 codEmpresa: 1,
                 formaPagamento:
                     order.paymentMethod === 'pix' ? 'A VISTA' : 'CARTAO',
@@ -174,31 +176,51 @@ export class SevenService {
                 },
 
                 produtos: order.items.map((item: any) => {
-                    const corOriginal = item.variant?.color || '';
+                    const corOriginal =
+                        item.variant?.attributes?.color ||
+                        item.variant?.color ||
+                        '';
+                    const tamanhoOriginal =
+                        item.variant?.attributes?.size ||
+                        item.variant?.size ||
+                        '';
+                    const complementoOriginal =
+                        item.variant?.attributes?.complement ||
+                        item.variant?.complement ||
+                        '';
+
                     let obsFormatada = '';
 
-                    // 2. Se a cor tiver um traço (-), nós dividimos em duas partes (Padrão das Camas)
-                    if (corOriginal.includes('-')) {
-                        const [ext, int] = corOriginal.split('-');
-                        obsFormatada = `Ext: ${ext.trim().toUpperCase()} - Int: ${int.trim().toUpperCase()}`;
-                    } else if (corOriginal) {
-                        obsFormatada = `Cor: ${corOriginal.trim().toUpperCase()}`;
+                    // 👉 1.5 FORMATA TAMANHO E EXTRA (Novo bônus para o seu ERP)
+                    if (
+                        tamanhoOriginal &&
+                        tamanhoOriginal !== 'Tamanho Único'
+                    ) {
+                        obsFormatada += `Tamanho: ${tamanhoOriginal} \n`;
+                    }
+                    if (complementoOriginal) {
+                        obsFormatada += `Extra: ${complementoOriginal} \n`;
                     }
 
-                    // 👉 2.5 LÓGICA NOVA: Formatação Perfeita com Quebra de Linha
+                    // 👉 2. FORMATA A COR (Igual você já tinha feito brilhantemente)
+                    if (corOriginal.includes('-')) {
+                        const [ext, int] = corOriginal.split('-');
+                        obsFormatada += `Ext: ${ext.trim().toUpperCase()} - Int: ${int.trim().toUpperCase()}`;
+                    } else if (corOriginal && corOriginal !== 'Cor Única') {
+                        obsFormatada += `Cor: ${corOriginal.trim().toUpperCase()}`;
+                    }
+
+                    // 👉 2.5 LÓGICA DE PRODUTOS PERSONALIZADOS (Continua intacta!)
                     if (item.customData) {
-                        // Prevenção caso o banco devolva como string ou como objeto
                         const custom =
                             typeof item.customData === 'string'
                                 ? JSON.parse(item.customData)
                                 : item.customData;
 
-                        // 1. Formata as cores para "Cor1: L11, Cor2: AZ3"
                         let coresFormatadas = 'Nenhuma';
                         if (custom.cores) {
                             coresFormatadas = Object.entries(custom.cores)
                                 .map(([chave, valor]) => {
-                                    // Transforma "cor1" em "Cor1"
                                     const chaveCapitalizada =
                                         chave.charAt(0).toUpperCase() +
                                         chave.slice(1);
@@ -207,10 +229,8 @@ export class SevenService {
                                 .join(', ');
                         }
 
-                        // 2. Monta a frase com o \n (Quebra de Linha)
                         const frasePersonalizada = `Modelo: ${custom.modelo}\nTamanho: ${custom.tamanho}\nKit LED: ${custom.kitLed}\nCores: ${coresFormatadas}`;
 
-                        // 3. Junta tudo (se tiver cor da cama antes, ele pula duas linhas para separar bem)
                         obsFormatada = obsFormatada
                             ? `${obsFormatada}\n\n${frasePersonalizada}`
                             : frasePersonalizada;

@@ -11,8 +11,8 @@ interface OrderState {
   fetchAllOrders: () => Promise<void>;
   fetchMyOrders: () => Promise<void>;
   updateOrderStatus: (orderId: number, newStatus: OrderStatus) => Promise<void>;
+  fetchAdminOrders: () => Promise<void>;
   deleteOrder: (id: number) => Promise<void>;
-
   createOrder: (orderData: {
     addressId: number;
     items: any[];
@@ -104,6 +104,17 @@ export const useOrderStore = create<OrderState>((set) => ({
     } catch (error) {
       console.error(error);
       alert("Erro ao excluir pedido.");
+    }
+  },
+
+  fetchAdminOrders: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      // Ajuste a rota '/admin/orders' para a rota correta da sua API se for diferente
+      const response = await api.get("/admin/orders");
+      set({ orders: response.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
     }
   },
 }));

@@ -11,25 +11,28 @@ import {
     ValidateNested,
 } from 'class-validator';
 
-// NOVO DTO: Valida as imagens dentro da variante
 export class CreateVariantImageDto {
     @IsString()
     @IsNotEmpty()
     url!: string;
 }
 
-// NOVO DTO: Valida cada variante
 export class CreateVariantDto {
     @IsOptional()
     id?: number;
 
+    // Ainda aceitamos isso do front para jogar pro JSON depois
     @IsString()
-    @IsNotEmpty()
-    color!: string;
+    @IsOptional()
+    color?: string;
 
     @IsString()
-    @IsNotEmpty()
-    size!: string;
+    @IsOptional()
+    size?: string;
+
+    @IsOptional()
+    @IsString()
+    complement?: string;
 
     @IsNumber()
     @Min(0)
@@ -45,17 +48,13 @@ export class CreateVariantDto {
 
     @IsBoolean()
     @IsOptional()
-    isFeatured?: boolean; // Permite receber isFeatured do Front!
+    isFeatured?: boolean;
 
     @IsArray()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => CreateVariantImageDto)
     images?: CreateVariantImageDto[];
-
-    @IsOptional()
-    @IsString()
-    complement?: string;
 }
 
 export class CreateProductDto {
@@ -76,16 +75,14 @@ export class CreateProductDto {
     @IsOptional()
     description?: string;
 
+    // Deixamos opcionais pois o Prisma não pede mais isso no Produto
     @IsNumber({ maxDecimalPlaces: 2 })
-    @Min(0)
-    price!: number; // Pode ser um preço base ou o menor preço
+    @IsOptional()
+    price?: number;
 
     @IsNumber()
-    @Min(0)
     @IsOptional()
-    stock?: number = 0;
-
-    // APAGADOS size e color daqui!
+    stock?: number;
 
     @IsString()
     @IsOptional()
@@ -109,8 +106,7 @@ export class CreateProductDto {
     categoryId?: number;
 
     @ApiProperty({
-        description:
-            'Variações do produto (cores, tamanhos, preços específicos)',
+        description: 'Variações do produto',
         required: false,
         type: [CreateVariantDto],
     })

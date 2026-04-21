@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useOrderStore } from "../../store/OrderStore";
 import { useAuthStore } from "../../store/AuthStore";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import {
   FaShoppingCart,
@@ -12,6 +12,7 @@ import {
   FaClock,
   FaFilePdf,
   FaSearch,
+  FaEye,
 } from "react-icons/fa";
 import { OrderStatus } from "../../types/order";
 
@@ -45,7 +46,7 @@ const AdminOrdersPage: React.FC = () => {
   const { user } = useAuthStore();
 
   const [searchTerm, setSearchTerm] = useState("");
-
+  const navigate = useNavigate();
   const canAccess =
     user &&
     (user.role === "ADMIN" || user.role === "DEV" || user.role === "SELLER");
@@ -268,22 +269,39 @@ const AdminOrdersPage: React.FC = () => {
                   Itens:
                 </p>
                 <ul className="list-disc pl-4 space-y-2">
-                  {order.items?.map((item) => (
-                    <li key={item.id} className="text-xs">
-                      <div>
-                        <span className="font-bold">{item.quantity}x</span>{" "}
-                        {item.product?.name || "Produto Indisponível"}
-                      </div>
-                      {/* MOSTRANDO VARIAÇÃO NO MOBILE */}
-                      {item.variant && (
-                        <div className="text-[10px] text-gray-500 mt-0.5 ml-4">
-                          {item.variant.color !== "Cor Única" &&
-                            `Cor: ${item.variant.color} | `}{" "}
-                          Tam: {item.variant.size}
+                  {order.items?.map((item: any) => {
+                    // 👉 PUXA OS DADOS DE FORMA INTELIGENTE
+                    const varSize =
+                      item.variant?.attributes?.size || item.variant?.size;
+                    const varColor =
+                      item.variant?.attributes?.color || item.variant?.color;
+                    const varComplement =
+                      item.variant?.attributes?.complement ||
+                      item.variant?.complement;
+
+                    return (
+                      <li key={item.id} className="text-xs">
+                        <div>
+                          <span className="font-bold">{item.quantity}x</span>{" "}
+                          {item.product?.name || "Produto Indisponível"}
                         </div>
-                      )}
-                    </li>
-                  ))}
+                        {/* MOSTRANDO VARIAÇÃO */}
+                        {item.variant && (
+                          <div className="text-[10px] text-gray-500 mt-0.5 ml-4">
+                            {varColor && varColor !== "Cor Única" && (
+                              <span>Cor: {varColor} | </span>
+                            )}
+                            {varSize && varSize !== "Tamanho Único" && (
+                              <span>Tam: {varSize} </span>
+                            )}
+                            {varComplement && (
+                              <span>| Extra: {varComplement}</span>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
@@ -362,24 +380,41 @@ const AdminOrdersPage: React.FC = () => {
                 </td>
                 <td className="p-5">
                   <ul className="list-disc pl-4 space-y-2">
-                    {order.items?.map((item) => (
-                      <li key={item.id} className="text-sm text-gray-700">
-                        <div>
-                          <span className="font-bold text-gray-900">
-                            {item.quantity}x
-                          </span>{" "}
-                          {item.product?.name || "Produto Excluído"}
-                        </div>
-                        {/* MOSTRANDO VARIAÇÃO NO DESKTOP */}
-                        {item.variant && (
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            {item.variant.color !== "Cor Única" &&
-                              `Cor: ${item.variant.color} | `}{" "}
-                            Tam: {item.variant.size}
+                    {order.items?.map((item: any) => {
+                      // 👉 PUXA OS DADOS DE FORMA INTELIGENTE (attributes ou direto)
+                      const varSize =
+                        item.variant?.attributes?.size || item.variant?.size;
+                      const varColor =
+                        item.variant?.attributes?.color || item.variant?.color;
+                      const varComplement =
+                        item.variant?.attributes?.complement ||
+                        item.variant?.complement;
+
+                      return (
+                        <li key={item.id} className="text-sm text-gray-700">
+                          <div>
+                            <span className="font-bold text-gray-900">
+                              {item.quantity}x
+                            </span>{" "}
+                            {item.product?.name || "Produto Excluído"}
                           </div>
-                        )}
-                      </li>
-                    ))}
+                          {/* MOSTRANDO VARIAÇÃO NO DESKTOP */}
+                          {item.variant && (
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {varColor && varColor !== "Cor Única" && (
+                                <span>Cor: {varColor} | </span>
+                              )}
+                              {varSize && varSize !== "Tamanho Único" && (
+                                <span>Tam: {varSize} </span>
+                              )}
+                              {varComplement && (
+                                <span>| Extra: {varComplement}</span>
+                              )}
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </td>
                 <td className="p-5 font-bold text-[#313b2f] text-base">
@@ -434,6 +469,15 @@ const AdminOrdersPage: React.FC = () => {
                       <FaTrashAlt />
                     </button>
                   </div>
+                </td>
+                <td className="p-4 text-center">
+                  <button
+                    onClick={() => navigate(`/admin/orders/${order.id}`)}
+                    className="bg-gray-100 hover:bg-[#ffd639] text-gray-600 hover:text-[#313b2f] p-2 rounded-lg transition-colors shadow-sm inline-flex items-center gap-2 font-bold text-xs"
+                    title="Ver Detalhes Completos"
+                  >
+                    <FaEye size={14} /> Detalhes
+                  </button>
                 </td>
               </tr>
             ))}

@@ -10,104 +10,54 @@ import {
   FaImage,
   FaBoxOpen,
   FaTag,
-  FaDollarSign,
   FaLayerGroup,
   FaSpinner,
   FaPalette,
   FaRuler,
-  FaBarcode,
   FaPlusCircle,
-  FaMagic,
-  FaCheckDouble,
+  FaTimes,
+  FaPuzzlePiece,
+  FaShapes,
+  FaBolt,
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
-import FullScreenLoader from "../../components/FullScreenLoader";
+
+// =========================================================
+// 🎨 PALETAS E MODELOS ESTÁTICOS
+// =========================================================
+const MODELOS_PROTETORES = [
+  "Nuvem - Lado Direito",
+  "Nuvem - Lado Esquerdo",
+  "Montanha - Lado Direito",
+  "Montanha - Lado Esquerdo",
+  "Onda - Lado Direito",
+  "Onda - Lado Esquerdo",
+  "Pico - Lado Direito",
+  "Pico - Lado Esquerdo",
+  "Encaixe - Lado Direito",
+  "Encaixe - Lado Esquerdo",
+  "Cerca - Lado Direito",
+  "Cerca - Lado Esquerdo",
+];
+
+const PROTETOR_MONTANHA_COLORS = [
+  { id: "cz6-cz26-B8", Cor1: "CZ6", Cor2: "CZ26", Cor3: "B8" },
+  { id: "cz6-vd25-B8", Cor1: "CZ6", Cor2: "VD25", Cor3: "B8" },
+];
 
 const CAMA_COLORS = [
-  {
-    id: "cz6-cz26",
-    Externo: "CZ6",
-    Interno: "CZ26",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#cbcbcb",
-  },
-  {
-    id: "cz6-vd25",
-    Externo: "CZ6",
-    Interno: "VD25",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#bfc6c9",
-  },
-  {
-    id: "cz6-r12",
-    Externo: "CZ6",
-    Interno: "R12",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#e0c7d2",
-  },
-  {
-    id: "cz6-az10",
-    Externo: "CZ6",
-    Interno: "AZ10",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#9ebdd0",
-  },
-  {
-    id: "cz6-l11",
-    Externo: "CZ6",
-    Interno: "L11",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#d4c7d9",
-  },
-  {
-    id: "cz6-am14",
-    Externo: "CZ6",
-    Interno: "AM14",
-    hexExterno: "#b4b7ba",
-    hexInterno: "#f4e0ad",
-  },
-  {
-    id: "b6-b8",
-    Externo: "B6",
-    Interno: "B8",
-    hexExterno: "#c4bcad",
-    hexInterno: "#dad6cb",
-  },
-  {
-    id: "b6-vd25",
-    Externo: "B6",
-    Interno: "VD25",
-    hexExterno: "#c4bcad",
-    hexInterno: "#bfcab4",
-  },
-  {
-    id: "b6-r12",
-    Externo: "B6",
-    Interno: "R12",
-    hexExterno: "#c4bcad",
-    hexInterno: "#e0c7d2",
-  },
-  {
-    id: "b6-az10",
-    Externo: "B6",
-    Interno: "AZ10",
-    hexExterno: "#c4bcad",
-    hexInterno: "#9ebdd0",
-  },
-  {
-    id: "b6-l11",
-    Externo: "B6",
-    Interno: "L11",
-    hexExterno: "#c4bcad",
-    hexInterno: "#d4c7d9",
-  },
-  {
-    id: "b6-am14",
-    Externo: "B6",
-    Interno: "AM14",
-    hexExterno: "#c4bcad",
-    hexInterno: "#f4e0ad",
-  },
+  { id: "cz6-cz26", Externo: "CZ6", Interno: "CZ26" },
+  { id: "cz6-vd25", Externo: "CZ6", Interno: "VD25" },
+  { id: "cz6-r12", Externo: "CZ6", Interno: "R12" },
+  { id: "cz6-az10", Externo: "CZ6", Interno: "AZ10" },
+  { id: "cz6-l11", Externo: "CZ6", Interno: "L11" },
+  { id: "cz6-am14", Externo: "CZ6", Interno: "AM14" },
+  { id: "b6-b8", Externo: "B6", Interno: "B8" },
+  { id: "b6-vd25", Externo: "B6", Interno: "VD25" },
+  { id: "b6-r12", Externo: "B6", Interno: "R12" },
+  { id: "b6-az10", Externo: "B6", Interno: "AZ10" },
+  { id: "b6-l11", Externo: "B6", Interno: "L11" },
+  { id: "b6-am14", Externo: "B6", Interno: "AM14" },
 ];
 
 const LENCOL_COLORS = [
@@ -135,16 +85,30 @@ const ITEM_SIZES = [
   "KING",
 ];
 
-interface VariantForm {
+// =========================================================
+// 🧩 TIPOS DO ESTADO
+// =========================================================
+interface VariantRowDef {
   id: string;
-  color: string;
   size: string;
   complement: string;
   price: string;
   stock: string;
   sku: string;
+}
+
+interface VariantGroup {
+  id: string;
+  model: string;
+  color: string;
   imageUrls: string[];
-  isFeatured: boolean;
+  rows: VariantRowDef[];
+  // Estados do Gerador em Massa
+  showGenerator: boolean;
+  genSizes: string[];
+  genComplements: string;
+  genPrice: string;
+  genStock: string;
 }
 
 const AdminCreateProductPage: React.FC = () => {
@@ -152,222 +116,333 @@ const AdminCreateProductPage: React.FC = () => {
   const { createProduct } = useProductStore();
   const { categories, fetchCategories } = useCategoryStore();
 
-  // Estados Base
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [mainImage, setMainImage] = useState("");
 
-  const [variants, setVariants] = useState<VariantForm[]>([]);
+  const [groups, setGroups] = useState<VariantGroup[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Estados do Gerador em Lote (Batch)
-  const [batchSize, setBatchSize] = useState("");
-  const [batchComplement, setBatchComplement] = useState("");
-  const [batchPrice, setBatchPrice] = useState("");
-  const [batchStock, setBatchStock] = useState("10"); // Default 10
-  const [batchColors, setBatchColors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
+  // =========================================================
+  // 🧠 LEITURA DINÂMICA DAS REGRAS DA CATEGORIA
+  // =========================================================
   const selectedCategoryObj = categories.find(
     (c) => c.id.toString() === categoryId,
   );
-  const categoryName = selectedCategoryObj
-    ? selectedCategoryObj.name.toLowerCase()
-    : "";
-
-  const isCama = categoryName.includes("cama");
-  const isLencol =
-    categoryName.includes("lençol") || categoryName.includes("lencol");
-  const isProtetor = categoryName.includes("protetor");
-  const isColorRequired = !isProtetor;
-
-  // --- LÓGICA DO GERADOR EM LOTE ---
-  const toggleBatchColor = (colorId: string) => {
-    setBatchColors((prev) =>
-      prev.includes(colorId)
-        ? prev.filter((c) => c !== colorId)
-        : [...prev, colorId],
-    );
-  };
-
-  const handleSelectAllColors = () => {
-    const allColors = isCama
-      ? CAMA_COLORS.map((c) => c.id)
-      : isLencol
-        ? LENCOL_COLORS
-        : [];
-    if (batchColors.length === allColors.length) {
-      setBatchColors([]); // Desmarca todas
-    } else {
-      setBatchColors(allColors); // Marca todas
+  let parsedConfig = (selectedCategoryObj as any)?.config;
+  if (typeof parsedConfig === "string") {
+    try {
+      parsedConfig = JSON.parse(parsedConfig);
+    } catch (e) {
+      parsedConfig = null;
     }
+  }
+
+  const config = parsedConfig || {
+    showSizes: true,
+    showColors: true,
+    colorPalette: "CAMA_COLORS",
+    showComplements: false,
+    showModels: false,
   };
 
-  const handleGenerateBatch = () => {
-    if (!batchSize || !batchPrice || !batchStock || batchColors.length === 0) {
-      toast.error(
-        "Preencha Tamanho, Preço, Estoque e selecione pelo menos 1 Cor!",
-      );
-      return;
-    }
+  const hasColors = config.showColors;
+  const hasSizes = config.showSizes;
+  const hasComplements = config.showComplements;
+  const hasModels = config.showModels;
+  const basePalette =
+    config.colorPalette === "LENCOL_COLORS" ? LENCOL_COLORS : CAMA_COLORS;
 
-    const newVariants: VariantForm[] = batchColors.map((color) => ({
-      id: Math.random().toString(),
-      color: color,
-      size: batchSize,
-      complement: batchComplement,
-      price: batchPrice,
-      stock: batchStock,
-      sku: "",
-      imageUrls: [""],
-      isFeatured: false,
-    }));
+  useEffect(() => {
+    setGroups([]);
+  }, [categoryId]);
 
-    // Remove a variação vazia se for a única, senão apenas adiciona no final
-    setVariants((prev) => {
-      if (
-        prev.length === 1 &&
-        !prev[0].color &&
-        !prev[0].size &&
-        !prev[0].price
-      ) {
-        return newVariants;
-      }
-      return [...prev, ...newVariants];
-    });
-
-    toast.success(`${newVariants.length} variações geradas com sucesso!`, {
-      icon: "🪄",
-    });
-    // Limpar as cores para a próxima geração (mantém tamanho e complemento para facilitar)
-    setBatchColors([]);
-  };
-  // ---------------------------------
-
-  const handleAddVariant = () => {
-    setVariants([
-      ...variants,
+  // =========================================================
+  // 🛠️ FUNÇÕES DE MANIPULAÇÃO
+  // =========================================================
+  const handleAddGroup = () => {
+    setGroups([
+      ...groups,
       {
         id: Math.random().toString(),
+        model: "",
         color: "",
-        size: "",
-        complement: "",
-        price: "",
-        stock: "",
-        sku: "",
         imageUrls: [""],
-        isFeatured: false,
+        rows: [
+          {
+            id: Math.random().toString(),
+            size: "",
+            complement: "",
+            price: "",
+            stock: "10",
+            sku: "",
+          },
+        ],
+        showGenerator: false,
+        genSizes: [],
+        genComplements: "",
+        genPrice: "",
+        genStock: "10",
       },
     ]);
   };
 
-  const handleRemoveVariant = (id: string) => {
-    setVariants(variants.filter((v) => v.id !== id));
-  };
+  const handleRemoveGroup = (groupId: string) =>
+    setGroups(groups.filter((g) => g.id !== groupId));
 
-  const handleVariantChange = (
-    id: string,
-    field: keyof VariantForm,
-    value: string,
-  ) => {
-    setVariants(
-      variants.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
+  const handleGroupModelChange = (groupId: string, model: string) => {
+    setGroups(
+      groups.map((g) => (g.id === groupId ? { ...g, model, color: "" } : g)),
     );
   };
 
-  const handleVariantImageChange = (
-    variantId: string,
-    imageIndex: number,
+  const handleGroupColorChange = (groupId: string, color: string) => {
+    setGroups(groups.map((g) => (g.id === groupId ? { ...g, color } : g)));
+  };
+
+  const handleAddImageToGroup = (groupId: string) =>
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId ? { ...g, imageUrls: [...g.imageUrls, ""] } : g,
+      ),
+    );
+  const handleImageChangeInGroup = (
+    groupId: string,
+    imgIndex: number,
     value: string,
   ) => {
-    setVariants(
-      variants.map((v) => {
-        if (v.id === variantId) {
-          const newUrls = [...v.imageUrls];
-          newUrls[imageIndex] = value;
-          return { ...v, imageUrls: newUrls };
+    setGroups(
+      groups.map((g) => {
+        if (g.id === groupId) {
+          const newUrls = [...g.imageUrls];
+          newUrls[imgIndex] = value;
+          return { ...g, imageUrls: newUrls };
         }
-        return v;
+        return g;
       }),
     );
   };
-
-  const handleAddVariantImage = (variantId: string) => {
-    setVariants(
-      variants.map((v) =>
-        v.id === variantId ? { ...v, imageUrls: [...v.imageUrls, ""] } : v,
+  const handleRemoveImageFromGroup = (groupId: string, imgIndex: number) => {
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              imageUrls: g.imageUrls.filter((_, idx) => idx !== imgIndex),
+            }
+          : g,
       ),
     );
   };
 
-  const handleRemoveVariantImage = (variantId: string, imageIndex: number) => {
-    setVariants(
-      variants.map((v) => {
-        if (v.id === variantId) {
+  const handleAddRowToGroup = (groupId: string) => {
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              rows: [
+                ...g.rows,
+                {
+                  id: Math.random().toString(),
+                  size: "",
+                  complement: "",
+                  price: "",
+                  stock: "10",
+                  sku: "",
+                },
+              ],
+            }
+          : g,
+      ),
+    );
+  };
+  const handleRemoveRowFromGroup = (groupId: string, rowId: string) => {
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId
+          ? { ...g, rows: g.rows.filter((r) => r.id !== rowId) }
+          : g,
+      ),
+    );
+  };
+  const handleRowChange = (
+    groupId: string,
+    rowId: string,
+    field: keyof VariantRowDef,
+    value: string,
+  ) => {
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              rows: g.rows.map((r) =>
+                r.id === rowId ? { ...r, [field]: value } : r,
+              ),
+            }
+          : g,
+      ),
+    );
+  };
+
+  // ⚡ FUNÇÕES DO GERADOR EM MASSA ⚡
+  const toggleGenerator = (groupId: string) => {
+    setGroups(
+      groups.map((g) =>
+        g.id === groupId ? { ...g, showGenerator: !g.showGenerator } : g,
+      ),
+    );
+  };
+
+  const handleGenSizeToggle = (groupId: string, size: string) => {
+    setGroups(
+      groups.map((g) => {
+        if (g.id === groupId) {
+          const hasSize = g.genSizes.includes(size);
           return {
-            ...v,
-            imageUrls: v.imageUrls.filter((_, idx) => idx !== imageIndex),
+            ...g,
+            genSizes: hasSize
+              ? g.genSizes.filter((s) => s !== size)
+              : [...g.genSizes, size],
           };
         }
-        return v;
+        return g;
       }),
     );
   };
 
+  const handleGenerateBulk = (groupId: string) => {
+    setGroups(
+      groups.map((g) => {
+        if (g.id === groupId) {
+          const sizesToUse =
+            hasSizes && g.genSizes.length > 0 ? g.genSizes : [""];
+          const compsToUse =
+            hasComplements && g.genComplements
+              ? g.genComplements
+                  .split(",")
+                  .map((c) => c.trim())
+                  .filter((c) => c !== "")
+              : [""];
+
+          const newRows: VariantRowDef[] = [];
+
+          sizesToUse.forEach((size) => {
+            compsToUse.forEach((comp) => {
+              newRows.push({
+                id: Math.random().toString(),
+                size: size,
+                complement: comp,
+                price: g.genPrice,
+                stock: g.genStock || "10",
+                sku: "",
+              });
+            });
+          });
+
+          if (newRows.length === 0) {
+            toast.error("Selecione pelo menos um tamanho/opcional.");
+            return g;
+          }
+
+          toast.success(`${newRows.length} combinações geradas!`);
+          return {
+            ...g,
+            // Se a primeira linha estiver vazia, substitui. Se não, adiciona na lista.
+            rows:
+              g.rows.length === 1 &&
+              !g.rows[0].price &&
+              !g.rows[0].size &&
+              !g.rows[0].complement
+                ? newRows
+                : [...g.rows, ...newRows],
+            showGenerator: false,
+            genSizes: [],
+            genComplements: "",
+            genPrice: "",
+          };
+        }
+        return g;
+      }),
+    );
+  };
+
+  // =========================================================
+  // 📤 ENVIO PARA O BANCO DE DADOS
+  // =========================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     if (!categoryId) {
-      toast.error("Por favor, selecione uma categoria.");
+      toast.error("Selecione uma categoria.");
+      setIsSaving(false);
+      return;
+    }
+    if (groups.length === 0) {
+      toast.error("Adicione pelo menos um bloco.");
+      setIsSaving(false);
       return;
     }
 
-    if (variants.length === 0) {
-      toast.error("Gere ou adicione pelo menos uma variação.");
+    let hasError = false;
+    groups.forEach((g) => {
+      if (hasModels && !g.model) hasError = true;
+      if (hasColors && !g.color) hasError = true;
+      if (g.rows.length === 0) hasError = true;
+      g.rows.forEach((r) => {
+        if (hasSizes && !r.size) hasError = true;
+        if (!r.price || !r.stock) hasError = true;
+      });
+    });
+
+    if (hasError) {
+      toast.error("Preencha todos os campos obrigatórios nos blocos.");
+      setIsSaving(false);
       return;
     }
 
-    const invalidVariant = variants.find(
-      (v) => (isColorRequired && !v.color) || !v.size || !v.price || !v.stock,
-    );
+    const flatVariants: any[] = [];
 
-    if (invalidVariant) {
-      toast.error(
-        "Preencha todos os campos obrigatórios das variações geradas.",
-      );
-      return;
-    }
+    groups.forEach((group) => {
+      const validImages = group.imageUrls
+        .filter((url) => url.trim() !== "")
+        .map((url) => ({ url }));
 
-    const basePrice = Math.min(...variants.map((v) => parseCurrency(v.price)));
-    const totalStock = variants.reduce(
-      (sum, v) => sum + (parseInt(v.stock) || 0),
-      0,
-    );
+      group.rows.forEach((row) => {
+        let finalComplement = row.complement;
+        if (hasModels) {
+          finalComplement =
+            row.complement.trim() !== ""
+              ? `${group.model} | ${row.complement}`
+              : group.model;
+        }
+
+        flatVariants.push({
+          color: hasColors ? group.color : "Cor Única",
+          size: hasSizes ? row.size : "Tamanho Único",
+          complement: finalComplement || undefined,
+          price: parseCurrency(row.price),
+          stock: parseInt(row.stock) || 0,
+          sku: row.sku || undefined,
+          isFeatured: false,
+          images: validImages,
+        });
+      });
+    });
 
     const productData = {
       name,
       description,
       categoryId: parseInt(categoryId),
       mainImage,
-      price: basePrice,
-      stock: totalStock,
-      variants: variants.map((v) => ({
-        color: isColorRequired ? v.color : "Cor Única",
-        size: v.size,
-        complement: v.complement.trim() !== "" ? v.complement : undefined,
-        price: parseCurrency(v.price),
-        stock: parseInt(v.stock),
-        sku: v.sku || undefined,
-        isFeatured: v.isFeatured,
-        images: v.imageUrls
-          .filter((url) => url.trim() !== "")
-          .map((url) => ({ url })),
-      })),
+      variants: flatVariants,
     };
 
     try {
@@ -375,60 +450,36 @@ const AdminCreateProductPage: React.FC = () => {
       toast.success("Produto criado com sucesso!");
       setTimeout(() => navigate("/admin/products"), 1500);
     } catch (error: any) {
-      console.error(error);
-      const errorMessage = error.response?.data?.message;
-      const msg = Array.isArray(errorMessage)
-        ? errorMessage[0]
-        : errorMessage || "Erro ao criar produto.";
-      toast.error(`Erro: ${msg}`);
+      toast.error(`Erro: ${error.message}`);
+      setIsSaving(false);
     }
   };
 
-  // 1. Transforma o que o utilizador digita na máscara visual (ex: 1.200,50)
   const formatCurrencyInput = (value: string) => {
-    const onlyNumbers = value.replace(/\D/g, ""); // Remove tudo o que não for número
+    const onlyNumbers = value.replace(/\D/g, "");
     if (!onlyNumbers) return "";
     return (Number(onlyNumbers) / 100).toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
   };
-
-  // 2. Transforma a máscara visual de volta num número para o Backend (ex: 1200.50)
   const parseCurrency = (value: string) => {
     if (!value) return 0;
-    // Remove os pontos de milhar e troca a vírgula por ponto
-    const cleanString = value.replace(/\./g, "").replace(",", ".");
-    return parseFloat(cleanString) || 0;
+    return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
+
   return (
     <div className="w-full max-w-5xl mx-auto p-4 md:p-8 pt-24 pb-20">
       <Toaster />
-      <FullScreenLoader
-        isLoading={isSaving}
-        title="A criar magia! ✨"
-        message={
-          <>
-            Estamos a gerar as suas dezenas de variações no banco de dados.
-            <br />
-            <span className="font-bold text-[#ffd639]">
-              Não feche a página.
-            </span>
-          </>
-        }
-      />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[#313b2f] flex items-center gap-3">
             <FaBoxOpen className="text-[#ffd639]" /> Novo Produto
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Adicione um novo item e gere centenas de variações em segundos.
-          </p>
         </div>
         <button
           onClick={() => navigate("/admin/products")}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-bold shadow-sm"
         >
           <FaArrowLeft /> Voltar
         </button>
@@ -455,14 +506,14 @@ const AdminCreateProductPage: React.FC = () => {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-1">
-                Descrição Detalhada
+                Descrição
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none resize-y"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
               />
             </div>
             <div className="md:col-span-2">
@@ -473,7 +524,6 @@ const AdminCreateProductPage: React.FC = () => {
                 type="text"
                 value={mainImage}
                 onChange={(e) => setMainImage(e.target.value)}
-                placeholder="https://..."
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
               />
             </div>
@@ -485,9 +535,9 @@ const AdminCreateProductPage: React.FC = () => {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none bg-white"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none bg-yellow-50 font-bold"
               >
-                <option value="">Selecione uma categoria...</option>
+                <option value="">Selecione para liberar as regras...</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -498,388 +548,390 @@ const AdminCreateProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* GERADOR MÁGICO DE VARIAÇÕES (SÓ APARECE DEPOIS DE ESCOLHER CATEGORIA) */}
-        {categoryId && isColorRequired && (
-          <div className="bg-[#313b2f] p-6 rounded-2xl shadow-md border border-[#ffd639]/30 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <FaMagic size={100} className="text-white" />
-            </div>
-
-            <h2 className="text-xl font-bold text-[#ffd639] mb-1 flex items-center gap-2 relative z-10">
-              <FaMagic /> Gerador Rápido de Variações
+        {/* BLOCOS DINÂMICOS */}
+        {categoryId && (
+          <div className="space-y-6 animate-in fade-in">
+            <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2 pb-2 border-b border-gray-200">
+              <FaLayerGroup className="text-[#ffd639]" /> Variações do Produto
             </h2>
-            <p className="text-gray-300 text-sm mb-6 relative z-10">
-              Crie dezenas de combinações automaticamente com o mesmo preço e
-              tamanho.
-            </p>
 
-            <div className="bg-white p-5 rounded-xl space-y-5 relative z-10">
-              {/* Passo 1: Definições Base */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                    <FaRuler className="text-gray-400" /> Tamanho Fixo
-                  </label>
-                  <select
-                    value={batchSize}
-                    onChange={(e) => setBatchSize(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
-                  >
-                    <option value="">Selecione...</option>
-                    {ITEM_SIZES.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {groups.map((group) => {
+              const isMontanha = group.model.toLowerCase().includes("montanha");
+              const activePalette = isMontanha
+                ? PROTETOR_MONTANHA_COLORS
+                : basePalette;
 
-                <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                    <FaPlusCircle className="text-gray-400" /> Opção Extra{" "}
-                    <span className="text-gray-400 font-normal">
-                      (ex: Com Colchão)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={batchComplement}
-                    onChange={(e) => setBatchComplement(e.target.value)}
-                    placeholder="Deixe em branco se não houver"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                    <FaDollarSign className="text-gray-400" /> Preço (R$)
-                  </label>
-                  <input
-                    type="text" // ERA number, AGORA É text!
-                    value={batchPrice}
-                    onChange={(e) =>
-                      setBatchPrice(formatCurrencyInput(e.target.value))
-                    }
-                    placeholder="0,00"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                    <FaLayerGroup className="text-gray-400" /> Estoque Inicial
-                  </label>
-                  <input
-                    type="number"
-                    value={batchStock}
-                    onChange={(e) => setBatchStock(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-[#ffd639] outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Passo 2: Seleção de Cores */}
-              <div className="pt-4 border-t border-gray-100">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                    <FaPalette className="text-gray-400" /> Quais cores terão
-                    esse preço e tamanho?
-                  </label>
+              return (
+                <div
+                  key={group.id}
+                  className="bg-white border-2 border-[#313b2f]/10 rounded-2xl shadow-sm overflow-hidden relative"
+                >
                   <button
                     type="button"
-                    onClick={handleSelectAllColors}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full font-bold text-gray-600 flex items-center gap-1 transition-colors"
+                    onClick={() => handleRemoveGroup(group.id)}
+                    className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-2 rounded-lg"
+                    title="Remover Bloco"
                   >
-                    <FaCheckDouble /> Selecionar Todas
+                    <FaTrash />
                   </button>
-                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {isCama &&
-                    CAMA_COLORS.map((color) => (
-                      <label
-                        key={color.id}
-                        className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer transition-all text-xs font-medium ${batchColors.includes(color.id) ? "border-[#313b2f] bg-[#313b2f]/5 text-[#313b2f]" : "border-gray-200 text-gray-500 hover:border-gray-300"}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={batchColors.includes(color.id)}
-                          onChange={() => toggleBatchColor(color.id)}
-                          className="w-4 h-4 text-[#313b2f] rounded focus:ring-[#313b2f]"
-                        />
-                        {color.id.toUpperCase()}
-                      </label>
-                    ))}
-                  {isLencol &&
-                    LENCOL_COLORS.map((color) => (
-                      <label
-                        key={color}
-                        className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer transition-all text-xs font-medium ${batchColors.includes(color) ? "border-[#313b2f] bg-[#313b2f]/5 text-[#313b2f]" : "border-gray-200 text-gray-500 hover:border-gray-300"}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={batchColors.includes(color)}
-                          onChange={() => toggleBatchColor(color)}
-                          className="w-4 h-4 text-[#313b2f] rounded focus:ring-[#313b2f]"
-                        />
-                        {color}
-                      </label>
-                    ))}
-                </div>
-              </div>
-
-              {/* Botão de Gerar */}
-              <button
-                type="button"
-                onClick={handleGenerateBatch}
-                className="w-full py-3 bg-[#ffd639] text-[#313b2f] font-bold rounded-xl hover:bg-[#e6c135] shadow-sm transition-all flex items-center justify-center gap-2"
-              >
-                <FaMagic /> Gerar{" "}
-                {batchColors.length > 0 ? batchColors.length : ""} Variações
-                Agora
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* LISTA DE VARIAÇÕES INDIVIDUAIS */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-50">
-            <h2 className="text-lg font-bold text-[#313b2f] flex items-center gap-2">
-              <FaLayerGroup className="text-gray-400" /> Lista de Variações
-            </h2>
-            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-500">
-              {variants.length} geradas
-            </span>
-          </div>
-
-          <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-            {variants.length === 0 && (
-              <div className="text-center py-10 text-gray-400">
-                <FaBoxOpen className="text-4xl mx-auto mb-2 opacity-30" />
-                <p>
-                  Nenhuma variação criada. Use o gerador mágico acima ou
-                  adicione manualmente.
-                </p>
-              </div>
-            )}
-
-            {variants.map((variant, index) => (
-              <div
-                key={variant.id}
-                className="p-5 border-2 border-gray-100 rounded-xl bg-gray-50 relative group"
-              >
-                <button
-                  type="button"
-                  onClick={() => handleRemoveVariant(variant.id)}
-                  className="absolute -top-3 -right-3 bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
-                  title="Remover Variação"
-                >
-                  <FaTrash size={12} />
-                </button>
-
-                <h3 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider">
-                  Variação #{index + 1}
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-                  {!isProtetor && (
-                    <div>
-                      <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                        <FaPalette className="text-gray-400" /> Cor
-                      </label>
-                      <select
-                        value={variant.color}
-                        onChange={(e) =>
-                          handleVariantChange(
-                            variant.id,
-                            "color",
-                            e.target.value,
-                          )
-                        }
-                        required={isColorRequired}
-                        disabled={!categoryId}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
-                      >
-                        <option value="">
-                          {categoryId
-                            ? "Selecione..."
-                            : "Escolha a categoria antes"}
-                        </option>
-                        {isCama &&
-                          CAMA_COLORS.map((color) => (
-                            <option key={color.id} value={color.id}>
-                              Ext: {color.Externo} / Int: {color.Interno}
+                  <div className="bg-gray-50 p-4 border-b border-gray-100 flex flex-col md:flex-row gap-6">
+                    {hasModels && (
+                      <div className="flex-1">
+                        <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                          <FaShapes className="text-[#ffd639]" /> Modelo
+                        </label>
+                        <select
+                          value={group.model}
+                          onChange={(e) =>
+                            handleGroupModelChange(group.id, e.target.value)
+                          }
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
+                        >
+                          <option value="">Selecione o modelo...</option>
+                          {MODELOS_PROTETORES.map((m) => (
+                            <option key={m} value={m}>
+                              {m}
                             </option>
                           ))}
-                        {isLencol &&
-                          LENCOL_COLORS.map((color) => (
-                            <option key={color} value={color}>
-                              {color}
-                            </option>
-                          ))}
-                        {!isCama && !isLencol && !isProtetor && categoryId && (
-                          <option value="Unica">Cor Única</option>
-                        )}
-                      </select>
+                        </select>
+                      </div>
+                    )}
+                    {hasColors && (
+                      <div className="flex-1">
+                        <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                          <FaPalette className="text-[#ffd639]" /> Cor
+                        </label>
+                        <select
+                          value={group.color}
+                          onChange={(e) =>
+                            handleGroupColorChange(group.id, e.target.value)
+                          }
+                          required
+                          disabled={hasModels && !group.model}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
+                        >
+                          <option value="">
+                            {hasModels && !group.model
+                              ? "Escolha o modelo 1º"
+                              : "Selecione a cor..."}
+                          </option>
+                          {activePalette.map((c: any) => {
+                            if (typeof c === "string")
+                              return (
+                                <option key={c} value={c}>
+                                  {c}
+                                </option>
+                              );
+                            if (c.Cor3)
+                              return (
+                                <option key={c.id} value={c.id}>
+                                  Ext: {c.Cor1} / Int: {c.Cor2} / Det: {c.Cor3}
+                                </option>
+                              );
+                            return (
+                              <option key={c.id} value={c.id}>
+                                Ext: {c.Externo} / Int: {c.Interno}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                        <FaImage className="text-[#ffd639]" /> Fotos
+                        Compartilhadas
+                      </label>
+                      <div className="space-y-2">
+                        {group.imageUrls.map((url, imgIdx) => (
+                          <div key={imgIdx} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={url}
+                              onChange={(e) =>
+                                handleImageChangeInGroup(
+                                  group.id,
+                                  imgIdx,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="URL da Imagem"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                            />
+                            {group.imageUrls.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveImageFromGroup(group.id, imgIdx)
+                                }
+                                className="p-2 bg-red-100 text-red-600 rounded-lg"
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => handleAddImageToGroup(group.id)}
+                          className="text-xs text-blue-600 font-bold hover:underline"
+                        >
+                          + Adicionar foto
+                        </button>
+                      </div>
                     </div>
-                  )}
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaRuler className="text-gray-400" /> Tamanho
-                    </label>
-                    <select
-                      value={variant.size}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "size", e.target.value)
-                      }
-                      required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    >
-                      <option value="">Selecione...</option>
-                      {ITEM_SIZES.map((size) => (
-                        <option key={size} value={size}>
-                          {size}
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaPlusCircle className="text-gray-400" /> Opção Extra
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.complement}
-                      onChange={(e) =>
-                        handleVariantChange(
-                          variant.id,
-                          "complement",
-                          e.target.value,
-                        )
-                      }
-                      placeholder="Ex: Com Colchão"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
+                  {/* DADOS DA VARIAÇÃO */}
+                  <div className="p-4 bg-white">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 border-b border-gray-100 pb-3">
+                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                        <FaRuler className="text-gray-400" /> Detalhes (Preço,
+                        Estoque)
+                      </label>
+                      {(hasSizes || hasComplements) && (
+                        <button
+                          type="button"
+                          onClick={() => toggleGenerator(group.id)}
+                          className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-purple-200 transition-colors"
+                        >
+                          <FaBolt /> Gerador Múltiplo
+                        </button>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaDollarSign className="text-gray-400" /> Preço (R$)
-                    </label>
-                    <input
-                      type="text" // ERA number, AGORA É text!
-                      value={variant.price}
-                      onChange={(e) =>
-                        handleVariantChange(
-                          variant.id,
-                          "price",
-                          formatCurrencyInput(e.target.value),
-                        )
-                      }
-                      required
-                      placeholder="0,00"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
+                    {/* ⚡ PAINEL DO GERADOR EM MASSA ⚡ */}
+                    {group.showGenerator && (
+                      <div className="mb-4 bg-purple-50 border border-purple-100 p-4 rounded-xl animate-in fade-in slide-in-from-top-2">
+                        <h4 className="font-bold text-purple-800 text-sm mb-3 flex items-center gap-2">
+                          <FaBolt /> Gerar Múltiplas Linhas Automaticamente
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          {hasSizes && (
+                            <div>
+                              <label className="block text-xs font-bold text-purple-600 uppercase mb-2">
+                                Marque os Tamanhos:
+                              </label>
+                              <div className="flex flex-wrap gap-2">
+                                {ITEM_SIZES.slice(1).map((s) => (
+                                  <label
+                                    key={s}
+                                    className="flex items-center gap-1 bg-white px-2 py-1 border border-purple-200 rounded text-xs cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={group.genSizes.includes(s)}
+                                      onChange={() =>
+                                        handleGenSizeToggle(group.id, s)
+                                      }
+                                      className="text-purple-600 focus:ring-purple-500 rounded-sm"
+                                    />{" "}
+                                    {s}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {hasComplements && (
+                            <div>
+                              <label className="block text-xs font-bold text-purple-600 uppercase mb-2">
+                                Opções Extras (Separe por vírgula):
+                              </label>
+                              <input
+                                type="text"
+                                value={group.genComplements}
+                                onChange={(e) =>
+                                  setGroups(
+                                    groups.map((g) =>
+                                      g.id === group.id
+                                        ? {
+                                            ...g,
+                                            genComplements: e.target.value,
+                                          }
+                                        : g,
+                                    ),
+                                  )
+                                }
+                                placeholder="Ex: Com Sensor, Sem Sensor, Sem Kit"
+                                className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-400"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-4 items-end">
+                          <div className="flex-1">
+                            <label className="block text-xs font-bold text-purple-600 uppercase mb-1">
+                              Preço Base (R$):
+                            </label>
+                            <input
+                              type="text"
+                              value={group.genPrice}
+                              onChange={(e) =>
+                                setGroups(
+                                  groups.map((g) =>
+                                    g.id === group.id
+                                      ? {
+                                          ...g,
+                                          genPrice: formatCurrencyInput(
+                                            e.target.value,
+                                          ),
+                                        }
+                                      : g,
+                                  ),
+                                )
+                              }
+                              placeholder="0,00"
+                              className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm bg-white"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateBulk(group.id)}
+                            className="bg-purple-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
+                          >
+                            Gerar Agora!
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaLayerGroup className="text-gray-400" /> Estoque
-                    </label>
-                    <input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "stock", e.target.value)
-                      }
-                      required
-                      placeholder="Qtd"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2 md:col-span-2">
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaBarcode className="text-gray-400" /> SKU{" "}
-                      <span className="text-gray-400 font-normal">
-                        (Opcional)
-                      </span>
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.sku}
-                      onChange={(e) =>
-                        handleVariantChange(variant.id, "sku", e.target.value)
-                      }
-                      placeholder="Ex: CAMA-SOLT"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                    />
-                  </div>
-
-                  {/* MULTIPLAS IMAGENS DA VARIAÇÃO */}
-                  <div className="sm:col-span-2 md:col-span-3">
-                    <label className="text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-                      <FaImage className="text-gray-400" /> Imagens Específicas
-                    </label>
-                    <div className="space-y-2">
-                      {variant.imageUrls.map((url, imgIdx) => (
-                        <div key={imgIdx} className="flex gap-2">
+                    <div className="space-y-3">
+                      {group.rows.map((row) => (
+                        <div
+                          key={row.id}
+                          className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
+                        >
+                          {hasSizes && (
+                            <select
+                              value={row.size}
+                              onChange={(e) =>
+                                handleRowChange(
+                                  group.id,
+                                  row.id,
+                                  "size",
+                                  e.target.value,
+                                )
+                              }
+                              required
+                              className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+                            >
+                              <option value="">Tamanho...</option>
+                              {ITEM_SIZES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          {hasComplements && (
+                            <div className="flex items-center w-full md:w-40 relative">
+                              <span className="absolute left-3 text-gray-400">
+                                <FaPuzzlePiece size={12} />
+                              </span>
+                              <input
+                                type="text"
+                                value={row.complement}
+                                onChange={(e) =>
+                                  handleRowChange(
+                                    group.id,
+                                    row.id,
+                                    "complement",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Opção Extra"
+                                className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm"
+                              />
+                            </div>
+                          )}
                           <input
                             type="text"
-                            value={url}
+                            value={row.price}
                             onChange={(e) =>
-                              handleVariantImageChange(
-                                variant.id,
-                                imgIdx,
+                              handleRowChange(
+                                group.id,
+                                row.id,
+                                "price",
+                                formatCurrencyInput(e.target.value),
+                              )
+                            }
+                            required
+                            placeholder="Preço R$"
+                            className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-yellow-50/50"
+                          />
+                          <input
+                            type="number"
+                            value={row.stock}
+                            onChange={(e) =>
+                              handleRowChange(
+                                group.id,
+                                row.id,
+                                "stock",
                                 e.target.value,
                               )
                             }
-                            placeholder="https://..."
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
+                            required
+                            placeholder="Estoque"
+                            className="w-full md:w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm"
                           />
-                          {variant.imageUrls.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveVariantImage(variant.id, imgIdx)
-                              }
-                              className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          )}
+                          <input
+                            type="text"
+                            value={row.sku}
+                            onChange={(e) =>
+                              handleRowChange(
+                                group.id,
+                                row.id,
+                                "sku",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="SKU (OpcIONAL)"
+                            className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveRowFromGroup(group.id, row.id)
+                            }
+                            disabled={group.rows.length === 1}
+                            className="w-full md:w-auto p-2 text-red-400 disabled:opacity-30 flex justify-center"
+                          >
+                            <FaTimes />
+                          </button>
                         </div>
                       ))}
+                    </div>
+                    {(hasSizes || hasComplements) && (
                       <button
                         type="button"
-                        onClick={() => handleAddVariantImage(variant.id)}
-                        className="text-xs text-[#007bff] font-bold hover:underline mt-1"
+                        onClick={() => handleAddRowToGroup(group.id)}
+                        className="mt-3 text-sm font-bold text-[#313b2f] bg-[#ffd639]/20 px-4 py-2 rounded-lg flex items-center gap-2"
                       >
-                        + Adicionar outra foto
+                        <FaPlusCircle /> Linha manual
                       </button>
-                    </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <button
               type="button"
-              onClick={handleAddVariant}
-              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-400 hover:text-[#313b2f] transition-all"
+              onClick={handleAddGroup}
+              className="w-full py-5 border-2 border-dashed border-[#313b2f]/30 bg-[#313b2f]/5 rounded-xl font-bold flex items-center justify-center gap-2 text-[#313b2f]"
             >
-              <FaPlus /> Adicionar Variação Manualmente
+              <FaPlus /> Adicionar Novo Bloco de Variação
             </button>
           </div>
-        </div>
+        )}
 
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full py-4 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full py-4 mt-8 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] shadow-lg flex items-center justify-center gap-3 text-lg disabled:opacity-70"
         >
           {isSaving ? (
             <>

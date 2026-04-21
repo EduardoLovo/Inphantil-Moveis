@@ -19,7 +19,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; // ⬅️ Importe s
 import { ContactModule } from './contact/contact.module';
 import { EnvironmentModule } from './environment/environment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { AnalyticsModule } from './analytics/analytics.module';
 import { UsersModule } from './users/users.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { ShippingQuoteModule } from './shipping-quote/shipping-quote.module';
@@ -71,7 +70,6 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // <-- 1. I
         LogCleanupModule,
         ContactModule,
         EnvironmentModule,
-        AnalyticsModule,
         UsersModule,
         ProxyModule,
         ShippingQuoteModule,

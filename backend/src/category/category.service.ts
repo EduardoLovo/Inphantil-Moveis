@@ -2,6 +2,7 @@ import {
     Injectable,
     ConflictException,
     NotFoundException,
+    BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -45,6 +46,10 @@ export class CategoryService {
             data: {
                 name: createCategoryDto.name,
                 slug: createCategoryDto.slug,
+                // ⚡ A PEÇA QUE FALTAVA: Salvando o JSON de regras!
+                config: createCategoryDto.config
+                    ? createCategoryDto.config
+                    : null,
             },
         });
     }
@@ -85,6 +90,8 @@ export class CategoryService {
             updateCategoryDto.slug = this.generateSlug(updateCategoryDto.name);
         }
 
+        // Como o update recebe o DTO inteiro, se o 'config' estiver no UpdateCategoryDto,
+        // ele já vai ser salvo automaticamente aqui.
         return this.prisma.category.update({
             where: { id },
             data: updateCategoryDto,
@@ -95,8 +102,13 @@ export class CategoryService {
         await this.findOne(id); // Verifica existência
 
         // Opcional: Bloquear deleção se houver produtos vinculados
-        // const productsCount = await this.prisma.product.count({ where: { categoryId: id } });
-        // if (productsCount > 0) throw new BadRequestException('Categoria possui produtos vinculados.');
+        const productsCount = await this.prisma.product.count({
+            where: { categoryId: id },
+        });
+        if (productsCount > 0)
+            throw new BadRequestException(
+                'Categoria possui produtos vinculados.',
+            );
 
         return this.prisma.category.delete({
             where: { id },

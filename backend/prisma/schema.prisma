@@ -15,134 +15,135 @@ enum Role {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  fone      String?
-  password  String?
-  googleId  String?  @unique 
-  avatar    String?  
-  role      Role     @default(USER)
-  cpf       String?  @unique @db.VarChar(14)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int       @id @default(autoincrement())
+  name               String
+  email              String    @unique
+  fone               String?
+  password           String?
+  googleId           String?   @unique 
+  avatar             String?  
+  role               Role      @default(USER)
+  cpf                String?   @unique @db.VarChar(14)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   resetPasswordToken   String?   @unique
   resetPasswordExpires DateTime?
 
-  addresses       Address[]
-  orders          Order[]
-  authLogs        AuthLog[]
-  contactMessages ContactMessage[] 
-  shippingQuotes  ShippingQuote[]
+  addresses          Address[]
+  orders             Order[]
+  authLogs           AuthLog[]
+  contactMessages    ContactMessage[] 
+  shippingQuotes     ShippingQuote[]
 }
 
 model Address {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  recipientName String  @db.VarChar(150)
-  zipCode       String  @db.VarChar(20)
-  street        String  @db.VarChar(200)
-  number        String  @db.VarChar(20)
-  complement    String? @db.VarChar(100)
-  neighborhood  String  @db.VarChar(100)
-  city          String  @db.VarChar(100)
-  state         String  @db.VarChar(2)
+  recipientName String   @db.VarChar(150)
+  zipCode       String   @db.VarChar(20)
+  street        String   @db.VarChar(200)
+  number        String   @db.VarChar(20)
+  complement    String?  @db.VarChar(100)
+  neighborhood  String   @db.VarChar(100)
+  city          String   @db.VarChar(100)
+  state         String   @db.VarChar(2)
 
-  isDefault Boolean @default(false)
+  isDefault    Boolean  @default(false)
 
-  userId Int
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders Order[]
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders       Order[]
 }
 
 model AuthLog {
-  id        Int      @id @default(autoincrement())
-  email     String 
-  success   Boolean 
-  message   String 
-  ipAddress String? 
-  userAgent String? 
-  createdAt DateTime @default(now())
-  userId    Int?
-  user      User?    @relation(fields: [userId], references: [id])
+  id         Int       @id @default(autoincrement())
+  email      String 
+  success    Boolean 
+  message    String 
+  ipAddress  String? 
+  userAgent  String? 
+  createdAt  DateTime  @default(now())
+  userId     Int?
+  user       User?     @relation(fields: [userId], references: [id])
 }
 
+// =========================================================
+// 🚀 INÍCIO DAS ALTERAÇÕES: MOTOR DINÂMICO DE PRODUTOS
+// =========================================================
+
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique @db.VarChar(100)
-  slug String @unique @db.VarChar(100)
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(100)
+  slug     String    @unique @db.VarChar(100)
+  
+  // 👉 NOVO: O "Cérebro" da Categoria. Aqui o Admin guarda as regras (quais listas usar)
+  // Ex: { "hasColor": true, "hasSize": true, "palette": "CAMA_COLORS", "extras": ["Com Colchão"] }
+  config   Json?     
 
   products Product[]
 }
 
-model ProductImage {
-  id        Int     @id @default(autoincrement())
-  url       String
-  key       String?
-  alt       String?
-  productId Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-}
-
 model Product {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  name String  @db.VarChar(150)
-  sku  String? @unique @db.VarChar(50)
-  slug String? @unique @db.VarChar(150)
+  name        String    @db.VarChar(150)
+  slug        String?   @unique @db.VarChar(150)
+  description String?   @db.Text
+  mainImage   String?
 
-  description String? @db.Text
+  isAvailable Boolean   @default(true)
+  isFeatured  Boolean   @default(false) 
 
-  price Decimal @db.Decimal(10, 2)
-  stock Int     @default(0)
-
-  isAvailable Boolean @default(true)
-  isFeatured  Boolean @default(false) 
-
-  mainImage String?
-  images    ProductImage[] 
-
-  categoryId Int?
-  category   Category? @relation(fields: [categoryId], references: [id])
-  orderItems OrderItem[]
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
   
-  // RELAÇÃO COM AS VARIAÇÕES
-  variants   ProductVariant[]
+  variants    ProductVariant[]
+
+  orderItems  OrderItem[]
 }
 
 model ProductVariant {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  color      String  @db.VarChar(50)
-  size       String  @db.VarChar(50)
-  complement String?
-  price      Decimal @db.Decimal(10, 2)
-  stock      Int     @default(0)
-  sku        String? @db.VarChar(50)
+  sku         String?   @db.VarChar(50)
+  price       Decimal   @db.Decimal(10, 2)
+  stock       Int       @default(0)
+  isFeatured  Boolean   @default(false) 
+
+  // 👉 NOVO: Substituímos as colunas engessadas por um JSON flexível!
+  // Aqui o banco aceita TUDO que a Categoria mandar.
+  // Ex: { "color": "CZ6", "size": "Casal", "lado": "Esquerdo", "modelo": "Nuvem" }
+  attributes  Json      @default("{}")
   
-  isFeatured Boolean @default(false) 
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  productId Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  images    VariantImage[] 
-  orderItems OrderItem[]
+  images      VariantImage[] 
+  orderItems  OrderItem[]
 }
 
 model VariantImage {
-  id        Int     @id @default(autoincrement())
-  url       String
+  id          Int            @id @default(autoincrement())
+  url         String
   
-  variantId Int
-  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId   Int
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 }
+
+// 👉 AVISO: A tabela ProductImage antiga foi removida.
+// Em um E-commerce Sênior, todas as imagens (exceto a capa principal)
+// devem estar ligadas à Variante, não ao Produto solto.
+
+// =========================================================
+// 🚀 FIM DAS ALTERAÇÕES
+// =========================================================
 
 enum OrderStatus {
   PENDING 
@@ -154,44 +155,44 @@ enum OrderStatus {
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  total        Decimal @db.Decimal(10, 2) 
-  shippingCost Decimal @default(0) @db.Decimal(10, 2)
-  status       OrderStatus @default(PENDING)
+  total         Decimal   @db.Decimal(10, 2) 
+  shippingCost  Decimal   @default(0) @db.Decimal(10, 2)
+  status        OrderStatus @default(PENDING)
 
-  paymentMethod String? @db.VarChar(50) 
-  shippingFee   Decimal @default(0) @db.Decimal(10, 2) 
+  paymentMethod String?   @db.VarChar(50) 
+  shippingFee   Decimal   @default(0) @db.Decimal(10, 2) 
   invoiceUrl    String?
 
-  tid           String? @unique // 👉 NOVO: Guarda o ID da Transação da Rede!
+  tid           String?   @unique
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
 
-  addressId Int
-  address   Address @relation(fields: [addressId], references: [id])
+  addressId     Int
+  address       Address   @relation(fields: [addressId], references: [id])
 
-  items OrderItem[]
+  items         OrderItem[]
 }
 
 model OrderItem {
-  id Int @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
+  quantity    Int 
+  price       Decimal   @db.Decimal(10, 2) 
 
-  quantity Int 
-  price    Decimal @db.Decimal(10, 2) 
+  orderId     Int
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  orderId Int
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int?
+  product     Product?  @relation(fields: [productId], references: [id])
 
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  variantId   Int
+  variant     ProductVariant @relation(fields: [variantId], references: [id])
   
-  variantId Int?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
-  customData Json?
+  customData  Json?
 }
 
 enum VisualItemType {
@@ -236,46 +237,46 @@ enum ItemSize {
 }
 
 model VisualItem {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   
-  name     String?  @db.VarChar(150)
-  code     String   @unique @db.VarChar(50)
-  imageUrl String?
+  name        String?   @db.VarChar(150)
+  code        String    @unique @db.VarChar(50)
+  imageUrl    String?
   
-  type VisualItemType
+  type        VisualItemType
   
-  color ItemColor?
-  size  ItemSize?
+  color       ItemColor?
+  size        ItemSize?
   
-  inStock    Boolean @default(true) 
-  sequence   Int? 
-  quantity   Int? 
-  isExternal Boolean @default(false) 
-  isTapete Boolean @default(false)
+  inStock     Boolean   @default(true) 
+  sequence    Int? 
+  quantity    Int? 
+  isExternal  Boolean   @default(false) 
+  isTapete    Boolean   @default(false)
 }
 
 model ContactMessage {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  subject   String
-  message   String   @db.Text
-  read      Boolean  @default(false) 
-  createdAt DateTime @default(now())
-  userId    Int?     
-  user      User?    @relation(fields: [userId], references: [id])
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String
+  subject     String
+  message     String    @db.Text
+  read        Boolean   @default(false) 
+  createdAt   DateTime  @default(now())
+  userId      Int?     
+  user        User?     @relation(fields: [userId], references: [id])
 }
 
 model Environment {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(150)
-  cover     String   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(150)
+  cover       String   
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  images    EnvironmentImage[] 
+  images      EnvironmentImage[] 
 }
 
 model EnvironmentImage {
@@ -286,48 +287,41 @@ model EnvironmentImage {
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
 }
 
-model SiteAccess {
-  id        Int      @id @default(autoincrement())
-  path      String   @db.VarChar(200) 
-  ip        String?  
-  createdAt DateTime @default(now())
-}
-
 model ShippingQuote {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt
+  id                Int       @id @default(autoincrement())
+  createdAt         DateTime  @default(now()) 
+  updatedAt         DateTime  @updatedAt
   
-  quoteDetails    String?   @db.Text 
-  customerName    String?   @db.VarChar(150)
-  customerCpf     String?   @db.VarChar(14) 
-  customerZipCode String?   @db.VarChar(10)
-  customerAddress String?   @db.VarChar(255) 
-  customerCity    String?   @db.VarChar(100) 
-  customerState   String?   @db.VarChar(2)   
+  quoteDetails      String?   @db.Text 
+  customerName      String?   @db.VarChar(150)
+  customerCpf       String?   @db.VarChar(14) 
+  customerZipCode   String?   @db.VarChar(10)
+  customerAddress   String?   @db.VarChar(255) 
+  customerCity      String?   @db.VarChar(100) 
+  customerState     String?   @db.VarChar(2)   
 
-  createdById Int
-  createdBy   User @relation(fields: [createdById], references: [id])
+  createdById       Int
+  createdBy         User      @relation(fields: [createdById], references: [id])
 
-  isRequested     Boolean     @default(false)
-  isConcluded     Boolean     @default(false)
-  adminNotes      String?     @db.Text
-  concludedAt     DateTime? 
+  isRequested       Boolean   @default(false)
+  isConcluded       Boolean   @default(false)
+  adminNotes        String?   @db.Text
+  concludedAt       DateTime? 
 
-  carrierName       String?     @db.VarChar(150) 
-  deliveryDeadline  String?     @db.VarChar(50)
+  carrierName       String?   @db.VarChar(150) 
+  deliveryDeadline  String?   @db.VarChar(50)
   volumeQuantity    Int?        
-  shippingValue     Decimal?    @db.Decimal(10, 2) 
-  weight            String?     @db.VarChar(50) 
-  orderValue        Decimal?    @db.Decimal(10, 2) 
-  bedSize           String?     @db.VarChar(100)
+  shippingValue     Decimal?  @db.Decimal(10, 2) 
+  weight            String?   @db.VarChar(50) 
+  orderValue        Decimal?  @db.Decimal(10, 2) 
+  bedSize           String?   @db.VarChar(100)
   
-  hasWallProtector  Boolean     @default(false)
+  hasWallProtector  Boolean   @default(false)
   wallProtectorSize String?   
   
-  hasRug            Boolean     @default(false)
-  rugSize           String?     @db.VarChar(100) 
+  hasRug            Boolean   @default(false)
+  rugSize           String?   @db.VarChar(100) 
   
-  hasAccessories    Boolean     @default(false)
+  hasAccessories    Boolean   @default(false)
   accessoryQuantity Int?        
 }

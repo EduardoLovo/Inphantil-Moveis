@@ -86,148 +86,131 @@ export class OrderService {
                     `Produto "${product.name}" indisponível.`,
                 );
 
-            let unitPrice = 0;
-            const itemCustomData = (itemDto as any).customData; // Pega o JSON de personalização
-
-            if (itemDto.variantId) {
-                const variant = variants.find(
-                    (v) => v.id === itemDto.variantId,
+            // ⚡ NA NOVA ARQUITETURA, O ITEM DEVE TER UMA VARIAÇÃO (Nem que seja a "Cor Única")
+            if (!itemDto.variantId) {
+                throw new BadRequestException(
+                    `O produto "${product.name}" precisa de uma variação selecionada para ser comprado.`,
                 );
-                if (!variant)
-                    throw new BadRequestException(
-                        `Variação ID ${itemDto.variantId} não encontrada.`,
-                    );
-                if (variant.stock < itemDto.quantity) {
-                    throw new BadRequestException(
-                        `Estoque insuficiente para "${product.name}". Restam: ${variant.stock}.`,
-                    );
-                }
-
-                unitPrice = Number(variant.price);
-                totalProdutos += unitPrice * itemDto.quantity;
-
-                orderItemsData.push({
-                    quantity: itemDto.quantity,
-                    price: unitPrice,
-                    product: { connect: { id: product.id } },
-                    variant: { connect: { id: variant.id } },
-                    customData: itemCustomData ? itemCustomData : undefined, // 👉 SALVA AS CORES SE EXISTIREM
-                });
-            } else {
-                if (product.stock < itemDto.quantity) {
-                    throw new BadRequestException(
-                        `Estoque insuficiente para "${product.name}". Restam: ${product.stock}.`,
-                    );
-                }
-
-                // =========================================================
-                // 🛡️ NOVA BLINDAGEM DE PREÇO ATUALIZADA (ID 34)
-                // =========================================================
-                if (product.id === 34 && itemCustomData) {
-                    const tamanhoStr = normalizeString(
-                        itemCustomData.tamanho || '',
-                    );
-                    const modeloStr = normalizeString(
-                        itemCustomData.modelo || '',
-                    );
-                    const ledTipo = itemCustomData.kitLed; // "Não", "Com Sensor" ou "Sem Sensor"
-
-                    const isEncaixe = modeloStr.includes('encaixe');
-                    const temLed = ledTipo !== 'Não';
-
-                    // 1. Tabela de Preços do Servidor (Valores Exatos do Site)
-                    const tabelaPrecos: Record<string, any> = {
-                        berco: {
-                            encaixeSem: 974.43,
-                            encaixeCom: 1023.03,
-                            outrosSem: 750.87,
-                            outrosCom: 799.77,
-                        },
-                        junior: {
-                            encaixeSem: 1098.74,
-                            encaixeCom: 1153.54,
-                            outrosSem: 846.66,
-                            outrosCom: 901.46,
-                        },
-                        solteiro: {
-                            encaixeSem: 1259.14,
-                            encaixeCom: 1281.94,
-                            outrosSem: 970.26,
-                            outrosCom: 1033.06,
-                        },
-                        solteirao: {
-                            encaixeSem: 1291.22,
-                            encaixeCom: 1315.62,
-                            outrosSem: 994.98,
-                            outrosCom: 1059.38,
-                        },
-                        viuva: {
-                            encaixeSem: 1347.36,
-                            encaixeCom: 1374.56,
-                            outrosSem: 1038.24,
-                            outrosCom: 1105.44,
-                        },
-                        casal: {
-                            encaixeSem: 1459.64,
-                            encaixeCom: 1492.44,
-                            outrosSem: 1124.76,
-                            outrosCom: 1197.56,
-                        },
-                        queen: {
-                            encaixeSem: 1579.94,
-                            encaixeCom: 1658.74,
-                            outrosSem: 1217.46,
-                            outrosCom: 1296.26,
-                        },
-                        king: {
-                            encaixeSem: 1736.33,
-                            encaixeCom: 1822.93,
-                            outrosSem: 1337.97,
-                            outrosCom: 1424.57,
-                        },
-                    };
-
-                    // 2. Busca o preço base na tabela
-                    const precosTamanho = tabelaPrecos[tamanhoStr];
-
-                    if (precosTamanho) {
-                        let precoBaseProtetor = 0;
-
-                        if (isEncaixe) {
-                            precoBaseProtetor = temLed
-                                ? precosTamanho.encaixeCom
-                                : precosTamanho.encaixeSem;
-                        } else {
-                            precoBaseProtetor = temLed
-                                ? precosTamanho.outrosCom
-                                : precosTamanho.outrosSem;
-                        }
-
-                        // 3. Soma o valor fixo do Kit LED escolhido
-                        let valorDoKit = 0;
-                        if (ledTipo === 'Com Sensor') valorDoKit = 269;
-                        else if (ledTipo === 'Sem Sensor') valorDoKit = 130;
-
-                        unitPrice = precoBaseProtetor + valorDoKit;
-                    } else {
-                        // Se der algum erro de nome de tamanho, usa o preço do banco por segurança
-                        unitPrice = Number(product.price);
-                    }
-                }
-                // =========================================================
-
-                totalProdutos += unitPrice * itemDto.quantity;
-
-                orderItemsData.push({
-                    quantity: itemDto.quantity,
-                    price: unitPrice,
-                    product: { connect: { id: product.id } },
-                    customData: itemCustomData ? itemCustomData : undefined, // 👉 SALVA AS CORES NO BANCO DE DADOS
-                });
             }
+
+            const variant = variants.find((v) => v.id === itemDto.variantId);
+            if (!variant)
+                throw new BadRequestException(
+                    `Variação ID ${itemDto.variantId} não encontrada.`,
+                );
+
+            // ⚡ AQUI VERIFICAMOS O ESTOQUE DA VARIAÇÃO
+            if (variant.stock < itemDto.quantity) {
+                throw new BadRequestException(
+                    `Estoque insuficiente para "${product.name}". Restam: ${variant.stock}.`,
+                );
+            }
+
+            let unitPrice = Number(variant.price);
+            const itemCustomData = (itemDto as any).customData;
+
+            // =========================================================
+            // 🛡️ NOVA BLINDAGEM DE PREÇO ATUALIZADA (ID 34)
+            // =========================================================
+            if (product.id === 34 && itemCustomData) {
+                const tamanhoStr = normalizeString(
+                    itemCustomData.tamanho || '',
+                );
+                const modeloStr = normalizeString(itemCustomData.modelo || '');
+                const ledTipo = itemCustomData.kitLed;
+
+                const isEncaixe = modeloStr.includes('encaixe');
+                const temLed = ledTipo !== 'Não';
+
+                const tabelaPrecos: Record<string, any> = {
+                    berco: {
+                        encaixeSem: 974.43,
+                        encaixeCom: 1023.03,
+                        outrosSem: 750.87,
+                        outrosCom: 799.77,
+                    },
+                    junior: {
+                        encaixeSem: 1098.74,
+                        encaixeCom: 1153.54,
+                        outrosSem: 846.66,
+                        outrosCom: 901.46,
+                    },
+                    solteiro: {
+                        encaixeSem: 1259.14,
+                        encaixeCom: 1281.94,
+                        outrosSem: 970.26,
+                        outrosCom: 1033.06,
+                    },
+                    solteirao: {
+                        encaixeSem: 1291.22,
+                        encaixeCom: 1315.62,
+                        outrosSem: 994.98,
+                        outrosCom: 1059.38,
+                    },
+                    viuva: {
+                        encaixeSem: 1347.36,
+                        encaixeCom: 1374.56,
+                        outrosSem: 1038.24,
+                        outrosCom: 1105.44,
+                    },
+                    casal: {
+                        encaixeSem: 1459.64,
+                        encaixeCom: 1492.44,
+                        outrosSem: 1124.76,
+                        outrosCom: 1197.56,
+                    },
+                    queen: {
+                        encaixeSem: 1579.94,
+                        encaixeCom: 1658.74,
+                        outrosSem: 1217.46,
+                        outrosCom: 1296.26,
+                    },
+                    king: {
+                        encaixeSem: 1736.33,
+                        encaixeCom: 1822.93,
+                        outrosSem: 1337.97,
+                        outrosCom: 1424.57,
+                    },
+                };
+
+                const precosTamanho = tabelaPrecos[tamanhoStr];
+
+                if (precosTamanho) {
+                    let precoBaseProtetor = 0;
+                    if (isEncaixe) {
+                        precoBaseProtetor = temLed
+                            ? precosTamanho.encaixeCom
+                            : precosTamanho.encaixeSem;
+                    } else {
+                        precoBaseProtetor = temLed
+                            ? precosTamanho.outrosCom
+                            : precosTamanho.outrosSem;
+                    }
+
+                    let valorDoKit = 0;
+                    if (ledTipo === 'Com Sensor') valorDoKit = 269;
+                    else if (ledTipo === 'Sem Sensor') valorDoKit = 130;
+
+                    unitPrice = precoBaseProtetor + valorDoKit;
+                } else {
+                    // ⚡ Se der erro no nome do tamanho, recua para o preço salvo na Variação
+                    unitPrice = Number(variant.price);
+                }
+            }
+            // =========================================================
+
+            totalProdutos += unitPrice * itemDto.quantity;
+
+            orderItemsData.push({
+                quantity: itemDto.quantity,
+                price: unitPrice,
+                product: { connect: { id: product.id } },
+                variant: { connect: { id: variant.id } },
+                customData: itemCustomData ? itemCustomData : undefined,
+            });
         }
 
-        // --- CÁLCULO DO FRETE (Mantido original) ---
+        // --- CÁLCULO DO FRETE ---
         let shippingPercentage = 0;
         let requiresQuote = false;
         const uf = address.state.trim().toUpperCase();
@@ -282,22 +265,19 @@ export class OrderService {
                         paymentMethod: dto.paymentMethod,
                         items: { create: orderItemsData },
                     },
-                    include: { items: true },
+                    include: { items: true }, // Trazemos os itens reais recém-criados
                 });
 
-                for (const item of dto.items) {
+                // ⚡ FORMA 100% SEGURA: Iteramos sobre os itens reais que o banco devolveu!
+                for (const item of newOrder.items) {
                     if (item.variantId) {
                         await tx.productVariant.update({
                             where: { id: item.variantId },
                             data: { stock: { decrement: item.quantity } },
                         });
-                    } else {
-                        await tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } },
-                        });
                     }
                 }
+
                 return newOrder;
             },
             { maxWait: 10000, timeout: 15000 },
@@ -370,7 +350,7 @@ export class OrderService {
             include: {
                 user: true,
                 address: true,
-                items: { include: { variant: true, product: true } }, // 👈 Perfeito, garante o SKU
+                items: { include: { product: true, variant: true } },
             },
         });
 
@@ -379,7 +359,6 @@ export class OrderService {
             updateDto.status === 'PAID' &&
             updatedOrder.user
         ) {
-            // 1. Envia o E-mail de confirmação
             this.mailService
                 .sendPaymentApprovedEmail(
                     updatedOrder,
@@ -388,12 +367,11 @@ export class OrderService {
                 )
                 .catch((error) =>
                     console.error(
-                        `Erro ao disparar e-mail de pagamento do pedido ${id}:`,
+                        `Erro ao disparar e-mail de pagamento:`,
                         error,
                     ),
                 );
 
-            // 2. Avisa o ERP Seven (a formatação das observações já acontece lá dentro do service)
             this.sevenService
                 .enviarPedidoParaOSeven(
                     updatedOrder,
@@ -402,7 +380,7 @@ export class OrderService {
                 )
                 .catch((err: any) =>
                     console.error(
-                        `Erro crítico na integração com o Seven do pedido ${id}:`,
+                        `Erro crítico na integração com o Seven:`,
                         err,
                     ),
                 );
@@ -411,7 +389,6 @@ export class OrderService {
         return updatedOrder;
     }
 
-    // 👉 Salva o TID gerado pela Rede no pedido
     async updateTid(id: number, tid: string) {
         return this.prisma.order.update({
             where: { id },
@@ -419,12 +396,12 @@ export class OrderService {
         });
     }
 
-    // 👉 Busca quem é o dono desse TID quando o Webhook chamar
     async findByTid(tid: string) {
         return this.prisma.order.findUnique({
             where: { tid },
         });
     }
+
     async remove(id: number) {
         const order = await this.prisma.order.findUnique({
             where: { id },
@@ -434,18 +411,12 @@ export class OrderService {
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
 
         return this.prisma.$transaction(async (tx) => {
+            // ⚡ Devolve o estoque para a variação correta
             for (const item of order.items) {
-                if (item.variantId) {
-                    await tx.productVariant.update({
-                        where: { id: item.variantId },
-                        data: { stock: { increment: item.quantity } },
-                    });
-                } else {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { increment: item.quantity } },
-                    });
-                }
+                await tx.productVariant.update({
+                    where: { id: item.variantId },
+                    data: { stock: { increment: item.quantity } },
+                });
             }
             return tx.order.delete({ where: { id } });
         });
@@ -455,42 +426,29 @@ export class OrderService {
     async cancelarPedidosAbandonados() {
         console.log('🧹 Rodando limpeza de pedidos abandonados...');
 
-        // Calcula a data de 2 horas atrás
         const duasHorasAtras = new Date();
         duasHorasAtras.setHours(duasHorasAtras.getHours() - 2);
 
-        // Busca todos os pedidos que estão PENDING e velhos
         const pedidosAbandonados = await this.prisma.order.findMany({
             where: {
                 status: 'PENDING',
-                createdAt: {
-                    lt: duasHorasAtras, // lt = less than (menor que a data)
-                },
+                createdAt: { lt: duasHorasAtras },
             },
             include: { items: true },
         });
 
         if (pedidosAbandonados.length === 0) return;
 
-        // Para cada pedido velho, devolve o estoque e cancela
         for (const order of pedidosAbandonados) {
             await this.prisma.$transaction(async (tx) => {
-                // 1. Devolve o estoque de cada item
+                // ⚡ Devolve o estoque para as variações
                 for (const item of order.items) {
-                    if (item.variantId) {
-                        await tx.productVariant.update({
-                            where: { id: item.variantId },
-                            data: { stock: { increment: item.quantity } },
-                        });
-                    } else {
-                        await tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { increment: item.quantity } },
-                        });
-                    }
+                    await tx.productVariant.update({
+                        where: { id: item.variantId },
+                        data: { stock: { increment: item.quantity } },
+                    });
                 }
 
-                // 2. Muda o status para CANCELED
                 await tx.order.update({
                     where: { id: order.id },
                     data: { status: 'CANCELED' },

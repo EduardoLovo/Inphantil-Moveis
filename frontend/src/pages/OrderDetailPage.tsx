@@ -250,88 +250,131 @@ const DetalhesPedidoPage: React.FC = () => {
               Itens Comprados
             </h2>
             <div className="space-y-6">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex gap-4 items-center">
-                  <div className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
-                    {item.product.mainImage ? (
-                      <img
-                        src={item.product.mainImage}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <FaBox />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-800">
-                      {item.product.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Qtd: {item.quantity}
-                    </p>
-                  </div>
-                  {/* 👉 1. MOSTRA A COR SE FOR UM PRODUTO COMUM (EX: CAMA) */}
-                  {item.variant?.color && (
-                    <p className="text-xs text-gray-600">
-                      <span className="font-bold">Cor:</span>{" "}
-                      {item.variant.color}
-                    </p>
-                  )}
+              {order.items.map((item: any) => {
+                // 👉 1. PUXA OS DADOS DE FORMA INTELIGENTE (attributes ou direto)
+                const varSize =
+                  item.variant?.attributes?.size || item.variant?.size;
+                const varColor =
+                  item.variant?.attributes?.color || item.variant?.color;
+                const varComplement =
+                  item.variant?.attributes?.complement ||
+                  item.variant?.complement;
 
-                  {/* 👉 2. MOSTRA OS DADOS SE FOR UM PROTETOR DE PAREDE (CUSTOM DATA) */}
-                  {item.customData && (
-                    <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                      {item.customData.modelo && (
-                        <p>
-                          <span className="font-bold">Modelo:</span>{" "}
-                          {item.customData.modelo}
-                        </p>
-                      )}
-                      {item.customData.tamanho && (
-                        <p className="mt-1">
-                          <span className="font-bold">Tamanho:</span>{" "}
-                          {item.customData.tamanho}
-                        </p>
-                      )}
-                      {item.customData.kitLed && (
-                        <p className="mt-1">
-                          <span className="font-bold">Kit LED:</span>{" "}
-                          {item.customData.kitLed}
-                        </p>
-                      )}
+                // Lógica da Cama Personalizada
+                const isCustom = item.product?.id === 34 && item.customData;
+                const custom =
+                  typeof item.customData === "string"
+                    ? JSON.parse(item.customData)
+                    : item.customData;
 
-                      {/* Mapeando as cores dinâmicas do Protetor */}
-                      {item.customData.cores &&
-                        typeof item.customData.cores === "object" && (
-                          <div className="mt-2 pt-2 border-t border-gray-200">
-                            <span className="font-bold">Cores Escolhidas:</span>
-                            <ul className="mt-1 space-y-1">
-                              {Object.entries(item.customData.cores).map(
-                                ([parte, corEscolhida]) => (
-                                  <li
-                                    key={parte}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <span className="w-2 h-2 rounded-full bg-[#ffd639]"></span>
-                                    <span className="capitalize">{parte}:</span>{" "}
-                                    {String(corEscolhida)}
-                                  </li>
-                                ),
+                return (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 items-start py-4 border-b border-gray-50 last:border-0"
+                  >
+                    {/* IMAGEM DO PRODUTO */}
+                    <div className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
+                      {item.product?.mainImage ? (
+                        <img
+                          src={item.product.mainImage}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <FaBox />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-800">
+                        {item.quantity}x{" "}
+                        {item.product?.name || "Produto Excluído"}
+                      </h3>
+
+                      {/* 👉 2. MOSTRANDO A VARIAÇÃO BONITINHA PARA O CLIENTE */}
+                      <div className="text-sm text-gray-500 mt-2 space-y-1">
+                        {isCustom ? (
+                          <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-xs">
+                            {custom?.modelo && (
+                              <p>
+                                <span className="font-bold">Modelo:</span>{" "}
+                                {custom.modelo}
+                              </p>
+                            )}
+                            {custom?.tamanho && (
+                              <p className="mt-1">
+                                <span className="font-bold">Tamanho:</span>{" "}
+                                {custom.tamanho}
+                              </p>
+                            )}
+                            {custom?.kitLed && (
+                              <p className="mt-1">
+                                <span className="font-bold">Kit LED:</span>{" "}
+                                {custom.kitLed}
+                              </p>
+                            )}
+                            {custom?.cores &&
+                              typeof custom.cores === "object" && (
+                                <div className="mt-2 pt-2 border-t border-yellow-200/50">
+                                  <span className="font-bold">Cores:</span>
+                                  <ul className="mt-1 space-y-1">
+                                    {Object.entries(custom.cores).map(
+                                      ([parte, cor]) => (
+                                        <li
+                                          key={parte}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[#ffd639]"></span>
+                                          <span className="capitalize">
+                                            {parte}:
+                                          </span>{" "}
+                                          {String(cor)}
+                                        </li>
+                                      ),
+                                    )}
+                                  </ul>
+                                </div>
                               )}
-                            </ul>
+                          </div>
+                        ) : (
+                          <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1">
+                            {varColor && varColor !== "Cor Única" && (
+                              <p>
+                                <span className="font-bold">Cor:</span>{" "}
+                                {varColor}
+                              </p>
+                            )}
+                            {varSize && varSize !== "Tamanho Único" && (
+                              <p>
+                                <span className="font-bold">Tamanho:</span>{" "}
+                                {varSize}
+                              </p>
+                            )}
+                            {varComplement && (
+                              <p>
+                                <span className="font-bold">Extra:</span>{" "}
+                                {varComplement}
+                              </p>
+                            )}
+                            {!varColor && !varSize && !varComplement && (
+                              <p className="italic text-gray-400">
+                                Modelo Padrão
+                              </p>
+                            )}
                           </div>
                         )}
+                      </div>
                     </div>
-                  )}
 
-                  <div className="font-bold text-[#313b2f]">
-                    {formatPrice(Number(item.price) * item.quantity)}
+                    {/* PREÇO DA LINHA */}
+                    <div className="font-bold text-[#313b2f] text-right">
+                      {formatPrice(Number(item.price) * item.quantity)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

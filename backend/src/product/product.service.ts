@@ -7,10 +7,14 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductService {
     constructor(private prisma: PrismaService) {}
 
-    private parseProductData(dto: CreateProductDto | UpdateProductDto) {
+    // 1. Limpa os dados velhos que o React envia mas o Prisma não quer mais
+    private parseProductData(dto: any) {
         const data: any = { ...dto };
-        if (data.price !== undefined) data.price = Number(data.price);
-        if (data.stock !== undefined) data.stock = Number(data.stock);
+        delete data.price;
+        delete data.stock;
+        delete data.sku;
+        delete data.images;
+
         if (data.categoryId !== undefined)
             data.categoryId = Number(data.categoryId);
         if (data.name && !data.slug) {
@@ -22,31 +26,43 @@ export class ProductService {
         return data;
     }
 
-    async create(createProductDto: CreateProductDto) {
-        const { images, variants, ...rest } =
-            this.parseProductData(createProductDto);
+    // 2. ⚡ A MÁGICA: Pega o JSON do banco e espalha para o React entender
+    private formatVariantsForResponse(product: any) {
+        if (product && product.variants) {
+            product.variants = product.variants.map((v: any) => {
+                const { attributes, ...rest } = v;
+                return {
+                    ...rest,
+                    // Despeja cor, tamanho, etc do JSON de volta pra raiz do objeto
+                    ...(typeof attributes === 'object' && attributes !== null
+                        ? attributes
+                        : {}),
+                };
+            });
+        }
+        return product;
+    }
 
-        return this.prisma.product.create({
+    async create(createProductDto: CreateProductDto) {
+        const { variants, ...rawRest } = createProductDto;
+        const rest = this.parseProductData(rawRest);
+
+        const createdProduct = await this.prisma.product.create({
             data: {
                 ...rest,
-                // Cria imagens do produto base
-                images: {
-                    create:
-                        images && Array.isArray(images)
-                            ? images.map((url: string) => ({ url }))
-                            : [],
-                },
-                // Cria Variações e suas Imagens
                 variants: {
                     create: variants
                         ? variants.map((v: any) => ({
-                              color: v.color,
-                              size: v.size,
-                              complement: v.complement,
                               price: Number(v.price),
                               stock: Number(v.stock),
                               sku: v.sku,
-                              isFeatured: v.isFeatured,
+                              isFeatured: v.isFeatured || false,
+                              // EMPACOTANDO NO JSON DINÂMICO!
+                              attributes: {
+                                  color: v.color,
+                                  size: v.size,
+                                  complement: v.complement,
+                              },
                               images: {
                                   create: v.images
                                       ? v.images.map((img: any) => ({
@@ -58,19 +74,24 @@ export class ProductService {
                         : [],
                 },
             },
-            include: { images: true, variants: { include: { images: true } } },
+            include: {
+                category: true,
+                variants: { include: { images: true } },
+            },
         });
+
+        return this.formatVariantsForResponse(createdProduct);
     }
 
     async findAll() {
-        return this.prisma.product.findMany({
+        const products = await this.prisma.product.findMany({
             include: {
                 category: true,
-                images: true,
                 variants: { include: { images: true } },
             },
             orderBy: { createdAt: 'desc' },
         });
+        return products.map((p) => this.formatVariantsForResponse(p));
     }
 
     async findOne(id: number) {
@@ -78,60 +99,134 @@ export class ProductService {
             where: { id },
             include: {
                 category: true,
-                images: true,
                 variants: { include: { images: true } },
             },
         });
         if (!product)
             throw new NotFoundException(`Produto com ID ${id} não encontrado.`);
-        return product;
+        return this.formatVariantsForResponse(product);
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
         await this.findOne(id);
-        const { images, variants, ...rest } =
-            this.parseProductData(updateProductDto);
+        const { variants, ...rawRest } = updateProductDto;
+        const rest = this.parseProductData(rawRest);
 
-        // O jeito mais simples de atualizar Variações complexas é apagar as antigas e recriar as novas
+        // 1. Atualiza os dados básicos do produto
+        await this.prisma.product.update({
+            where: { id },
+            data: rest,
+        });
+
         if (variants) {
-            await this.prisma.productVariant.deleteMany({
+            // 2. Busca as variações que já existem no banco
+            const existingVariants = await this.prisma.productVariant.findMany({
                 where: { productId: id },
             });
+
+            // Cria uma "assinatura" para cada variação nova (Cor + Tamanho + Complemento)
+            const incomingSignatures = variants.map((v: any) =>
+                `${v.color || ''}|${v.size || ''}|${v.complement || ''}`.toLowerCase(),
+            );
+
+            // 3. Limpa as antigas de forma inteligente
+            for (const ev of existingVariants) {
+                const attrs: any = ev.attributes || {};
+                const evSig =
+                    `${attrs.color || ''}|${attrs.size || ''}|${attrs.complement || ''}`.toLowerCase();
+
+                // Se a variação do banco NÃO veio na lista do React (foi deletada no Admin)
+                if (!incomingSignatures.includes(evSig)) {
+                    try {
+                        // Tenta deletar a variação de verdade
+                        await this.prisma.productVariant.delete({
+                            where: { id: ev.id },
+                        });
+                    } catch (error) {
+                        // 🛡️ O BANCO BARROU! Tem pedido salvo nela.
+                        // Solução: Zera o estoque para sumir da vitrine, mas preserva a linha!
+                        await this.prisma.productVariant.update({
+                            where: { id: ev.id },
+                            data: { stock: 0 },
+                        });
+                    }
+                }
+            }
+
+            // 4. Salva as novas (Atualiza se já existir, Cria se for nova)
+            for (const v of variants) {
+                const vSig =
+                    `${v.color || ''}|${v.size || ''}|${v.complement || ''}`.toLowerCase();
+
+                const existing = existingVariants.find((ev) => {
+                    const attrs: any = ev.attributes || {};
+                    const evSig =
+                        `${attrs.color || ''}|${attrs.size || ''}|${attrs.complement || ''}`.toLowerCase();
+                    return evSig === vSig;
+                });
+
+                const variantData = {
+                    price: Number(v.price),
+                    stock: Number(v.stock),
+                    sku: v.sku,
+                    isFeatured: v.isFeatured || false,
+                    attributes: {
+                        color: v.color,
+                        size: v.size,
+                        complement: v.complement,
+                    },
+                };
+
+                if (existing) {
+                    // ATUALIZA a variação que já existe
+                    await this.prisma.productVariant.update({
+                        where: { id: existing.id },
+                        data: variantData,
+                    });
+
+                    // Atualiza as fotos (apaga as velhas, insere as novas)
+                    if (v.images) {
+                        await this.prisma.variantImage.deleteMany({
+                            where: { variantId: existing.id },
+                        });
+                        if (v.images.length > 0) {
+                            await this.prisma.variantImage.createMany({
+                                data: v.images.map((img: any) => ({
+                                    url: img.url,
+                                    variantId: existing.id,
+                                })),
+                            });
+                        }
+                    }
+                } else {
+                    // CRIA uma variação totalmente nova
+                    await this.prisma.productVariant.create({
+                        data: {
+                            ...variantData,
+                            productId: id,
+                            images: {
+                                create: v.images
+                                    ? v.images.map((img: any) => ({
+                                          url: img.url,
+                                      }))
+                                    : [],
+                            },
+                        },
+                    });
+                }
+            }
         }
 
-        return this.prisma.product.update({
+        // 5. Retorna o produto com tudo atualizado
+        const finalProduct = await this.prisma.product.findUnique({
             where: { id },
-            data: {
-                ...rest,
-                images: images
-                    ? {
-                          deleteMany: {},
-                          create: images.map((url: string) => ({ url })),
-                      }
-                    : undefined,
-                variants: variants
-                    ? {
-                          create: variants.map((v: any) => ({
-                              color: v.color,
-                              size: v.size,
-                              complement: v.complement,
-                              price: Number(v.price),
-                              stock: Number(v.stock),
-                              sku: v.sku,
-                              isFeatured: v.isFeatured,
-                              images: {
-                                  create: v.images
-                                      ? v.images.map((img: any) => ({
-                                            url: img.url,
-                                        }))
-                                      : [],
-                              },
-                          })),
-                      }
-                    : undefined,
+            include: {
+                category: true,
+                variants: { include: { images: true } },
             },
-            include: { images: true, variants: { include: { images: true } } },
         });
+
+        return this.formatVariantsForResponse(finalProduct);
     }
 
     async remove(id: number) {

@@ -8,18 +8,15 @@ import {
   FaArrowLeft,
   FaSpinner,
   FaTag,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaChevronLeft,
-  FaChevronRight,
   FaTimes,
-  FaSearchPlus,
   FaExclamationCircle,
 } from "react-icons/fa";
 import { CiShoppingCart } from "react-icons/ci";
 import toast, { Toaster } from "react-hot-toast";
 
-// Lista de Cores Base
+// =========================================================
+// 🎨 DADOS BRUTOS (Paletas e Ordens)
+// =========================================================
 const CAMA_COLORS = [
   {
     id: "cz6-cz26",
@@ -107,7 +104,19 @@ const CAMA_COLORS = [
   },
 ];
 
-// --- ORDEM DOS TAMANHOS ---
+const LENCOL_COLORS = [
+  "AZ3",
+  "AZUL BEBÊ",
+  "BEGE",
+  "BRANCO",
+  "CINZA",
+  "PALHA",
+  "PRATA",
+  "ROSA BEBÊ",
+  "ROSA",
+  "VERDE",
+];
+
 const SIZE_ORDER = [
   "BERÇO",
   "JUNIOR",
@@ -118,36 +127,55 @@ const SIZE_ORDER = [
   "QUEEN",
   "KING",
 ];
-
-// --- ORDEM DAS CORES (Camas e Lençóis) ---
-const COLOR_ORDER = [
-  // Camas
-  "b6-am14",
-  "b6-az10",
-  "b6-b8",
-  "b6-l11",
-  "b6-r12",
-  "b6-vd25",
-  "cz6-am14",
-  "cz6-az10",
-  "cz6-cz26",
-  "cz6-l11",
-  "cz6-r12",
-  "cz6-vd25",
-  // Lençóis
-  "azul",
-  "azul bebê",
-  "bege",
-  "branco",
-  "cinza",
-  "palha",
-  "prata",
-  "rosa",
-  "rosa bebê",
-  "verde",
-];
-
 const COMPLEMENT_ORDER = ["com colchão", "sem colchão"];
+
+// =========================================================
+// 🧠 CÉREBRO DA PÁGINA: Define as regras por Categoria
+// =========================================================
+const getCategoryConfig = (categoryName: string = "") => {
+  const name = categoryName.toLowerCase();
+
+  // 1. Protetor Impermeável ou Travesseiro (SÓ TAMANHO, SEM COR, SEM COMPLEMENTO)
+  if (
+    (name.includes("protetor") && !name.includes("parede")) ||
+    name.includes("travesseiro")
+  ) {
+    return {
+      showSizes: true,
+      showColors: false,
+      showComplements: false,
+      colorPalette: [],
+    };
+  }
+
+  // 2. Camas e Protetores de Parede (TAMANHO + PALETA CAMA + COMPLEMENTO)
+  if (name.includes("cama") || name.includes("parede")) {
+    return {
+      showSizes: true,
+      showColors: true,
+      showComplements: true,
+      colorPalette: CAMA_COLORS,
+    };
+  }
+
+  // 3. Lençóis (TAMANHO + PALETA LENÇOL)
+  if (name.includes("lençol") || name.includes("lencol")) {
+    return {
+      showSizes: true,
+      showColors: true,
+      showComplements: false,
+      colorPalette: LENCOL_COLORS,
+    };
+  }
+
+  // 4. Padrão para novas categorias
+  return {
+    showSizes: true,
+    showColors: true,
+    showComplements: false,
+    colorPalette: [],
+  };
+};
 
 const ProductDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -159,7 +187,6 @@ const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  // Estados da Galeria e do Modal
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -175,74 +202,74 @@ const ProductDetailsPage = () => {
   }, [id, getProductById]);
 
   useEffect(() => {
-    if (products.length === 0) {
-      fetchProducts();
-    }
+    if (products.length === 0) fetchProducts();
   }, [products.length, fetchProducts]);
 
-  // --- PARÂMETROS DA URL ---
-  const selectedColor = searchParams.get("color");
+  // Carrega as Regras da Categoria Atual
+  const config = useMemo(() => {
+    return getCategoryConfig(product?.category?.name);
+  }, [product?.category?.name]);
+
+  // Parâmetros da URL
   const selectedSize = searchParams.get("size");
   const selectedComplement = searchParams.get("complement");
+  const selectedColor = searchParams.get("color");
 
-  // --- 1. FILTRO DE TAMANHOS (ORDENADO) ---
+  // --- 1. FILTRO DE TAMANHOS ---
   const availableSizes = useMemo(() => {
-    if (!product?.variants) return [];
-
+    if (!product?.variants || !config.showSizes) return [];
     const uniqueSizes = Array.from(
       new Set(product.variants.map((v) => v.size).filter(Boolean)),
     );
-
     return uniqueSizes.sort((a, b) => {
       const indexA = SIZE_ORDER.indexOf(a.toUpperCase());
       const indexB = SIZE_ORDER.indexOf(b.toUpperCase());
-
-      const posA = indexA !== -1 ? indexA : 999;
-      const posB = indexB !== -1 ? indexB : 999;
-
-      return posA - posB;
+      return (indexA !== -1 ? indexA : 999) - (indexB !== -1 ? indexB : 999);
     });
-  }, [product?.variants]);
+  }, [product?.variants, config.showSizes]);
 
-  // --- 2. FILTRO DE COMPLEMENTOS (COLCHÃO ORDENADO) ---
+  // --- 2. FILTRO DE COMPLEMENTOS ---
   const availableComplements = useMemo(() => {
-    if (!product?.variants || !selectedSize) return [];
+    if (!product?.variants || !config.showComplements) return [];
+    if (availableSizes.length > 0 && !selectedSize) return [];
 
-    // Extrai os complementos únicos
     const uniqueComplements = Array.from(
       new Set(
         product.variants
-          .filter((v) => v.size === selectedSize)
+          .filter((v) =>
+            availableSizes.length > 0 ? v.size === selectedSize : true,
+          )
           .map((v) => v.complement)
           .filter(Boolean),
       ),
     ) as string[];
 
-    // Ordena baseando-se na nossa lista COMPLEMENT_ORDER
     return uniqueComplements.sort((a, b) => {
       const indexA = COMPLEMENT_ORDER.indexOf(a.toLowerCase().trim());
       const indexB = COMPLEMENT_ORDER.indexOf(b.toLowerCase().trim());
-
       const posA = indexA !== -1 ? indexA : 999;
       const posB = indexB !== -1 ? indexB : 999;
-
-      if (posA === posB) {
-        return a.localeCompare(b);
-      }
-
-      return posA - posB;
+      return posA === posB ? a.localeCompare(b) : posA - posB;
     });
-  }, [product?.variants, selectedSize]);
+  }, [
+    product?.variants,
+    selectedSize,
+    availableSizes.length,
+    config.showComplements,
+  ]);
 
-  // --- 3. FILTRO DE CORES (ORDENADO) ---
+  // --- 3. FILTRO DE CORES ---
   const availableColors = useMemo(() => {
-    if (!product?.variants || !selectedSize) return [];
+    if (!product?.variants || !config.showColors) return [];
+    if (availableSizes.length > 0 && !selectedSize) return [];
+    if (availableComplements.length > 0 && !selectedComplement) return [];
 
     const uniqueColors = Array.from(
       new Set(
         product.variants
           .filter((v) => {
-            const matchSize = v.size === selectedSize;
+            const matchSize =
+              availableSizes.length > 0 ? v.size === selectedSize : true;
             const matchComplement =
               availableComplements.length > 0
                 ? v.complement === selectedComplement
@@ -254,45 +281,126 @@ const ProductDetailsPage = () => {
       ),
     );
 
-    return uniqueColors.sort((a, b) => {
-      const indexA = COLOR_ORDER.indexOf(a.toLowerCase());
-      const indexB = COLOR_ORDER.indexOf(b.toLowerCase());
-
-      const posA = indexA !== -1 ? indexA : 999;
-      const posB = indexB !== -1 ? indexB : 999;
-
-      return posA - posB;
-    });
+    return uniqueColors.sort((a, b) => a.localeCompare(b));
   }, [
     product?.variants,
     selectedSize,
     selectedComplement,
-    availableComplements,
+    availableSizes.length,
+    availableComplements.length,
+    config.showColors,
   ]);
 
+  // =========================================================
+  // ⚡ AUTO-SELEÇÃO INTELIGENTE (Efeito Cascata)
+  // =========================================================
+  useEffect(() => {
+    const currentSize = searchParams.get("size");
+    const currentComplement = searchParams.get("complement");
+    const currentColor = searchParams.get("color");
+
+    let changed = false;
+    const newParams = new URLSearchParams(searchParams);
+
+    if (config.showSizes && availableSizes.length === 1 && !currentSize) {
+      newParams.set("size", availableSizes[0]);
+      changed = true;
+    }
+
+    if (
+      config.showComplements &&
+      availableComplements.length === 1 &&
+      !currentComplement
+    ) {
+      newParams.set("complement", availableComplements[0]);
+      changed = true;
+    }
+
+    if (config.showColors && availableColors.length === 1 && !currentColor) {
+      newParams.set("color", availableColors[0]);
+      changed = true;
+    }
+
+    // Se a cor NÃO for exigida, limpa ela da URL para não dar conflito
+    if (!config.showColors && currentColor) {
+      newParams.delete("color");
+      changed = true;
+    }
+
+    if (changed) {
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [
+    availableSizes,
+    availableComplements,
+    availableColors,
+    searchParams,
+    setSearchParams,
+    config,
+  ]);
+
+  // --- VARIAÇÃO ATIVA ---
   const activeVariant = useMemo(() => {
     if (!product?.variants) return undefined;
     return product.variants.find((v) => {
-      const matchColor = v.color === selectedColor;
-      const matchSize = v.size === selectedSize;
+      const matchSize =
+        config.showSizes && availableSizes.length > 0
+          ? v.size === selectedSize
+          : true;
       const matchComplement =
-        availableComplements.length > 0
+        config.showComplements && availableComplements.length > 0
           ? v.complement === selectedComplement
           : true;
-
-      return matchColor && matchSize && matchComplement;
+      const matchColor =
+        config.showColors && availableColors.length > 0
+          ? v.color === selectedColor
+          : true;
+      return matchSize && matchComplement && matchColor;
     });
   }, [
     product?.variants,
     selectedColor,
     selectedSize,
     selectedComplement,
-    availableComplements,
+    availableSizes.length,
+    availableComplements.length,
+    availableColors.length,
+    config,
+  ]);
+
+  // --- VARIAÇÃO PARCIAL (Para mostrar preço/foto antes de finalizar a escolha) ---
+  const partialVariant = useMemo(() => {
+    if (!product?.variants) return undefined;
+
+    // Se a variação completa já existir, não precisa da parcial
+    if (activeVariant) return activeVariant;
+
+    // Procura a melhor correspondência baseada no que já foi selecionado
+    return (
+      product.variants.find((v) => {
+        const matchSize = selectedSize ? v.size === selectedSize : true;
+        const matchComplement = selectedComplement
+          ? v.complement === selectedComplement
+          : true;
+        const matchColor = selectedColor ? v.color === selectedColor : true;
+
+        // Retorna a primeira que combinar com as seleções atuais
+        return matchSize && matchComplement && matchColor;
+      }) || product.variants[0]
+    ); // Fallback: Pega a primeira variação se nada combinar
+  }, [
+    product?.variants,
+    activeVariant,
+    selectedSize,
+    selectedComplement,
+    selectedColor,
   ]);
 
   const handleSizeSelect = (size: string) => {
     setSearchParams((prev) => {
       prev.set("size", size);
+      if (availableComplements.length > 1) prev.delete("complement");
+      if (availableColors.length > 1) prev.delete("color");
       return prev;
     });
   };
@@ -300,6 +408,7 @@ const ProductDetailsPage = () => {
   const handleComplementSelect = (complement: string) => {
     setSearchParams((prev) => {
       prev.set("complement", complement);
+      if (availableColors.length > 1) prev.delete("color");
       return prev;
     });
   };
@@ -313,63 +422,30 @@ const ProductDetailsPage = () => {
 
   useEffect(() => {
     setCurrentImageIndex(0);
-  }, [activeVariant]);
+  }, [partialVariant]);
 
-  // --- LÓGICA DE IMAGENS & CARROSSEL ---
+  // --- LÓGICA DE IMAGENS ---
   const displayImages = useMemo(() => {
     if (!product) return ["https://via.placeholder.com/400"];
-
     const images: string[] = [];
 
-    if (activeVariant?.images && activeVariant.images.length > 0) {
-      activeVariant.images.forEach((img) => {
-        if (img.url && !images.includes(img.url)) {
-          images.push(img.url);
-        }
+    // 👉 TROCADO AQUI: Usa a partialVariant para buscar as fotos
+    if (partialVariant?.images && partialVariant.images.length > 0) {
+      partialVariant.images.forEach((img) => {
+        if (img.url && !images.includes(img.url)) images.push(img.url);
       });
-    } else if ((activeVariant as any)?.imageUrl) {
-      images.push((activeVariant as any).imageUrl);
     } else if (product.mainImage) {
       images.push(product.mainImage);
     }
 
     if (product.images && product.images.length > 0) {
       product.images.forEach((img) => {
-        if (img.url && !images.includes(img.url)) {
-          images.push(img.url);
-        }
+        if (img.url && !images.includes(img.url)) images.push(img.url);
       });
     }
-
-    if (images.length === 0) {
-      images.push("https://via.placeholder.com/400");
-    }
-
+    if (images.length === 0) images.push("https://via.placeholder.com/400");
     return images;
-  }, [product, activeVariant]);
-
-  const handlePrevImage = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? displayImages.length - 1 : prev - 1,
-    );
-  };
-
-  const handleNextImage = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === displayImages.length - 1 ? 0 : prev + 1,
-    );
-  };
-
-  // --- TODOS OS OUTROS PRODUTOS DA LOJA ---
-  const otherProducts = product
-    ? products.filter((p) => p.id !== product.id)
-    : [];
-
-  const handleRelatedClick = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [product, partialVariant]);
 
   const handleAddToCart = (
     productToAdd: Product,
@@ -405,7 +481,7 @@ const ProductDetailsPage = () => {
         </h2>
         <Link
           to="/loja"
-          className="flex items-center gap-2 px-6 py-3 bg-[#313b2f] text-white rounded-lg hover:bg-[#ffd639] hover:text-[#313b2f] transition-all font-bold"
+          className="flex items-center gap-2 px-6 py-3 bg-[#313b2f] text-white rounded-lg hover:bg-[#ffd639] transition-all font-bold"
         >
           <FaArrowLeft /> Voltar ao Catálogo
         </Link>
@@ -419,7 +495,7 @@ const ProductDetailsPage = () => {
     });
   };
 
-  const displayPrice = activeVariant ? activeVariant.price : product.price;
+  const displayPrice = partialVariant ? partialVariant.price : product.price;
   const currentStock = activeVariant ? activeVariant.stock : product.stock;
 
   const hasVariants = product.variants && product.variants.length > 0;
@@ -428,10 +504,10 @@ const ProductDetailsPage = () => {
   const canPurchase = isFullySelected && !isOutOfStock;
 
   return (
-    <div className="w-full  mx-auto px-32 py-8 md:pt-32 pb-20">
+    <div className="w-ful mx-auto px-4 md:px-32 py-8 md:pt-32 pb-20">
       <Toaster />
 
-      {/* MODAL DE IMAGEM EM TELA CHEIA */}
+      {/* Modal de Imagem Omitido por Limite de Tamanho - Mas a Galeria continua igual */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
           <button
@@ -440,23 +516,6 @@ const ProductDetailsPage = () => {
           >
             <FaTimes size={32} />
           </button>
-
-          {displayImages.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 text-white hover:text-[#ffd639] transition-colors p-4 z-[101]"
-              >
-                <FaChevronLeft size={40} />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 text-white hover:text-[#ffd639] transition-colors p-4 z-[101]"
-              >
-                <FaChevronRight size={40} />
-              </button>
-            </>
-          )}
           <img
             src={displayImages[currentImageIndex]}
             alt={product.name}
@@ -470,7 +529,7 @@ const ProductDetailsPage = () => {
           to="/loja"
           className="inline-flex items-center gap-2 text-gray-500 hover:text-[#313b2f] font-medium transition-colors group"
         >
-          <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+          <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />{" "}
           Voltar para o catálogo
         </Link>
       </div>
@@ -479,46 +538,20 @@ const ProductDetailsPage = () => {
         {/* --- COLUNA ESQUERDA: GALERIA --- */}
         <div className="flex flex-col gap-4 h-fit lg:sticky lg:top-32 z-10 items-center justify-center">
           <div
-            className="w-[80vw] md:w-[30vw] aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center group cursor-zoom-in"
+            className="w-[80vw] md:w-[30vw] aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center cursor-zoom-in"
             onClick={() => setIsModalOpen(true)}
-            title="Clique para ampliar"
           >
             <img
               src={displayImages[currentImageIndex]}
               alt={product.name}
-              className="w-full  transition-transform duration-500 group-hover:scale-105"
+              className="w-full transition-transform duration-500 hover:scale-105"
             />
-
             {hasVariants && !isFullySelected && (
-              <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse ">
-                <FaExclamationCircle className="text-[#313b2f]" /> Escolha um
-                tamanho e uma cor
+              <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse">
+                <FaExclamationCircle className="text-[#313b2f]" /> Conclua sua
+                seleção abaixo
               </div>
             )}
-
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-              <div className="bg-white/90 p-3 rounded-full shadow-lg text-[#313b2f] transform translate-y-4 group-hover:translate-y-0 transition-all">
-                <FaSearchPlus size={24} />
-              </div>
-            </div>
-
-            {displayImages.length > 1 && (
-              <>
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md text-[#313b2f] hover:bg-[#ffd639] transition-all z-20 opacity-0 group-hover:opacity-100"
-                >
-                  <FaChevronLeft size={16} />
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md text-[#313b2f] hover:bg-[#ffd639] transition-all z-20 opacity-0 group-hover:opacity-100"
-                >
-                  <FaChevronRight size={16} />
-                </button>
-              </>
-            )}
-
             {isOutOfStock && (
               <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
                 <span className="bg-red-500 text-white px-6 py-2 rounded-full text-lg font-bold shadow-lg transform -rotate-12">
@@ -527,35 +560,26 @@ const ProductDetailsPage = () => {
               </div>
             )}
           </div>
-
           {displayImages.length > 1 && (
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {displayImages.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                    currentImageIndex === idx
-                      ? "border-[#ffd639] ring-2 ring-[#ffd639]/30"
-                      : "border-transparent hover:border-gray-300 opacity-70 hover:opacity-100"
-                  }`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? "border-[#ffd639]" : "border-transparent opacity-70"}`}
                 >
-                  <img
-                    src={imgUrl}
-                    alt={`Miniatura ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={imgUrl} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* --- COLUNA DIREITA: INFORMAÇÕES --- */}
+        {/* --- COLUNA DIREITA: INFORMAÇÕES E SELETORES --- */}
         <div className="flex flex-col">
           <div className="mb-2">
             <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-              <FaTag className="text-[#ffd639]" />
+              <FaTag className="text-[#ffd639]" />{" "}
               {product.category?.name || "Geral"}
             </span>
           </div>
@@ -565,34 +589,35 @@ const ProductDetailsPage = () => {
           </h1>
 
           <div className="text-3xl font-bold text-[#313b2f] mb-6 flex items-baseline gap-2">
-            {hasVariants && !activeVariant ? (
-              <span className="text-lg text-gray-500 font-medium">
-                Selecione tamanho, opção extra e cor para ver o preço
+            {/* 👉 TROCADO AQUI: Sempre mostra o preço (mesmo que seja o da partialVariant) */}
+            <span className="text-green-700">{formatPrice(displayPrice)}</span>
+            {hasVariants && !isFullySelected && (
+              <span className="text-sm text-gray-400 font-medium ml-2">
+                (A partir de)
               </span>
-            ) : (
-              formatPrice(displayPrice)
             )}
           </div>
 
-          {/* Seletores de Variantes Organizados */}
+          {/* Seletores de Variantes Dinâmicos */}
           {hasVariants && (
             <div className="mb-8 space-y-6 border-b border-gray-100 pb-6">
               {/* 1. SELETOR DE TAMANHO */}
-              {availableSizes.length > 0 && (
+              {config.showSizes && availableSizes.length > 0 && (
                 <div>
                   <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                    Tamanho: {selectedSize || "Selecione"}
+                    Tamanho: {selectedSize || "Selecione"}{" "}
+                    {availableSizes.length === 1 && (
+                      <span className="text-xs text-green-600 ml-2">
+                        (Opção Única)
+                      </span>
+                    )}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {availableSizes.map((size) => (
                       <button
                         key={size}
                         onClick={() => handleSizeSelect(size)}
-                        className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
-                          selectedSize === size
-                            ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]"
-                            : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
-                        }`}
+                        className={`w-48 px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedSize === size ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]" : "border-gray-200 text-gray-600 bg-white"}`}
                       >
                         {size}
                       </button>
@@ -601,57 +626,64 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* 2. SELETOR DE OPÇÃO EXTRA (COLCHÃO) */}
-              {selectedSize && availableComplements.length > 0 && (
-                <div className="animate-in fade-in duration-300">
-                  <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                    Opção Extra: {selectedComplement || "Selecione"}
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {availableComplements.map((comp) => (
-                      <button
-                        key={comp as string}
-                        onClick={() => handleComplementSelect(comp as string)}
-                        className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
-                          selectedComplement === comp
-                            ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f] shadow-sm"
-                            : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
-                        }`}
-                      >
-                        {comp}
-                      </button>
-                    ))}
+              {/* 2. SELETOR DE COMPLEMENTO */}
+              {config.showComplements &&
+                (availableSizes.length === 0 || selectedSize) &&
+                availableComplements.length > 0 && (
+                  <div className="animate-in fade-in duration-300">
+                    <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                      Opção Extra: {selectedComplement || "Selecione"}{" "}
+                      {availableComplements.length === 1 && (
+                        <span className="text-xs text-green-600 ml-2">
+                          (Opção Única)
+                        </span>
+                      )}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {availableComplements.map((comp) => (
+                        <button
+                          key={comp as string}
+                          onClick={() => handleComplementSelect(comp as string)}
+                          className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedComplement === comp ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]" : "border-gray-200 text-gray-600 bg-white"}`}
+                        >
+                          {comp}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* 3. SELETOR DE COR */}
-              {selectedSize &&
+              {config.showColors &&
+                (availableSizes.length === 0 || selectedSize) &&
                 (availableComplements.length === 0 || selectedComplement) &&
                 availableColors.length > 0 && (
-                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="animate-in fade-in duration-300">
                     <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                      Cor: {selectedColor ? "" : "Selecione"}
+                      Cor: {selectedColor ? "" : "Selecione"}{" "}
+                      {availableColors.length === 1 && (
+                        <span className="text-xs text-green-600 ml-2">
+                          (Opção Única)
+                        </span>
+                      )}
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {availableColors.map((color) => {
-                        const colorDef = CAMA_COLORS.find(
-                          (c) => c.id === color,
+                        // Busca a definição da cor baseada na paleta atual da categoria (CAMA ou LENCOL)
+                        const colorDef = CAMA_COLORS?.find(
+                          (c: any) => c.id === color || c === color,
                         );
+
                         return (
                           <button
                             key={color}
                             onClick={() => handleColorSelect(color)}
-                            className={`flex items-center justify-start text-left gap-3 px-3 py-2 rounded-lg border-2 font-medium transition-all min-w-[210px] w-full sm:w-auto ${
-                              selectedColor === color
-                                ? "border-[#313b2f] bg-[#313b2f] text-white shadow-md"
-                                : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
-                            }`}
+                            className={`flex items-center w-56 gap-3 px-3 py-2 rounded-lg border-2 font-medium transition-all ${selectedColor === color ? "border-[#313b2f] bg-[#313b2f] text-white" : "border-gray-200 text-gray-600 bg-white"}`}
                           >
-                            {colorDef ? (
+                            {colorDef?.hexExterno ? (
                               <>
                                 <span
-                                  className="w-8 h-8 rounded-full block shrink-0 border border-gray-400/30"
+                                  className="w-8 h-8 rounded-full border border-gray-400/30"
                                   style={{
                                     background: `linear-gradient(to bottom, ${colorDef.hexExterno} 50%, ${colorDef.hexInterno} 50%)`,
                                   }}
@@ -673,76 +705,22 @@ const ProductDetailsPage = () => {
             </div>
           )}
 
-          {/* Disponibilidade Inteligente */}
-          <div className="grid grid-cols-2 gap-4 mb-8 mt-4">
-            {!hasVariants && product.size && (
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <span className="block text-xs text-gray-400 font-bold uppercase">
-                  Tamanho
-                </span>
-                <span className="font-medium text-[#313b2f]">
-                  {product.size}
-                </span>
-              </div>
-            )}
-            {!hasVariants && product.color && (
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <span className="block text-xs text-gray-400 font-bold uppercase">
-                  Cor
-                </span>
-                <span className="font-medium text-[#313b2f]">
-                  {product.color}
-                </span>
-              </div>
-            )}
-
-            {!isFullySelected ? (
-              <div className="p-3 rounded-lg border bg-blue-50 border-blue-100">
-                <span className="block text-xs font-bold uppercase opacity-70">
-                  Disponibilidade
-                </span>
-                <div className="flex items-center gap-2 font-bold text-blue-800">
-                  Selecione as opções
-                </div>
-              </div>
-            ) : isOutOfStock ? (
-              <div className="p-3 rounded-lg border bg-red-50 border-red-100">
-                <span className="block text-xs font-bold uppercase opacity-70">
-                  Disponibilidade
-                </span>
-                <div className="flex items-center gap-2 font-bold text-red-800">
-                  <FaTimesCircle /> Esgotado
-                </div>
-              </div>
-            ) : (
-              <div className="p-3 rounded-lg border bg-green-50 border-green-100">
-                <span className="block text-xs font-bold uppercase opacity-70">
-                  Disponibilidade
-                </span>
-                <div className="flex items-center gap-2 font-bold text-green-800">
-                  <FaCheckCircle /> {currentStock} em estoque
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Botões de Ação */}
           <div className="mt-auto space-y-3">
             <button
               onClick={() => handleAddToCart(product, activeVariant)}
               disabled={!canPurchase}
-              className="w-full py-4 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 text-lg"
+              className="w-full py-4 bg-[#313b2f] text-white font-bold rounded-xl hover:bg-[#ffd639] hover:text-[#313b2f] shadow-lg transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-50"
             >
-              <FaCartPlus />
+              <FaCartPlus />{" "}
               {!isFullySelected
                 ? "Selecione as Opções"
                 : isOutOfStock
                   ? "Esgotado"
                   : "Adicionar ao Carrinho"}
             </button>
-
             <Link to="/cart" className="block w-full">
-              <button className="w-full py-3 bg-white text-[#313b2f] border-2 border-[#313b2f] font-bold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full py-3 bg-white text-[#313b2f] border-2 border-[#313b2f] font-bold rounded-xl hover:bg-gray-50 flex items-center justify-center gap-2">
                 <CiShoppingCart size={24} /> Ir para o Carrinho
               </button>
             </Link>
@@ -750,60 +728,15 @@ const ProductDetailsPage = () => {
         </div>
       </div>
 
-      <div className="prose prose-sm text-gray-600 mb-8 border-b border-gray-100 p-6 mt-6 bg-white rounded-xl shadow-sm">
+      {/* Descrição Abaixo */}
+      <div className="prose prose-sm text-gray-600 mb-8 p-6 mt-6 bg-white rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-[#313b2f] mb-3">
           Detalhes do Produto
         </h3>
         <p className="whitespace-pre-wrap">
-          {product.description ||
-            "Sem descrição disponível para este item no momento."}
+          {product.description || "Sem descrição disponível."}
         </p>
       </div>
-
-      {/* Todos os Outros Produtos */}
-      {otherProducts.length > 0 && (
-        <div className="mt-20 pt-10 border-t border-gray-100">
-          <h2 className="text-2xl font-bold text-[#313b2f] mb-8 ">
-            Mais Produtos da Loja
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {otherProducts.map((other) => (
-              <div
-                key={other.id}
-                className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all flex flex-col"
-              >
-                <div className="relative aspect-square overflow-hidden bg-gray-50">
-                  <Link
-                    to={`/products/${other.id}`}
-                    onClick={handleRelatedClick}
-                    className="block w-full h-full"
-                  >
-                    <img
-                      src={other.mainImage || "https://via.placeholder.com/200"}
-                      alt={other.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </Link>
-                </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <Link
-                    to={`/products/${other.id}`}
-                    onClick={handleRelatedClick}
-                    className="font-bold text-[#313b2f] hover:text-[#ffd639] transition-colors mb-2 line-clamp-2"
-                  >
-                    {other.name}
-                  </Link>
-                  <div className="mt-auto pt-2">
-                    <span className="font-bold text-lg text-[#313b2f]">
-                      {formatPrice(other.price)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
