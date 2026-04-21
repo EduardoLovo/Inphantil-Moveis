@@ -30,7 +30,6 @@ import ProductsPage from "./pages/ProductsPage";
 import PosCompraPage from "./pages/PosCompraPage";
 // ROTAS LOJA
 import ProductDetailsPage from "./pages/ProductDetailsPage";
-import InternalAnalytics from "./components/InternalAnalytics";
 import VersionCheck from "./components/VersionCheck";
 // ROTAS ADMIN
 import AdminLayout from "./components/layouts/AdminLayout";
@@ -55,7 +54,7 @@ import AdminCreateProductPage from "./pages/pagesAdmin/AdminCreateProductPage";
 import LowStockApliquesPage from "./pages/pagesAdmin/AdminLowStockApliquesPage";
 import RestockApliquesPage from "./pages/pagesAdmin/AdminRestockApliquesPage";
 import AdminEditProductPage from "./pages/pagesAdmin/AdminEditProductPage";
-import UnderConstructionPage from "./pages/UnderConstructionPage";
+// import UnderConstructionPage from "./pages/UnderConstructionPage";
 import LencoisPage from "./pages/catalogs/LencoisPage";
 import AdminCreateLencolPage from "./pages/pagesAdmin/AdminCreateLencolPage";
 import ShippingQuoteRequestPage from "./pages/pagesAdmin/ShippingQuoteRequestPage";
@@ -69,6 +68,8 @@ import { AdminReportsPage } from "./pages/AdminReportsPage";
 import CookieConsent from "./components/CookieConsent";
 import ProtetorDeParedeProductPage from "./pages/ProtetorDeParede";
 import PagamentoPendentePage from "./pages/PagamentoPendentePage";
+import CartPage from "./pages/CartPage";
+import AdminOrderDetailPage from "./pages/pagesAdmin/AdminOrderDetailPage";
 
 function App() {
   const location = useLocation();
@@ -80,7 +81,6 @@ function App() {
     <>
       <GoogleAnalytics />
       <VersionCheck />
-      <InternalAnalytics />
       <ScrollToTop />
       <div className="md:hidden">
         <Header />
@@ -92,8 +92,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/loja" element={<UnderConstructionPage />} />
-        <Route path="/checkout" element={<UnderConstructionPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/catalogo/apliques" element={<ApliquesPage />} />
         <Route path="/apliques" element={<ApliquesPage />} />
         <Route path="/tecidos-lencol" element={<TecidosPage />} />
@@ -116,8 +115,7 @@ function App() {
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/loja-teste" element={<ProductsPage />} />
-        {/* <Route path="/cart" element={<CartPage />} /> */}
-        <Route path="/cart" element={<UnderConstructionPage />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route
           path="/monte-seu-protetor"
           element={<ProtetorDeParedeProductPage />}
@@ -128,7 +126,6 @@ function App() {
         />
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          {/* <Route path="/cart" element={<UnderConstructionPage />} /> */}
           <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/pos-compra" element={<PosCompraPage />} />
@@ -221,6 +218,10 @@ function App() {
               element={<SearchShippingQuotePage />}
             />
             <Route path="/admin/relatorios" element={<AdminReportsPage />} />
+            <Route
+              path="/admin/orders/:id"
+              element={<AdminOrderDetailPage />}
+            />
           </Route>
         </Route>
         <Route path="/restock-apliques" element={<RestockApliquesPage />} />
