@@ -135,7 +135,6 @@ const COMPLEMENT_ORDER = ["com colchão", "sem colchão"];
 const getCategoryConfig = (categoryName: string = "") => {
   const name = categoryName.toLowerCase();
 
-  // 1. Protetor Impermeável ou Travesseiro (SÓ TAMANHO, SEM COR, SEM COMPLEMENTO)
   if (
     (name.includes("protetor") && !name.includes("parede")) ||
     name.includes("travesseiro")
@@ -144,35 +143,47 @@ const getCategoryConfig = (categoryName: string = "") => {
       showSizes: true,
       showColors: false,
       showComplements: false,
+      showModels: false,
       colorPalette: [],
     };
   }
 
-  // 2. Camas e Protetores de Parede (TAMANHO + PALETA CAMA + COMPLEMENTO)
-  if (name.includes("cama") || name.includes("parede")) {
+  if (name.includes("parede")) {
+    // 👉 AGORA O FRONTEND SABE QUE PROTETOR DE PAREDE TEM MODELO!
     return {
       showSizes: true,
       showColors: true,
       showComplements: true,
+      showModels: true,
       colorPalette: CAMA_COLORS,
     };
   }
 
-  // 3. Lençóis (TAMANHO + PALETA LENÇOL)
+  if (name.includes("cama")) {
+    return {
+      showSizes: true,
+      showColors: true,
+      showComplements: true,
+      showModels: false,
+      colorPalette: CAMA_COLORS,
+    };
+  }
+
   if (name.includes("lençol") || name.includes("lencol")) {
     return {
       showSizes: true,
       showColors: true,
       showComplements: false,
+      showModels: false,
       colorPalette: LENCOL_COLORS,
     };
   }
 
-  // 4. Padrão para novas categorias
   return {
     showSizes: true,
     showColors: true,
     showComplements: false,
+    showModels: false,
     colorPalette: [],
   };
 };
@@ -205,14 +216,26 @@ const ProductDetailsPage = () => {
     if (products.length === 0) fetchProducts();
   }, [products.length, fetchProducts]);
 
-  // Carrega as Regras da Categoria Atual
-  const config = useMemo(() => {
-    return getCategoryConfig(product?.category?.name);
-  }, [product?.category?.name]);
+  const config = useMemo(
+    () => getCategoryConfig(product?.category?.name),
+    [product?.category?.name],
+  );
+
+  // 👉 CORTADOR DE TEXTO INTELIGENTE: Separa "Montanha | Com Sensor" em duas variáveis
+  const getModelAndExtra = (comp?: string) => {
+    if (!comp) return { model: "", extra: "" };
+    if (comp.includes(" | ")) {
+      const parts = comp.split(" | ");
+      return { model: parts[0].trim(), extra: parts[1].trim() };
+    }
+    if (config.showModels) return { model: comp.trim(), extra: "" };
+    return { model: "", extra: comp.trim() };
+  };
 
   // Parâmetros da URL
   const selectedSize = searchParams.get("size");
-  const selectedComplement = searchParams.get("complement");
+  const selectedModel = searchParams.get("model");
+  const selectedExtra = searchParams.get("extra");
   const selectedColor = searchParams.get("color");
 
   // --- 1. FILTRO DE TAMANHOS ---
@@ -228,23 +251,54 @@ const ProductDetailsPage = () => {
     });
   }, [product?.variants, config.showSizes]);
 
-  // --- 2. FILTRO DE COMPLEMENTOS ---
-  const availableComplements = useMemo(() => {
-    if (!product?.variants || !config.showComplements) return [];
+  // --- 2. FILTRO DE MODELOS (Ex: Montanha, Nuvem) ---
+  const availableModels = useMemo(() => {
+    if (!product?.variants || !config.showModels) return [];
     if (availableSizes.length > 0 && !selectedSize) return [];
 
-    const uniqueComplements = Array.from(
+    const uniqueModels = Array.from(
       new Set(
         product.variants
           .filter((v) =>
             availableSizes.length > 0 ? v.size === selectedSize : true,
           )
-          .map((v) => v.complement)
+          .map((v) => getModelAndExtra(v.complement).model)
           .filter(Boolean),
       ),
     ) as string[];
 
-    return uniqueComplements.sort((a, b) => {
+    return uniqueModels.sort();
+  }, [
+    product?.variants,
+    selectedSize,
+    availableSizes.length,
+    config.showModels,
+  ]);
+
+  // --- 3. FILTRO DE EXTRAS (Ex: Com Sensor, Sem Colchão) ---
+  const availableExtras = useMemo(() => {
+    if (!product?.variants || !config.showComplements) return [];
+    if (availableSizes.length > 0 && !selectedSize) return [];
+    if (availableModels.length > 0 && !selectedModel) return [];
+
+    const uniqueExtras = Array.from(
+      new Set(
+        product.variants
+          .filter((v) => {
+            const matchSize =
+              availableSizes.length > 0 ? v.size === selectedSize : true;
+            const matchModel =
+              availableModels.length > 0
+                ? getModelAndExtra(v.complement).model === selectedModel
+                : true;
+            return matchSize && matchModel;
+          })
+          .map((v) => getModelAndExtra(v.complement).extra)
+          .filter(Boolean),
+      ),
+    ) as string[];
+
+    return uniqueExtras.sort((a, b) => {
       const indexA = COMPLEMENT_ORDER.indexOf(a.toLowerCase().trim());
       const indexB = COMPLEMENT_ORDER.indexOf(b.toLowerCase().trim());
       const posA = indexA !== -1 ? indexA : 999;
@@ -254,15 +308,18 @@ const ProductDetailsPage = () => {
   }, [
     product?.variants,
     selectedSize,
+    selectedModel,
     availableSizes.length,
+    availableModels.length,
     config.showComplements,
   ]);
 
-  // --- 3. FILTRO DE CORES ---
+  // --- 4. FILTRO DE CORES ---
   const availableColors = useMemo(() => {
     if (!product?.variants || !config.showColors) return [];
     if (availableSizes.length > 0 && !selectedSize) return [];
-    if (availableComplements.length > 0 && !selectedComplement) return [];
+    if (availableModels.length > 0 && !selectedModel) return [];
+    if (availableExtras.length > 0 && !selectedExtra) return [];
 
     const uniqueColors = Array.from(
       new Set(
@@ -270,11 +327,14 @@ const ProductDetailsPage = () => {
           .filter((v) => {
             const matchSize =
               availableSizes.length > 0 ? v.size === selectedSize : true;
-            const matchComplement =
-              availableComplements.length > 0
-                ? v.complement === selectedComplement
-                : true;
-            return matchSize && matchComplement;
+            const { model: vModel, extra: vExtra } = getModelAndExtra(
+              v.complement,
+            );
+            const matchModel =
+              availableModels.length > 0 ? vModel === selectedModel : true;
+            const matchExtra =
+              availableExtras.length > 0 ? vExtra === selectedExtra : true;
+            return matchSize && matchModel && matchExtra;
           })
           .map((v) => v.color)
           .filter(Boolean),
@@ -285,9 +345,11 @@ const ProductDetailsPage = () => {
   }, [
     product?.variants,
     selectedSize,
-    selectedComplement,
+    selectedModel,
+    selectedExtra,
     availableSizes.length,
-    availableComplements.length,
+    availableModels.length,
+    availableExtras.length,
     config.showColors,
   ]);
 
@@ -296,7 +358,8 @@ const ProductDetailsPage = () => {
   // =========================================================
   useEffect(() => {
     const currentSize = searchParams.get("size");
-    const currentComplement = searchParams.get("complement");
+    const currentModel = searchParams.get("model");
+    const currentExtra = searchParams.get("extra");
     const currentColor = searchParams.get("color");
 
     let changed = false;
@@ -306,108 +369,146 @@ const ProductDetailsPage = () => {
       newParams.set("size", availableSizes[0]);
       changed = true;
     }
-
-    if (
-      config.showComplements &&
-      availableComplements.length === 1 &&
-      !currentComplement
-    ) {
-      newParams.set("complement", availableComplements[0]);
+    if (config.showModels && availableModels.length === 1 && !currentModel) {
+      newParams.set("model", availableModels[0]);
       changed = true;
     }
-
+    if (
+      config.showComplements &&
+      availableExtras.length === 1 &&
+      !currentExtra
+    ) {
+      newParams.set("extra", availableExtras[0]);
+      changed = true;
+    }
     if (config.showColors && availableColors.length === 1 && !currentColor) {
       newParams.set("color", availableColors[0]);
       changed = true;
     }
 
-    // Se a cor NÃO for exigida, limpa ela da URL para não dar conflito
+    // Limpeza de URLs inúteis
+    if (!config.showModels && currentModel) {
+      newParams.delete("model");
+      changed = true;
+    }
+    if (!config.showComplements && currentExtra) {
+      newParams.delete("extra");
+      changed = true;
+    }
     if (!config.showColors && currentColor) {
       newParams.delete("color");
       changed = true;
     }
+    if (newParams.has("complement")) {
+      newParams.delete("complement");
+      changed = true;
+    } // Limpa o formato velho
 
-    if (changed) {
-      setSearchParams(newParams, { replace: true });
-    }
+    if (changed) setSearchParams(newParams, { replace: true });
   }, [
     availableSizes,
-    availableComplements,
+    availableModels,
+    availableExtras,
     availableColors,
     searchParams,
     setSearchParams,
     config,
   ]);
 
-  // --- VARIAÇÃO ATIVA ---
-  const activeVariant = useMemo(() => {
+  // --- VARIAÇÃO ATIVA E PARCIAL ---
+  const findVariant = (isPartial = false) => {
     if (!product?.variants) return undefined;
-    return product.variants.find((v) => {
-      const matchSize =
-        config.showSizes && availableSizes.length > 0
-          ? v.size === selectedSize
-          : true;
-      const matchComplement =
-        config.showComplements && availableComplements.length > 0
-          ? v.complement === selectedComplement
-          : true;
-      const matchColor =
-        config.showColors && availableColors.length > 0
-          ? v.color === selectedColor
-          : true;
-      return matchSize && matchComplement && matchColor;
-    });
-  }, [
-    product?.variants,
-    selectedColor,
-    selectedSize,
-    selectedComplement,
-    availableSizes.length,
-    availableComplements.length,
-    availableColors.length,
-    config,
-  ]);
-
-  // --- VARIAÇÃO PARCIAL (Para mostrar preço/foto antes de finalizar a escolha) ---
-  const partialVariant = useMemo(() => {
-    if (!product?.variants) return undefined;
-
-    // Se a variação completa já existir, não precisa da parcial
-    if (activeVariant) return activeVariant;
-
-    // Procura a melhor correspondência baseada no que já foi selecionado
     return (
       product.variants.find((v) => {
-        const matchSize = selectedSize ? v.size === selectedSize : true;
-        const matchComplement = selectedComplement
-          ? v.complement === selectedComplement
-          : true;
-        const matchColor = selectedColor ? v.color === selectedColor : true;
+        const matchSize =
+          config.showSizes && availableSizes.length > 0
+            ? isPartial
+              ? selectedSize
+                ? v.size === selectedSize
+                : true
+              : v.size === selectedSize
+            : true;
+        const { model: vModel, extra: vExtra } = getModelAndExtra(v.complement);
+        const matchModel =
+          config.showModels && availableModels.length > 0
+            ? isPartial
+              ? selectedModel
+                ? vModel === selectedModel
+                : true
+              : vModel === selectedModel
+            : true;
+        const matchExtra =
+          config.showComplements && availableExtras.length > 0
+            ? isPartial
+              ? selectedExtra
+                ? vExtra === selectedExtra
+                : true
+              : vExtra === selectedExtra
+            : true;
+        const matchColor =
+          config.showColors && availableColors.length > 0
+            ? isPartial
+              ? selectedColor
+                ? v.color === selectedColor
+                : true
+              : v.color === selectedColor
+            : true;
+        return matchSize && matchModel && matchExtra && matchColor;
+      }) || (isPartial ? product.variants[0] : undefined)
+    );
+  };
 
-        // Retorna a primeira que combinar com as seleções atuais
-        return matchSize && matchComplement && matchColor;
-      }) || product.variants[0]
-    ); // Fallback: Pega a primeira variação se nada combinar
-  }, [
-    product?.variants,
-    activeVariant,
-    selectedSize,
-    selectedComplement,
-    selectedColor,
-  ]);
+  const activeVariant = useMemo(
+    () => findVariant(false),
+    [
+      product,
+      selectedColor,
+      selectedSize,
+      selectedModel,
+      selectedExtra,
+      availableSizes,
+      availableModels,
+      availableExtras,
+      availableColors,
+      config,
+    ],
+  );
+  const partialVariant = useMemo(
+    () => activeVariant || findVariant(true),
+    [
+      activeVariant,
+      product,
+      selectedSize,
+      selectedModel,
+      selectedExtra,
+      selectedColor,
+      config,
+    ],
+  );
 
+  // --- HANDLERS DOS CLICKS ---
   const handleSizeSelect = (size: string) => {
     setSearchParams((prev) => {
       prev.set("size", size);
-      if (availableComplements.length > 1) prev.delete("complement");
+      if (availableModels.length > 1) prev.delete("model");
+      if (availableExtras.length > 1) prev.delete("extra");
       if (availableColors.length > 1) prev.delete("color");
       return prev;
     });
   };
 
-  const handleComplementSelect = (complement: string) => {
+  const handleModelSelect = (model: string) => {
     setSearchParams((prev) => {
-      prev.set("complement", complement);
+      prev.set("model", model);
+      if (availableExtras.length > 1) prev.delete("extra");
+      if (availableColors.length > 1) prev.delete("color");
+      return prev;
+    });
+  };
+
+  const handleExtraSelect = (extra: string) => {
+    setSearchParams((prev) => {
+      prev.set("extra", extra);
       if (availableColors.length > 1) prev.delete("color");
       return prev;
     });
@@ -420,16 +521,12 @@ const ProductDetailsPage = () => {
     });
   };
 
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [partialVariant]);
+  useEffect(() => setCurrentImageIndex(0), [partialVariant]);
 
-  // --- LÓGICA DE IMAGENS ---
+  // --- LÓGICA DE IMAGENS E PREÇOS ---
   const displayImages = useMemo(() => {
     if (!product) return ["https://via.placeholder.com/400"];
     const images: string[] = [];
-
-    // 👉 TROCADO AQUI: Usa a partialVariant para buscar as fotos
     if (partialVariant?.images && partialVariant.images.length > 0) {
       partialVariant.images.forEach((img) => {
         if (img.url && !images.includes(img.url)) images.push(img.url);
@@ -437,7 +534,6 @@ const ProductDetailsPage = () => {
     } else if (product.mainImage) {
       images.push(product.mainImage);
     }
-
     if (product.images && product.images.length > 0) {
       product.images.forEach((img) => {
         if (img.url && !images.includes(img.url)) images.push(img.url);
@@ -472,7 +568,6 @@ const ProductDetailsPage = () => {
         </h1>
       </div>
     );
-
   if (!product)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -488,26 +583,21 @@ const ProductDetailsPage = () => {
       </div>
     );
 
-  const formatPrice = (price: number | string) => {
-    return Number(price).toLocaleString("pt-BR", {
+  const formatPrice = (price: number | string) =>
+    Number(price).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
-  };
-
   const displayPrice = partialVariant ? partialVariant.price : product.price;
   const currentStock = activeVariant ? activeVariant.stock : product.stock;
-
   const hasVariants = product.variants && product.variants.length > 0;
   const isFullySelected = hasVariants ? !!activeVariant : true;
   const isOutOfStock = isFullySelected && currentStock <= 0;
   const canPurchase = isFullySelected && !isOutOfStock;
 
   return (
-    <div className="w-ful mx-auto px-4 md:px-32 py-8 md:pt-32 pb-20">
+    <div className="w-full mx-auto px-4 md:px-32 py-8 md:pt-32 pb-20">
       <Toaster />
-
-      {/* Modal de Imagem Omitido por Limite de Tamanho - Mas a Galeria continua igual */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
           <button
@@ -589,7 +679,6 @@ const ProductDetailsPage = () => {
           </h1>
 
           <div className="text-3xl font-bold text-[#313b2f] mb-6 flex items-baseline gap-2">
-            {/* 👉 TROCADO AQUI: Sempre mostra o preço (mesmo que seja o da partialVariant) */}
             <span className="text-green-700">{formatPrice(displayPrice)}</span>
             {hasVariants && !isFullySelected && (
               <span className="text-sm text-gray-400 font-medium ml-2">
@@ -626,37 +715,67 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* 2. SELETOR DE COMPLEMENTO */}
-              {config.showComplements &&
+              {/* 👉 NOVO: 2. SELETOR DE MODELOS (Ex: Montanha, Nuvem) */}
+              {config.showModels &&
                 (availableSizes.length === 0 || selectedSize) &&
-                availableComplements.length > 0 && (
+                availableModels.length > 0 && (
                   <div className="animate-in fade-in duration-300">
                     <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                      Opção Extra: {selectedComplement || "Selecione"}{" "}
-                      {availableComplements.length === 1 && (
+                      Modelo: {selectedModel || "Selecione"}{" "}
+                      {availableModels.length === 1 && (
                         <span className="text-xs text-green-600 ml-2">
                           (Opção Única)
                         </span>
                       )}
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {availableComplements.map((comp) => (
+                      {availableModels.map((model) => (
                         <button
-                          key={comp as string}
-                          onClick={() => handleComplementSelect(comp as string)}
-                          className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedComplement === comp ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]" : "border-gray-200 text-gray-600 bg-white"}`}
+                          key={model}
+                          onClick={() => handleModelSelect(model)}
+                          className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedModel === model ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]" : "border-gray-200 text-gray-600 bg-white"}`}
                         >
-                          {comp}
+                          {model}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-              {/* 3. SELETOR DE COR */}
+              {/* 3. SELETOR DE COMPLEMENTO / KIT */}
+              {config.showComplements &&
+                (availableSizes.length === 0 || selectedSize) &&
+                (availableModels.length === 0 || selectedModel) &&
+                availableExtras.length > 0 && (
+                  <div className="animate-in fade-in duration-300">
+                    <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                      {config.showModels ? "Kit / Opcional" : "Opção Extra"}:{" "}
+                      {selectedExtra || "Selecione"}{" "}
+                      {availableExtras.length === 1 && (
+                        <span className="text-xs text-green-600 ml-2">
+                          (Opção Única)
+                        </span>
+                      )}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {availableExtras.map((extra) => (
+                        <button
+                          key={extra}
+                          onClick={() => handleExtraSelect(extra)}
+                          className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedExtra === extra ? "border-[#ffd639] bg-[#ffd639]/10 text-[#313b2f]" : "border-gray-200 text-gray-600 bg-white"}`}
+                        >
+                          {extra}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* 4. SELETOR DE COR */}
               {config.showColors &&
                 (availableSizes.length === 0 || selectedSize) &&
-                (availableComplements.length === 0 || selectedComplement) &&
+                (availableModels.length === 0 || selectedModel) &&
+                (availableExtras.length === 0 || selectedExtra) &&
                 availableColors.length > 0 && (
                   <div className="animate-in fade-in duration-300">
                     <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
@@ -669,11 +788,9 @@ const ProductDetailsPage = () => {
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {availableColors.map((color) => {
-                        // Busca a definição da cor baseada na paleta atual da categoria (CAMA ou LENCOL)
                         const colorDef = CAMA_COLORS?.find(
                           (c: any) => c.id === color || c === color,
                         );
-
                         return (
                           <button
                             key={color}
@@ -728,7 +845,6 @@ const ProductDetailsPage = () => {
         </div>
       </div>
 
-      {/* Descrição Abaixo */}
       <div className="prose prose-sm text-gray-600 mb-8 p-6 mt-6 bg-white rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-[#313b2f] mb-3">
           Detalhes do Produto

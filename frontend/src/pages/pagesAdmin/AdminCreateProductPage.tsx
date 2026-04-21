@@ -19,32 +19,82 @@ import {
   FaPuzzlePiece,
   FaShapes,
   FaBolt,
+  FaMagic,
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 
 // =========================================================
-// 🎨 PALETAS E MODELOS ESTÁTICOS
+// 💰 TABELAS DE PREÇO AUTOMÁTICAS DOS PROTETORES
 // =========================================================
-const MODELOS_PROTETORES = [
-  "Nuvem - Lado Direito",
-  "Nuvem - Lado Esquerdo",
-  "Montanha - Lado Direito",
-  "Montanha - Lado Esquerdo",
-  "Onda - Lado Direito",
-  "Onda - Lado Esquerdo",
-  "Pico - Lado Direito",
-  "Pico - Lado Esquerdo",
-  "Encaixe - Lado Direito",
-  "Encaixe - Lado Esquerdo",
-  "Cerca - Lado Direito",
-  "Cerca - Lado Esquerdo",
-];
+const TABELA_PADRAO: any = {
+  "Sem Kit": {
+    BERÇO: 750.87,
+    JUNIOR: 846.66,
+    SOLTEIRO: 970.26,
+    SOLTEIRAO: 994.98,
+    VIUVA: 1038.24,
+    CASAL: 1124.76,
+    QUEEN: 1217.46,
+    KING: 1337.97,
+  },
+  "Kit sem sensor": {
+    BERÇO: 929.77,
+    JUNIOR: 1031.46,
+    SOLTEIRO: 1163.06,
+    SOLTEIRAO: 1189.38,
+    VIUVA: 1235.44,
+    CASAL: 1327.56,
+    QUEEN: 1426.26,
+    KING: 1554.57,
+  },
+  "Kit com sensor": {
+    BERÇO: 1068.77,
+    JUNIOR: 1170.46,
+    SOLTEIRO: 1302.06,
+    SOLTEIRAO: 1328.38,
+    VIUVA: 1374.44,
+    CASAL: 1466.56,
+    QUEEN: 1565.26,
+    KING: 1693.57,
+  },
+};
 
-const PROTETOR_MONTANHA_COLORS = [
-  { id: "cz6-cz26-B8", Cor1: "CZ6", Cor2: "CZ26", Cor3: "B8" },
-  { id: "cz6-vd25-B8", Cor1: "CZ6", Cor2: "VD25", Cor3: "B8" },
-];
+const TABELA_ENCAIXE: any = {
+  "Sem espera": {
+    BERÇO: 974.43,
+    JUNIOR: 1098.74,
+    SOLTEIRO: 1259.14,
+    SOLTEIRAO: 1291.22,
+    VIUVA: 1347.36,
+    CASAL: 1459.64,
+    QUEEN: 1579.94,
+    KING: 1736.33,
+  },
+  "Kit sem sensor": {
+    BERÇO: 1153.03,
+    JUNIOR: 1283.54,
+    SOLTEIRO: 1411.94,
+    SOLTEIRAO: 1445.62,
+    VIUVA: 1504.56,
+    CASAL: 1622.44,
+    QUEEN: 1788.74,
+    KING: 1952.93,
+  },
+  "Kit com sensor": {
+    BERÇO: 1292.03,
+    JUNIOR: 1422.54,
+    SOLTEIRO: 1550.94,
+    SOLTEIRAO: 1584.62,
+    VIUVA: 1643.56,
+    CASAL: 1761.44,
+    QUEEN: 1927.74,
+    KING: 2091.93,
+  },
+};
 
+// =========================================================
+// 🎨 PALETAS E DADOS ESTÁTICOS
+// =========================================================
 const CAMA_COLORS = [
   { id: "cz6-cz26", Externo: "CZ6", Interno: "CZ26" },
   { id: "cz6-vd25", Externo: "CZ6", Interno: "VD25" },
@@ -85,6 +135,21 @@ const ITEM_SIZES = [
   "KING",
 ];
 
+const MODELOS_PROTETORES = [
+  "Nuvem - Lado Direito",
+  "Nuvem - Lado Esquerdo",
+  "Montanha - Lado Direito",
+  "Montanha - Lado Esquerdo",
+  "Onda - Lado Direito",
+  "Onda - Lado Esquerdo",
+  "Pico - Lado Direito",
+  "Pico - Lado Esquerdo",
+  "Encaixe - Lado Direito",
+  "Encaixe - Lado Esquerdo",
+  "Cerca - Lado Direito",
+  "Cerca - Lado Esquerdo",
+];
+
 // =========================================================
 // 🧩 TIPOS DO ESTADO
 // =========================================================
@@ -96,14 +161,12 @@ interface VariantRowDef {
   stock: string;
   sku: string;
 }
-
 interface VariantGroup {
   id: string;
   model: string;
   color: string;
   imageUrls: string[];
   rows: VariantRowDef[];
-  // Estados do Gerador em Massa
   showGenerator: boolean;
   genSizes: string[];
   genComplements: string;
@@ -120,13 +183,17 @@ const AdminCreateProductPage: React.FC = () => {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [mainImage, setMainImage] = useState("");
-
   const [groups, setGroups] = useState<VariantGroup[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  // Limpa os grupos se mudar a categoria
+  useEffect(() => {
+    setGroups([]);
+  }, [categoryId]);
 
   // =========================================================
   // 🧠 LEITURA DINÂMICA DAS REGRAS DA CATEGORIA
@@ -142,7 +209,6 @@ const AdminCreateProductPage: React.FC = () => {
       parsedConfig = null;
     }
   }
-
   const config = parsedConfig || {
     showSizes: true,
     showColors: true,
@@ -158,12 +224,53 @@ const AdminCreateProductPage: React.FC = () => {
   const basePalette =
     config.colorPalette === "LENCOL_COLORS" ? LENCOL_COLORS : CAMA_COLORS;
 
-  useEffect(() => {
-    setGroups([]);
-  }, [categoryId]);
+  // =========================================================
+  // ⚡ MÁGICA: INJETOR DE TABELA DE PROTETORES
+  // =========================================================
+  const handleAutoFillProtetor = (tipo: "PADRAO" | "ENCAIXE") => {
+    const tabela = tipo === "PADRAO" ? TABELA_PADRAO : TABELA_ENCAIXE;
+    const lados = ["Lado Direito", "Lado Esquerdo"];
+    const newRows: VariantRowDef[] = [];
+
+    lados.forEach((lado) => {
+      Object.entries(tabela).forEach(([extra, precosPorTamanho]) => {
+        Object.entries(precosPorTamanho as Record<string, number>).forEach(
+          ([tamanho, preco]) => {
+            newRows.push({
+              id: Math.random().toString(),
+              size: tamanho,
+              complement: `${lado} | ${extra}`, // Formata para o frontend dividir bonitinho
+              price: preco.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              }),
+              stock: "999", // Sob demanda
+              sku: "",
+            });
+          },
+        );
+      });
+    });
+
+    setGroups([
+      {
+        id: Math.random().toString(),
+        model: "",
+        color: "Cor Única",
+        imageUrls: [""],
+        rows: newRows,
+        showGenerator: false,
+        genSizes: [],
+        genComplements: "",
+        genPrice: "",
+        genStock: "999",
+      },
+    ]);
+
+    toast.success(`Tabela ${tipo} gerada com 48 variações!`);
+  };
 
   // =========================================================
-  // 🛠️ FUNÇÕES DE MANIPULAÇÃO
+  // 🛠️ FUNÇÕES DE MANIPULAÇÃO MANUAIS
   // =========================================================
   const handleAddGroup = () => {
     setGroups([
@@ -194,16 +301,12 @@ const AdminCreateProductPage: React.FC = () => {
 
   const handleRemoveGroup = (groupId: string) =>
     setGroups(groups.filter((g) => g.id !== groupId));
-
-  const handleGroupModelChange = (groupId: string, model: string) => {
+  const handleGroupModelChange = (groupId: string, model: string) =>
     setGroups(
       groups.map((g) => (g.id === groupId ? { ...g, model, color: "" } : g)),
     );
-  };
-
-  const handleGroupColorChange = (groupId: string, color: string) => {
+  const handleGroupColorChange = (groupId: string, color: string) =>
     setGroups(groups.map((g) => (g.id === groupId ? { ...g, color } : g)));
-  };
 
   const handleAddImageToGroup = (groupId: string) =>
     setGroups(
@@ -215,7 +318,7 @@ const AdminCreateProductPage: React.FC = () => {
     groupId: string,
     imgIndex: number,
     value: string,
-  ) => {
+  ) =>
     setGroups(
       groups.map((g) => {
         if (g.id === groupId) {
@@ -226,8 +329,7 @@ const AdminCreateProductPage: React.FC = () => {
         return g;
       }),
     );
-  };
-  const handleRemoveImageFromGroup = (groupId: string, imgIndex: number) => {
+  const handleRemoveImageFromGroup = (groupId: string, imgIndex: number) =>
     setGroups(
       groups.map((g) =>
         g.id === groupId
@@ -238,9 +340,8 @@ const AdminCreateProductPage: React.FC = () => {
           : g,
       ),
     );
-  };
 
-  const handleAddRowToGroup = (groupId: string) => {
+  const handleAddRowToGroup = (groupId: string) =>
     setGroups(
       groups.map((g) =>
         g.id === groupId
@@ -261,8 +362,7 @@ const AdminCreateProductPage: React.FC = () => {
           : g,
       ),
     );
-  };
-  const handleRemoveRowFromGroup = (groupId: string, rowId: string) => {
+  const handleRemoveRowFromGroup = (groupId: string, rowId: string) =>
     setGroups(
       groups.map((g) =>
         g.id === groupId
@@ -270,13 +370,12 @@ const AdminCreateProductPage: React.FC = () => {
           : g,
       ),
     );
-  };
   const handleRowChange = (
     groupId: string,
     rowId: string,
     field: keyof VariantRowDef,
     value: string,
-  ) => {
+  ) =>
     setGroups(
       groups.map((g) =>
         g.id === groupId
@@ -289,18 +388,15 @@ const AdminCreateProductPage: React.FC = () => {
           : g,
       ),
     );
-  };
 
-  // ⚡ FUNÇÕES DO GERADOR EM MASSA ⚡
-  const toggleGenerator = (groupId: string) => {
+  // ⚡ GERADOR EM MASSA
+  const toggleGenerator = (groupId: string) =>
     setGroups(
       groups.map((g) =>
         g.id === groupId ? { ...g, showGenerator: !g.showGenerator } : g,
       ),
     );
-  };
-
-  const handleGenSizeToggle = (groupId: string, size: string) => {
+  const handleGenSizeToggle = (groupId: string, size: string) =>
     setGroups(
       groups.map((g) => {
         if (g.id === groupId) {
@@ -315,8 +411,6 @@ const AdminCreateProductPage: React.FC = () => {
         return g;
       }),
     );
-  };
-
   const handleGenerateBulk = (groupId: string) => {
     setGroups(
       groups.map((g) => {
@@ -330,14 +424,12 @@ const AdminCreateProductPage: React.FC = () => {
                   .map((c) => c.trim())
                   .filter((c) => c !== "")
               : [""];
-
           const newRows: VariantRowDef[] = [];
-
           sizesToUse.forEach((size) => {
             compsToUse.forEach((comp) => {
               newRows.push({
                 id: Math.random().toString(),
-                size: size,
+                size,
                 complement: comp,
                 price: g.genPrice,
                 stock: g.genStock || "10",
@@ -345,21 +437,14 @@ const AdminCreateProductPage: React.FC = () => {
               });
             });
           });
-
           if (newRows.length === 0) {
-            toast.error("Selecione pelo menos um tamanho/opcional.");
+            toast.error("Selecione tamanhos/opcionais.");
             return g;
           }
-
-          toast.success(`${newRows.length} combinações geradas!`);
           return {
             ...g,
-            // Se a primeira linha estiver vazia, substitui. Se não, adiciona na lista.
             rows:
-              g.rows.length === 1 &&
-              !g.rows[0].price &&
-              !g.rows[0].size &&
-              !g.rows[0].complement
+              g.rows.length === 1 && !g.rows[0].price
                 ? newRows
                 : [...g.rows, ...newRows],
             showGenerator: false,
@@ -373,51 +458,42 @@ const AdminCreateProductPage: React.FC = () => {
     );
   };
 
+  const formatCurrencyInput = (value: string) => {
+    const onlyNumbers = value.replace(/\D/g, "");
+    if (!onlyNumbers) return "";
+    return (Number(onlyNumbers) / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+  const parseCurrency = (value: string) => {
+    if (!value) return 0;
+    return (
+      parseFloat(value.toString().replace(/\./g, "").replace(",", ".")) || 0
+    );
+  };
+
   // =========================================================
-  // 📤 ENVIO PARA O BANCO DE DADOS
+  // 📤 ENVIO PARA O BANCO
   // =========================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-
-    if (!categoryId) {
-      toast.error("Selecione uma categoria.");
-      setIsSaving(false);
-      return;
-    }
-    if (groups.length === 0) {
-      toast.error("Adicione pelo menos um bloco.");
-      setIsSaving(false);
-      return;
-    }
-
-    let hasError = false;
-    groups.forEach((g) => {
-      if (hasModels && !g.model) hasError = true;
-      if (hasColors && !g.color) hasError = true;
-      if (g.rows.length === 0) hasError = true;
-      g.rows.forEach((r) => {
-        if (hasSizes && !r.size) hasError = true;
-        if (!r.price || !r.stock) hasError = true;
-      });
-    });
-
-    if (hasError) {
-      toast.error("Preencha todos os campos obrigatórios nos blocos.");
+    if (!categoryId || groups.length === 0) {
+      toast.error("Preencha a categoria e adicione blocos.");
       setIsSaving(false);
       return;
     }
 
     const flatVariants: any[] = [];
-
     groups.forEach((group) => {
       const validImages = group.imageUrls
         .filter((url) => url.trim() !== "")
         .map((url) => ({ url }));
-
       group.rows.forEach((row) => {
         let finalComplement = row.complement;
-        if (hasModels) {
+        // Se preencheu modelo manualmente no dropdown
+        if (hasModels && group.model) {
           finalComplement =
             row.complement.trim() !== ""
               ? `${group.model} | ${row.complement}`
@@ -437,16 +513,14 @@ const AdminCreateProductPage: React.FC = () => {
       });
     });
 
-    const productData = {
-      name,
-      description,
-      categoryId: parseInt(categoryId),
-      mainImage,
-      variants: flatVariants,
-    };
-
     try {
-      await createProduct(productData);
+      await createProduct({
+        name,
+        description,
+        categoryId: parseInt(categoryId),
+        mainImage,
+        variants: flatVariants,
+      } as any);
       toast.success("Produto criado com sucesso!");
       setTimeout(() => navigate("/admin/products"), 1500);
     } catch (error: any) {
@@ -455,42 +529,23 @@ const AdminCreateProductPage: React.FC = () => {
     }
   };
 
-  const formatCurrencyInput = (value: string) => {
-    const onlyNumbers = value.replace(/\D/g, "");
-    if (!onlyNumbers) return "";
-    return (Number(onlyNumbers) / 100).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-  const parseCurrency = (value: string) => {
-    if (!value) return 0;
-    return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
-  };
-
   return (
     <div className="w-full max-w-5xl mx-auto p-4 md:p-8 pt-24 pb-20">
       <Toaster />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-[#313b2f] flex items-center gap-3">
-            <FaBoxOpen className="text-[#ffd639]" /> Novo Produto
-          </h1>
-        </div>
+        <h1 className="text-3xl font-bold text-[#313b2f] flex items-center gap-3">
+          <FaBoxOpen className="text-[#ffd639]" /> Novo Produto
+        </h1>
         <button
           onClick={() => navigate("/admin/products")}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-bold shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-lg font-bold shadow-sm"
         >
           <FaArrowLeft /> Voltar
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* INFORMAÇÕES BÁSICAS */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-[#313b2f] mb-4 flex items-center gap-2 pb-2 border-b border-gray-50">
-            <FaTag className="text-gray-400" /> Informações Básicas
-          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-1">
@@ -501,7 +556,8 @@ const AdminCreateProductPage: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639]"
+                placeholder="Ex: Protetor de Parede Nuvem"
               />
             </div>
             <div className="md:col-span-2">
@@ -513,7 +569,7 @@ const AdminCreateProductPage: React.FC = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 required
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639]"
               />
             </div>
             <div className="md:col-span-2">
@@ -524,7 +580,7 @@ const AdminCreateProductPage: React.FC = () => {
                 type="text"
                 value={mainImage}
                 onChange={(e) => setMainImage(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639]"
               />
             </div>
             <div className="md:col-span-2">
@@ -535,9 +591,9 @@ const AdminCreateProductPage: React.FC = () => {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] outline-none bg-yellow-50 font-bold"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ffd639] bg-yellow-50 font-bold"
               >
-                <option value="">Selecione para liberar as regras...</option>
+                <option value="">Selecione...</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -548,376 +604,373 @@ const AdminCreateProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* BLOCOS DINÂMICOS */}
         {categoryId && (
           <div className="space-y-6 animate-in fade-in">
-            <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2 pb-2 border-b border-gray-200">
-              <FaLayerGroup className="text-[#ffd639]" /> Variações do Produto
-            </h2>
-
-            {groups.map((group) => {
-              const isMontanha = group.model.toLowerCase().includes("montanha");
-              const activePalette = isMontanha
-                ? PROTETOR_MONTANHA_COLORS
-                : basePalette;
-
-              return (
-                <div
-                  key={group.id}
-                  className="bg-white border-2 border-[#313b2f]/10 rounded-2xl shadow-sm overflow-hidden relative"
+            {/* 🪄 BOTÕES MÁGICOS (SÓ APARECEM SE A CATEGORIA FOR PROTETOR DE PAREDE) */}
+            {selectedCategoryObj?.name?.toLowerCase().includes("parede") && (
+              <div className="flex gap-4 p-4 mb-2 bg-blue-50 border border-blue-100 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <button
+                  type="button"
+                  onClick={() => handleAutoFillProtetor("PADRAO")}
+                  className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 shadow-sm transition-all"
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveGroup(group.id)}
-                    className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-2 rounded-lg"
-                    title="Remover Bloco"
-                  >
-                    <FaTrash />
-                  </button>
+                  <FaMagic /> Gerar Preços Protetor Padrão (Nuvem, Montanha...)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAutoFillProtetor("ENCAIXE")}
+                  className="flex-1 py-3 bg-purple-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-purple-700 shadow-sm transition-all"
+                >
+                  <FaMagic /> Gerar Preços Protetor Encaixe
+                </button>
+              </div>
+            )}
 
-                  <div className="bg-gray-50 p-4 border-b border-gray-100 flex flex-col md:flex-row gap-6">
-                    {hasModels && (
-                      <div className="flex-1">
-                        <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
-                          <FaShapes className="text-[#ffd639]" /> Modelo
-                        </label>
-                        <select
-                          value={group.model}
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="bg-white border-2 border-[#313b2f]/10 rounded-2xl shadow-sm overflow-hidden relative"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleRemoveGroup(group.id)}
+                  className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-2 rounded-lg"
+                >
+                  <FaTrash />
+                </button>
+
+                <div className="bg-gray-50 p-4 border-b border-gray-100 flex flex-col md:flex-row gap-6">
+                  {hasModels && (
+                    <div className="flex-1">
+                      <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                        <FaShapes className="text-[#ffd639]" /> Modelo (Opcional
+                        se auto-gerado)
+                      </label>
+                      <select
+                        value={group.model}
+                        onChange={(e) =>
+                          handleGroupModelChange(group.id, e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                      >
+                        <option value="">Selecione se for manual...</option>
+                        {MODELOS_PROTETORES.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {hasColors && (
+                    <div className="flex-1">
+                      <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                        <FaPalette className="text-[#ffd639]" />
+                        {selectedCategoryObj?.name
+                          ?.toLowerCase()
+                          .includes("parede")
+                          ? "Cor no Banco (Deixe Cor Única)"
+                          : "Cor"}
+                      </label>
+
+                      {/* Se for Protetor, mostra o campo de texto livre. Senão, mostra a lista de cores (basePalette) */}
+                      {selectedCategoryObj?.name
+                        ?.toLowerCase()
+                        .includes("parede") ? (
+                        <input
+                          type="text"
+                          value={group.color}
                           onChange={(e) =>
-                            handleGroupModelChange(group.id, e.target.value)
+                            handleGroupColorChange(group.id, e.target.value)
                           }
-                          required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
-                        >
-                          <option value="">Selecione o modelo...</option>
-                          {MODELOS_PROTETORES.map((m) => (
-                            <option key={m} value={m}>
-                              {m}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    {hasColors && (
-                      <div className="flex-1">
-                        <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
-                          <FaPalette className="text-[#ffd639]" /> Cor
-                        </label>
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          placeholder="Cor Única"
+                        />
+                      ) : (
                         <select
                           value={group.color}
                           onChange={(e) =>
                             handleGroupColorChange(group.id, e.target.value)
                           }
                           required
-                          disabled={hasModels && !group.model}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none disabled:bg-gray-200"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#ffd639] outline-none"
                         >
-                          <option value="">
-                            {hasModels && !group.model
-                              ? "Escolha o modelo 1º"
-                              : "Selecione a cor..."}
-                          </option>
-                          {activePalette.map((c: any) => {
-                            if (typeof c === "string")
-                              return (
-                                <option key={c} value={c}>
-                                  {c}
-                                </option>
-                              );
-                            if (c.Cor3)
-                              return (
-                                <option key={c.id} value={c.id}>
-                                  Ext: {c.Cor1} / Int: {c.Cor2} / Det: {c.Cor3}
-                                </option>
-                              );
-                            return (
-                              <option key={c.id} value={c.id}>
-                                Ext: {c.Externo} / Int: {c.Interno}
-                              </option>
-                            );
-                          })}
+                          <option value="">Selecione a cor...</option>
+                          {basePalette.map((c: any) => (
+                            <option
+                              key={typeof c === "string" ? c : c.id}
+                              value={typeof c === "string" ? c : c.id}
+                            >
+                              {typeof c === "string"
+                                ? c
+                                : `Ext: ${c.Externo} / Int: ${c.Interno}`}
+                            </option>
+                          ))}
                         </select>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
-                        <FaImage className="text-[#ffd639]" /> Fotos
-                        Compartilhadas
-                      </label>
-                      <div className="space-y-2">
-                        {group.imageUrls.map((url, imgIdx) => (
-                          <div key={imgIdx} className="flex gap-2">
-                            <input
-                              type="text"
-                              value={url}
-                              onChange={(e) =>
-                                handleImageChangeInGroup(
-                                  group.id,
-                                  imgIdx,
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="URL da Imagem"
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#ffd639] outline-none"
-                            />
-                            {group.imageUrls.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleRemoveImageFromGroup(group.id, imgIdx)
-                                }
-                                className="p-2 bg-red-100 text-red-600 rounded-lg"
-                              >
-                                <FaTrash size={12} />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => handleAddImageToGroup(group.id)}
-                          className="text-xs text-blue-600 font-bold hover:underline"
-                        >
-                          + Adicionar foto
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* DADOS DA VARIAÇÃO */}
-                  <div className="p-4 bg-white">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 border-b border-gray-100 pb-3">
-                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <FaRuler className="text-gray-400" /> Detalhes (Preço,
-                        Estoque)
-                      </label>
-                      {(hasSizes || hasComplements) && (
-                        <button
-                          type="button"
-                          onClick={() => toggleGenerator(group.id)}
-                          className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-purple-200 transition-colors"
-                        >
-                          <FaBolt /> Gerador Múltiplo
-                        </button>
                       )}
                     </div>
+                  )}
+                  <div className="flex-1">
+                    <label className="text-sm font-bold text-[#313b2f] mb-2 flex items-center gap-2">
+                      <FaImage className="text-[#ffd639]" /> Fotos
+                      Compartilhadas
+                    </label>
+                    {group.imageUrls.map((url, imgIdx) => (
+                      <div key={imgIdx} className="flex gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={url}
+                          onChange={(e) =>
+                            handleImageChangeInGroup(
+                              group.id,
+                              imgIdx,
+                              e.target.value,
+                            )
+                          }
+                          placeholder="URL"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        />
+                        {group.imageUrls.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveImageFromGroup(group.id, imgIdx)
+                            }
+                            className="p-2 text-red-600"
+                          >
+                            <FaTrash size={12} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => handleAddImageToGroup(group.id)}
+                      className="text-xs text-blue-600 font-bold"
+                    >
+                      + Adicionar foto
+                    </button>
+                  </div>
+                </div>
 
-                    {/* ⚡ PAINEL DO GERADOR EM MASSA ⚡ */}
-                    {group.showGenerator && (
-                      <div className="mb-4 bg-purple-50 border border-purple-100 p-4 rounded-xl animate-in fade-in slide-in-from-top-2">
-                        <h4 className="font-bold text-purple-800 text-sm mb-3 flex items-center gap-2">
-                          <FaBolt /> Gerar Múltiplas Linhas Automaticamente
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          {hasSizes && (
-                            <div>
-                              <label className="block text-xs font-bold text-purple-600 uppercase mb-2">
-                                Marque os Tamanhos:
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {ITEM_SIZES.slice(1).map((s) => (
-                                  <label
-                                    key={s}
-                                    className="flex items-center gap-1 bg-white px-2 py-1 border border-purple-200 rounded text-xs cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={group.genSizes.includes(s)}
-                                      onChange={() =>
-                                        handleGenSizeToggle(group.id, s)
-                                      }
-                                      className="text-purple-600 focus:ring-purple-500 rounded-sm"
-                                    />{" "}
-                                    {s}
-                                  </label>
-                                ))}
-                              </div>
+                <div className="p-4 bg-white">
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                      <FaRuler className="text-gray-400" /> Detalhes da Variação
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => toggleGenerator(group.id)}
+                      className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-purple-200"
+                    >
+                      <FaBolt /> Gerador Múltiplo
+                    </button>
+                  </div>
+
+                  {group.showGenerator && (
+                    <div className="mb-6 bg-purple-50 border border-purple-100 p-4 rounded-xl">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {hasSizes && (
+                          <div>
+                            <label className="block text-xs font-bold text-purple-600 mb-2">
+                              TAMANHOS:
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {ITEM_SIZES.slice(1).map((s) => (
+                                <label
+                                  key={s}
+                                  className="flex items-center gap-1 bg-white px-2 py-1 border border-purple-200 rounded text-xs cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={group.genSizes.includes(s)}
+                                    onChange={() =>
+                                      handleGenSizeToggle(group.id, s)
+                                    }
+                                    className="text-purple-600"
+                                  />{" "}
+                                  {s}
+                                </label>
+                              ))}
                             </div>
-                          )}
-                          {hasComplements && (
-                            <div>
-                              <label className="block text-xs font-bold text-purple-600 uppercase mb-2">
-                                Opções Extras (Separe por vírgula):
-                              </label>
-                              <input
-                                type="text"
-                                value={group.genComplements}
-                                onChange={(e) =>
-                                  setGroups(
-                                    groups.map((g) =>
-                                      g.id === group.id
-                                        ? {
-                                            ...g,
-                                            genComplements: e.target.value,
-                                          }
-                                        : g,
-                                    ),
-                                  )
-                                }
-                                placeholder="Ex: Com Sensor, Sem Sensor, Sem Kit"
-                                className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-400"
-                              />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-4 items-end">
-                          <div className="flex-1">
-                            <label className="block text-xs font-bold text-purple-600 uppercase mb-1">
-                              Preço Base (R$):
+                          </div>
+                        )}
+                        {hasComplements && (
+                          <div>
+                            <label className="block text-xs font-bold text-purple-600 mb-2">
+                              OPÇÕES (Separe por vírgula):
                             </label>
                             <input
                               type="text"
-                              value={group.genPrice}
+                              value={group.genComplements}
                               onChange={(e) =>
                                 setGroups(
                                   groups.map((g) =>
                                     g.id === group.id
-                                      ? {
-                                          ...g,
-                                          genPrice: formatCurrencyInput(
-                                            e.target.value,
-                                          ),
-                                        }
+                                      ? { ...g, genComplements: e.target.value }
                                       : g,
                                   ),
                                 )
                               }
-                              placeholder="0,00"
-                              className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm bg-white"
+                              placeholder="Com Sensor, Sem Sensor"
+                              className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm"
                             />
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleGenerateBulk(group.id)}
-                            className="bg-purple-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
-                          >
-                            Gerar Agora!
-                          </button>
-                        </div>
+                        )}
                       </div>
-                    )}
-
-                    <div className="space-y-3">
-                      {group.rows.map((row) => (
-                        <div
-                          key={row.id}
-                          className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
+                      <div className="flex gap-4 items-end">
+                        <div className="flex-1">
+                          <label className="block text-xs font-bold text-purple-600 mb-1">
+                            PREÇO BASE:
+                          </label>
+                          <input
+                            type="text"
+                            value={group.genPrice}
+                            onChange={(e) =>
+                              setGroups(
+                                groups.map((g) =>
+                                  g.id === group.id
+                                    ? {
+                                        ...g,
+                                        genPrice: formatCurrencyInput(
+                                          e.target.value,
+                                        ),
+                                      }
+                                    : g,
+                                ),
+                              )
+                            }
+                            placeholder="0,00"
+                            className="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleGenerateBulk(group.id)}
+                          className="bg-purple-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-purple-700"
                         >
-                          {hasSizes && (
-                            <select
-                              value={row.size}
+                          Gerar Agora
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    {group.rows.map((row) => (
+                      <div
+                        key={row.id}
+                        className="flex flex-col md:flex-row gap-3 items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
+                      >
+                        {hasSizes && (
+                          <select
+                            value={row.size}
+                            onChange={(e) =>
+                              handleRowChange(
+                                group.id,
+                                row.id,
+                                "size",
+                                e.target.value,
+                              )
+                            }
+                            required
+                            className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                          >
+                            <option value="">Tamanho...</option>
+                            {ITEM_SIZES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        {hasComplements && (
+                          <div className="flex items-center w-full md:w-48 relative">
+                            <span className="absolute left-3 text-gray-400">
+                              <FaPuzzlePiece size={12} />
+                            </span>
+                            <input
+                              type="text"
+                              value={row.complement}
                               onChange={(e) =>
                                 handleRowChange(
                                   group.id,
                                   row.id,
-                                  "size",
+                                  "complement",
                                   e.target.value,
                                 )
                               }
-                              required
-                              className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
-                            >
-                              <option value="">Tamanho...</option>
-                              {ITEM_SIZES.map((s) => (
-                                <option key={s} value={s}>
-                                  {s}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                          {hasComplements && (
-                            <div className="flex items-center w-full md:w-40 relative">
-                              <span className="absolute left-3 text-gray-400">
-                                <FaPuzzlePiece size={12} />
-                              </span>
-                              <input
-                                type="text"
-                                value={row.complement}
-                                onChange={(e) =>
-                                  handleRowChange(
-                                    group.id,
-                                    row.id,
-                                    "complement",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="Opção Extra"
-                                className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm"
-                              />
-                            </div>
-                          )}
-                          <input
-                            type="text"
-                            value={row.price}
-                            onChange={(e) =>
-                              handleRowChange(
-                                group.id,
-                                row.id,
-                                "price",
-                                formatCurrencyInput(e.target.value),
-                              )
-                            }
-                            required
-                            placeholder="Preço R$"
-                            className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-yellow-50/50"
-                          />
-                          <input
-                            type="number"
-                            value={row.stock}
-                            onChange={(e) =>
-                              handleRowChange(
-                                group.id,
-                                row.id,
-                                "stock",
-                                e.target.value,
-                              )
-                            }
-                            required
-                            placeholder="Estoque"
-                            className="w-full md:w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={row.sku}
-                            onChange={(e) =>
-                              handleRowChange(
-                                group.id,
-                                row.id,
-                                "sku",
-                                e.target.value,
-                              )
-                            }
-                            placeholder="SKU (OpcIONAL)"
-                            className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoveRowFromGroup(group.id, row.id)
-                            }
-                            disabled={group.rows.length === 1}
-                            className="w-full md:w-auto p-2 text-red-400 disabled:opacity-30 flex justify-center"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    {(hasSizes || hasComplements) && (
-                      <button
-                        type="button"
-                        onClick={() => handleAddRowToGroup(group.id)}
-                        className="mt-3 text-sm font-bold text-[#313b2f] bg-[#ffd639]/20 px-4 py-2 rounded-lg flex items-center gap-2"
-                      >
-                        <FaPlusCircle /> Linha manual
-                      </button>
-                    )}
+                              placeholder="Extra"
+                              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm"
+                            />
+                          </div>
+                        )}
+                        <input
+                          type="text"
+                          value={row.price}
+                          onChange={(e) =>
+                            handleRowChange(
+                              group.id,
+                              row.id,
+                              "price",
+                              formatCurrencyInput(e.target.value),
+                            )
+                          }
+                          required
+                          className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-yellow-50/50"
+                          placeholder="Preço R$"
+                        />
+                        <input
+                          type="number"
+                          value={row.stock}
+                          onChange={(e) =>
+                            handleRowChange(
+                              group.id,
+                              row.id,
+                              "stock",
+                              e.target.value,
+                            )
+                          }
+                          required
+                          className="w-full md:w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                          placeholder="Estoque"
+                        />
+                        <input
+                          type="text"
+                          value={row.sku}
+                          onChange={(e) =>
+                            handleRowChange(
+                              group.id,
+                              row.id,
+                              "sku",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full md:w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                          placeholder="SKU"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRemoveRowFromGroup(group.id, row.id)
+                          }
+                          disabled={group.rows.length === 1}
+                          className="text-red-400 disabled:opacity-30 p-2"
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    ))}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddRowToGroup(group.id)}
+                    className="mt-3 text-xs font-bold text-[#313b2f] bg-[#ffd639]/20 px-4 py-2 rounded-lg flex items-center gap-2"
+                  >
+                    <FaPlusCircle /> Linha manual
+                  </button>
                 </div>
-              );
-            })}
-
+              </div>
+            ))}
             <button
               type="button"
               onClick={handleAddGroup}

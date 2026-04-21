@@ -114,8 +114,8 @@ function App() {
         <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/showroom" element={<EnvironmentPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/loja" element={<ProductsPage />} />
-        <Route path="/cart" element={<CartPage />} />
+        {/* <Route path="/loja" element={<ProductsPage />} /> */}
+        {/* <Route path="/cart" element={<CartPage />} /> */}
         <Route
           path="/monte-seu-protetor"
           element={<ProtetorDeParedeProductPage />}
