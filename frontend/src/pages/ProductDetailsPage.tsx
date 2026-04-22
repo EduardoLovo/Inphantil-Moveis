@@ -639,7 +639,7 @@ const ProductDetailsPage = () => {
             {hasVariants && !isFullySelected && (
               <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse">
                 <FaExclamationCircle className="text-[#313b2f]" /> Conclua sua
-                seleção abaixo
+                seleção para atualizar a foto
               </div>
             )}
             {isOutOfStock && (
