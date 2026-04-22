@@ -9,7 +9,6 @@ import {
   FaPlus,
   FaImage,
   FaBoxOpen,
-  FaTag,
   FaLayerGroup,
   FaSpinner,
   FaPalette,
@@ -19,6 +18,7 @@ import {
   FaPuzzlePiece,
   FaShapes,
   FaBolt,
+  FaStar, // 👈 Importamos a estrelinha aqui!
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -94,6 +94,7 @@ interface VariantRowDef {
   price: string;
   stock: string;
   sku: string;
+  isFeatured: boolean; // 👈 Adicionamos a propriedade aqui
 }
 
 interface VariantGroup {
@@ -130,17 +131,14 @@ const AdminEditProductPage: React.FC = () => {
       if (id) {
         const prod = await getProductById(Number(id));
         if (prod) {
-          // Colocamos o || "" para garantir que sempre será uma string (texto)
           setName(prod.name || "");
           setDescription(prod.description || "");
           setCategoryId(prod.categoryId ? prod.categoryId.toString() : "");
           setMainImage(prod.mainImage || "");
 
-          // 🧠 MÁGICA: Reagrupa as variantes vindas do banco em Blocos (Groups)
           const grouped: { [key: string]: VariantGroup } = {};
 
           prod.variants.forEach((v: any) => {
-            // Separa Modelo e Extra se houver a barrinha |
             let model = "";
             let extra = v.complement || "";
             if (v.complement?.includes(" | ")) {
@@ -182,6 +180,7 @@ const AdminEditProductPage: React.FC = () => {
               price: v.price.toString().replace(".", ","),
               stock: v.stock.toString(),
               sku: v.sku || "",
+              isFeatured: v.isFeatured || false, // 👈 Carrega do banco de dados
             });
           });
 
@@ -220,7 +219,7 @@ const AdminEditProductPage: React.FC = () => {
     config.colorPalette === "LENCOL_COLORS" ? LENCOL_COLORS : CAMA_COLORS;
 
   // =========================================================
-  // 🛠️ FUNÇÕES DE MANIPULAÇÃO (Copiadas do Create)
+  // 🛠️ FUNÇÕES DE MANIPULAÇÃO
   // =========================================================
   const handleAddGroup = () => {
     setGroups([
@@ -238,6 +237,7 @@ const AdminEditProductPage: React.FC = () => {
             price: "",
             stock: "10",
             sku: "",
+            isFeatured: false, // 👈 Nova linha começa como false
           },
         ],
         showGenerator: false,
@@ -307,6 +307,7 @@ const AdminEditProductPage: React.FC = () => {
                   price: "",
                   stock: "10",
                   sku: "",
+                  isFeatured: false, // 👈 Nova linha manual
                 },
               ],
             }
@@ -321,11 +322,13 @@ const AdminEditProductPage: React.FC = () => {
           : g,
       ),
     );
+
+  // 👈 Atualizamos para aceitar boolean na mudança
   const handleRowChange = (
     groupId: string,
     rowId: string,
     field: keyof VariantRowDef,
-    value: string,
+    value: string | boolean,
   ) => {
     setGroups(
       groups.map((g) =>
@@ -388,6 +391,7 @@ const AdminEditProductPage: React.FC = () => {
                 price: g.genPrice,
                 stock: g.genStock || "10",
                 sku: "",
+                isFeatured: false, // 👈 Geradas começam como falso
               });
             });
           });
@@ -451,6 +455,7 @@ const AdminEditProductPage: React.FC = () => {
           price: parseCurrency(row.price),
           stock: parseInt(row.stock) || 0,
           sku: row.sku || undefined,
+          isFeatured: row.isFeatured, // 👈 Mandando pro banco
           images: validImages,
         });
       });
@@ -536,7 +541,7 @@ const AdminEditProductPage: React.FC = () => {
           </div>
         </div>
 
-        {/* VARIAÇÕES (IGUAL AO CREATE) */}
+        {/* VARIAÇÕES */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-[#313b2f] flex items-center gap-2 pb-2 border-b border-gray-200">
             <FaLayerGroup className="text-[#ffd639]" /> Variações Agrupadas
@@ -764,6 +769,27 @@ const AdminEditProductPage: React.FC = () => {
                         key={row.id}
                         className="flex flex-col md:flex-row gap-3 items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
                       >
+                        {/* 👈 BOTÃO DE FAVORITO ADICIONADO AQUI */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRowChange(
+                              group.id,
+                              row.id,
+                              "isFeatured",
+                              !row.isFeatured,
+                            )
+                          }
+                          className={`p-2 rounded-lg transition-colors ${
+                            row.isFeatured
+                              ? "text-[#ffd639] bg-yellow-50 border border-yellow-200"
+                              : "text-gray-300 hover:text-[#ffd639] border border-transparent"
+                          }`}
+                          title="Destacar na Home"
+                        >
+                          <FaStar size={18} />
+                        </button>
+
                         {hasSizes && (
                           <select
                             value={row.size}
