@@ -204,7 +204,7 @@ const HomePage = () => {
         <main className="pb-10">
           {/* --- HERO SECTION --- */}
           <motion.section
-            className="relative w-full  overflow-hidden flex items-center justify-center bg-gray-300"
+            className="relative w-full  overflow-hidden flex items-center justify-center bg-gray-300 shadow-lg"
             initial="hidden"
             animate="visible"
             variants={fadeIn}

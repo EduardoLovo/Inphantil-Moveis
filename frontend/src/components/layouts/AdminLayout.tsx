@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate } from "react-router-dom";
 import { useAuthStore } from "../../store/AuthStore";
+import { api } from "../../services/api"; // 👈 Importamos a API para buscar os pedidos
 import {
   FaBox,
   FaListAlt,
@@ -134,6 +135,32 @@ const CALCULADORAS = [
 
 const AdminLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
+  const [paidOrdersCount, setPaidOrdersCount] = useState(0); // 👈 Estado para a bolinha
+
+  // 👈 Efeito que busca os pedidos e conta os PAGOS
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchOrdersCount = async () => {
+      try {
+        const response = await api.get("/orders");
+        // Filtra apenas os pedidos com status "PAID"
+        const count = response.data.filter(
+          (order: any) => order.status === "PAID",
+        ).length;
+        setPaidOrdersCount(count);
+      } catch (error) {
+        console.error("Erro ao buscar contagem de pedidos", error);
+      }
+    };
+
+    // Busca imediatamente ao abrir o painel
+    fetchOrdersCount();
+
+    // Atualiza a bolinha automaticamente a cada 60 segundos
+    const intervalId = setInterval(fetchOrdersCount, 60000);
+    return () => clearInterval(intervalId);
+  }, [user]);
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -145,7 +172,7 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen md:pt-20 bg-gray-100">
-      <aside className="w-64  bg-white pt-20 border-r border-gray-200 fixed inset-y-0 left-0 h-screen hidden md:flex flex-col z-20">
+      <aside className="w-64 bg-white pt-20 border-r border-gray-200 fixed inset-y-0 left-0 h-screen hidden md:flex flex-col z-20">
         {/* Cabeçalho do Menu (Fixo) */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-center shrink-0">
           <h2 className="text-xl font-bold text-gray-800">
@@ -170,7 +197,18 @@ const AdminLayout: React.FC = () => {
                 }`
               }
             >
-              <item.icon className="text-lg shrink-0" />
+              {/* 👈 Isolamos o ícone em uma div relativa para pendurar a bolinha */}
+              <div className="relative flex items-center justify-center shrink-0">
+                <item.icon className="text-lg" />
+
+                {/* 👈 Se o item for "Pedidos" e tiver pedido pago, mostra a bolinha! */}
+                {item.title === "Pedidos" && paidOrdersCount > 0 && (
+                  <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold shadow-sm animate-pulse">
+                    {paidOrdersCount > 99 ? "99+" : paidOrdersCount}
+                  </span>
+                )}
+              </div>
+
               <span>{item.title}</span>
             </NavLink>
           ))}
@@ -223,7 +261,7 @@ const AdminLayout: React.FC = () => {
       {/* --- CONTEÚDO PRINCIPAL (DIREITA) --- */}
       <main className="flex-1 md:ml-64 overflow-x-hidden w-full flex flex-col min-h-screen">
         {/* Wrapper do conteúdo com padding e crescimento para empurrar o footer */}
-        <div className="flex-1 p-6 md:p-8  ">
+        <div className="flex-1 p-6 md:p-8">
           <Outlet />
         </div>
       </main>
