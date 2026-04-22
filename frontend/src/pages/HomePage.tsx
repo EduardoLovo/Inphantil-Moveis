@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   FaCamera,
-  FaChevronDown,
+  // FaChevronDown,
   FaInstagram,
   FaTimes,
   FaWhatsapp,
@@ -17,7 +17,7 @@ import "swiper/css/pagination";
 
 import { useProductStore } from "../store/ProductStore";
 import { api } from "../services/api";
-import home from "../assets/home.jpeg";
+import home from "../assets/home.png";
 const LOGO_IMAGE = "/logo.svg";
 
 // Tipos
@@ -153,12 +153,12 @@ const HomePage = () => {
     });
   };
 
-  const handleScrollDown = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: "smooth",
-    });
-  };
+  // const handleScrollDown = () => {
+  //   window.scrollTo({
+  //     top: window.innerHeight,
+  //     behavior: "smooth",
+  //   });
+  // };
 
   // Variantes de Animação
   const slideInLeft: Variants = {
@@ -204,7 +204,7 @@ const HomePage = () => {
         <main className="pb-10">
           {/* --- HERO SECTION --- */}
           <motion.section
-            className="relative w-full h-[50vh] md:h-screen overflow-hidden flex items-center justify-center bg-gray-300"
+            className="relative w-full  overflow-hidden flex items-center justify-center bg-gray-300"
             initial="hidden"
             animate="visible"
             variants={fadeIn}
@@ -213,7 +213,7 @@ const HomePage = () => {
             <motion.img
               src={home}
               alt="Camas Montessorianas"
-              className="w-full h-full object-cover object-center md:object-[0_-0px]"
+              className="w-full md:h-[550px] h-[300px] object-cover object-center md:object-[0_0px]"
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 1.5 }}
@@ -221,7 +221,7 @@ const HomePage = () => {
 
             {/* Overlay Escuro/Texto */}
             <motion.div
-              className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-24 md:pt-48 bg-black/10"
+              className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-2 md:pt-48 bg-black/10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -241,7 +241,7 @@ const HomePage = () => {
               />
 
               {/* Seta Animada */}
-              <motion.div
+              {/* <motion.div
                 className="absolute bottom-10 md:bottom-10 cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
                 onClick={handleScrollDown}
                 initial={{ opacity: 0 }}
@@ -257,7 +257,7 @@ const HomePage = () => {
                 }}
               >
                 <FaChevronDown className="text-[#ffffbc] text-4xl" />
-              </motion.div>
+              </motion.div> */}
             </motion.div>
           </motion.section>
 
