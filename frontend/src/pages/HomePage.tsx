@@ -343,7 +343,7 @@ const HomePage = () => {
 
             <div className="flex justify-center mt-6">
               <Link
-                to="/products"
+                to="/loja"
                 className="inline-flex items-center justify-center px-8 py-3 bg-[#313b2f] text-white font-bold rounded-full hover:bg-[#ffd639] hover:text-[#313b2f] hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
                 Ver Catálogo Completo
