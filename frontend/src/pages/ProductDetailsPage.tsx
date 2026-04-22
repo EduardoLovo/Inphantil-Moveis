@@ -515,7 +515,7 @@ const ProductDetailsPage = () => {
         {/* --- COLUNA ESQUERDA: GALERIA --- */}
         <div className="flex flex-col gap-4 h-fit lg:sticky lg:top-32 z-10 items-center justify-center">
           <div
-            className="w-[80vw] md:w-[30vw] aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center cursor-zoom-in"
+            className="w-[80vw] md:w-[30vw] aspect-square relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex items-center justify-center cursor-zoom-in shrink-0"
             onClick={() => setIsModalOpen(true)}
           >
             <img
@@ -537,13 +537,16 @@ const ProductDetailsPage = () => {
               </div>
             )}
           </div>
+
           {displayImages.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            // 👉 LIMITAMOS A LARGURA AQUI E ADICIONAMOS O SNAP-X
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide w-[80vw] md:w-[30vw] snap-x snap-mandatory">
               {displayImages.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? "border-[#ffd639]" : "border-transparent opacity-70"}`}
+                  // 👉 ADICIONAMOS O SNAP-START NO BOTÃO
+                  className={`flex-shrink-0 w-20 h-20 snap-start rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? "border-[#ffd639]" : "border-transparent opacity-70"}`}
                 >
                   <img src={imgUrl} className="w-full h-full object-cover" />
                 </button>
@@ -638,7 +641,7 @@ const ProductDetailsPage = () => {
                       </span>
                     )}
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap justify-center sm:justify-start">
                     {availableExtras.map((extra) => (
                       <button
                         key={extra}
@@ -663,7 +666,7 @@ const ProductDetailsPage = () => {
                       </span>
                     )}
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap justify-center sm:justify-start">
                     {availableColors.map((color) => {
                       const colorDef = CAMA_COLORS?.find(
                         (c: any) => c.id === color || c === color,
@@ -672,23 +675,29 @@ const ProductDetailsPage = () => {
                         <button
                           key={color}
                           onClick={() => handleColorSelect(color)}
-                          className={`flex items-center w-56 gap-3 px-3 py-2 rounded-lg border-2 font-medium transition-all ${selectedColor === color ? "border-[#313b2f] bg-[#313b2f] text-white" : "border-gray-200 text-gray-600 bg-white"}`}
+                          className={`flex items-center w-full sm:w-56 gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg border-2 font-medium transition-all ${
+                            selectedColor === color
+                              ? "border-[#313b2f] bg-[#313b2f] text-white"
+                              : "border-gray-200 text-gray-600 bg-white"
+                          }`}
                         >
                           {colorDef?.hexExterno ? (
                             <>
                               <span
-                                className="w-8 h-8 rounded-full border border-gray-400/30"
+                                className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 rounded-full border border-gray-400/30"
                                 style={{
                                   background: `linear-gradient(to bottom, ${colorDef.hexExterno} 50%, ${colorDef.hexInterno} 50%)`,
                                 }}
                               ></span>
-                              <span className="text-sm">
-                                Ext: {colorDef.Externo} / Int:{" "}
-                                {colorDef.Interno}
+                              <span className="text-[10px] sm:text-sm text-left leading-tight">
+                                Ext: {colorDef.Externo}{" "}
+                                <span className="hidden sm:inline">/</span>{" "}
+                                <br className="block sm:hidden" />
+                                Int: {colorDef.Interno}
                               </span>
                             </>
                           ) : (
-                            <span>{color}</span>
+                            <span className="text-xs sm:text-sm">{color}</span>
                           )}
                         </button>
                       );
