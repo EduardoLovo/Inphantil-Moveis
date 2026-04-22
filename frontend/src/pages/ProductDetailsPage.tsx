@@ -682,7 +682,7 @@ const ProductDetailsPage = () => {
             <span className="text-green-700">{formatPrice(displayPrice)}</span>
             {hasVariants && !isFullySelected && (
               <span className="text-sm text-gray-400 font-medium ml-2">
-                (A partir de)
+                {/* (A partir de) */}
               </span>
             )}
           </div>

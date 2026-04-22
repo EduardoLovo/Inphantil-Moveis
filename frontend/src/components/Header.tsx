@@ -139,7 +139,7 @@ const Header = () => {
                       to="/loja"
                       className="px-6 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3"
                     >
-                      <FaListUl className="text-gray-400" /> Todos Produtos
+                      <FaListUl className="text-gray-400" /> Loja
                     </Link>
                     <Link
                       to="/showroom"
@@ -407,10 +407,10 @@ const Header = () => {
               Catálogos
             </p>
             <Link
-              to="/products"
+              to="/loja"
               className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
             >
-              <FaListUl /> Todos Produtos
+              <FaListUl /> Loja
             </Link>
             <Link
               to="/showroom"
