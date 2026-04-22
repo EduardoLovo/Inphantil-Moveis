@@ -9,8 +9,6 @@ import {
   FaPlus,
   FaImage,
   FaBoxOpen,
-  FaTag,
-  FaLayerGroup,
   FaSpinner,
   FaPalette,
   FaRuler,

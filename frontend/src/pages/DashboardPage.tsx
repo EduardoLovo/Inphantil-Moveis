@@ -254,7 +254,7 @@ const DashboardPage = () => {
                   Você ainda não fez nenhum pedido.
                 </p>
                 <Link
-                  to="/products"
+                  to="/loja"
                   className="inline-block mt-3 text-blue-600 font-bold hover:underline"
                 >
                   Ir para a Loja
