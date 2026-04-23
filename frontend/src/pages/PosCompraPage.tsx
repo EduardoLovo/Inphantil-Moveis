@@ -4,6 +4,16 @@ import { api } from "../services/api"; // Sua configuração do Axios
 import { FaCheckCircle, FaSpinner, FaCopy } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 
+// =========================================================
+// 🌐 DECLARAÇÃO GLOBAL PARA O GOOGLE TAG MANAGER
+// Isso evita que o TypeScript dê erro reclamando do dataLayer
+// =========================================================
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
 const PosCompraPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,12 +28,58 @@ const PosCompraPage: React.FC = () => {
 
   const [orderStatus, setOrderStatus] = useState<string>("PENDING");
   const [isChecking, setIsChecking] = useState(false);
+  const [hasFiredPixel, setHasFiredPixel] = useState(false); // 👈 Controle para disparar a conversão apenas 1 vez
 
   // =========================================================
-  // ⏱️ A MÁGICA DO POLLING (VERIFICANDO O PAGAMENTO)
+  // 🎯 DISPARO DO EVENTO DE COMPRA (GTM / FACEBOOK / GOOGLE)
   // =========================================================
+  useEffect(() => {
+    // Verifica se a tela de "Sucesso" está aparecendo (Cartão aprovado ou Pix pago)
+    const isPaid = state?.method === "credit" || orderStatus === "PAID";
+
+    // Se está pago, tem ID do pedido, e ainda não disparamos o pixel...
+    if (isPaid && state?.orderId && !hasFiredPixel) {
+      const firePurchaseEvent = async () => {
+        try {
+          // 1. Buscamos os dados completos do pedido no banco para ter o valor e itens exatos
+          const response = await api.get(`/orders/${state.orderId}`);
+          const order = response.data;
+
+          // 2. Disparamos o evento "purchase" para o Google Tag Manager
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: "purchase",
+            ecommerce: {
+              transaction_id: order.id.toString(),
+              value: Number(order.total) || 0,
+              currency: "BRL",
+              items:
+                order.items?.map((item: any) => ({
+                  item_name: item.product?.name || "Produto da Loja",
+                  item_id: item.product?.id?.toString() || "",
+                  price: Number(item.price) || 0,
+                  quantity: item.quantity || 1,
+                })) || [],
+            },
+          });
+
+          // 3. Marca como disparado para não repetir se o cliente recarregar a página
+          setHasFiredPixel(true);
+          console.log("✅ Evento de Compra enviado ao Gestor de Tráfego!");
+        } catch (error) {
+          console.error(
+            "Erro ao buscar dados do pedido para o rastreamento:",
+            error,
+          );
+        }
+      };
+
+      firePurchaseEvent();
+    }
+  }, [state?.method, orderStatus, state?.orderId, hasFiredPixel]);
+
   // =========================================================
-  // ⏱️ A MÁGICA DO POLLING (VERIFICANDO O PAGAMENTO)
+  // ⏱️ A MÁGICA DO POLLING (VERIFICANDO O PAGAMENTO DO PIX)
   // =========================================================
   useEffect(() => {
     // Se não for Pix ou já estiver pago, não precisa fazer o cronômetro
@@ -50,13 +106,12 @@ const PosCompraPage: React.FC = () => {
       }
     };
 
-    // 👉 AUMENTAMOS PARA 10 SEGUNDOS (10000ms) para não sobrecarregar o seu servidor
+    // AUMENTAMOS PARA 10 SEGUNDOS (10000ms) para não sobrecarregar o seu servidor
     const intervalId = setInterval(checkPaymentStatus, 10000);
 
     // Quando o usuário sair da página ou o pedido for pago, nós "destruímos" o cronômetro
     return () => clearInterval(intervalId);
   }, [state?.orderId, state?.method, orderStatus]);
-  // =========================================================
 
   const handleCopyPix = () => {
     if (state?.pixCode) {

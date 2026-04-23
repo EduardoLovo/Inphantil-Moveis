@@ -10,6 +10,9 @@ import {
   FaTag,
   FaTimes,
   FaExclamationCircle,
+  FaChevronLeft, // 👈 Adicionado
+  FaChevronRight, // 👈 Adicionado
+  FaSearchPlus, // 👈 Adicionado
 } from "react-icons/fa";
 import { CiShoppingCart } from "react-icons/ci";
 import toast, { Toaster } from "react-hot-toast";
@@ -194,8 +197,15 @@ const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
+  // Estados da Galeria e Modal
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false); // 👈 Novo estado de Zoom
+
+  // Reseta o zoom quando a foto muda ou o modal fecha
+  useEffect(() => {
+    setIsZoomed(false);
+  }, [currentImageIndex, isModalOpen]);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -249,7 +259,6 @@ const ProductDetailsPage = () => {
   // --- 2. FILTRO DE MODELOS ---
   const availableModels = useMemo(() => {
     if (!product?.variants || !config.showModels) return [];
-    // 👈 REMOVIDO: A dependência do Tamanho estar selecionado
     const uniqueModels = Array.from(
       new Set(
         product.variants
@@ -263,7 +272,6 @@ const ProductDetailsPage = () => {
   // --- 3. FILTRO DE EXTRAS ---
   const availableExtras = useMemo(() => {
     if (!product?.variants || !config.showComplements) return [];
-    // 👈 REMOVIDO: A dependência do Tamanho/Modelo estarem selecionados
     const uniqueExtras = Array.from(
       new Set(
         product.variants
@@ -271,7 +279,6 @@ const ProductDetailsPage = () => {
           .filter(Boolean),
       ),
     ) as string[];
-
     return uniqueExtras.sort((a, b) => {
       const indexA = COMPLEMENT_ORDER.indexOf(a.toLowerCase().trim());
       const indexB = COMPLEMENT_ORDER.indexOf(b.toLowerCase().trim());
@@ -284,7 +291,6 @@ const ProductDetailsPage = () => {
   // --- 4. FILTRO DE CORES ---
   const availableColors = useMemo(() => {
     if (!product?.variants || !config.showColors) return [];
-    // 👈 REMOVIDO: A dependência dos outros estarem selecionados
     const uniqueColors = Array.from(
       new Set(product.variants.map((v) => v.color).filter(Boolean)),
     );
@@ -292,7 +298,7 @@ const ProductDetailsPage = () => {
   }, [product?.variants, config.showColors]);
 
   // =========================================================
-  // ⚡ AUTO-SELEÇÃO INTELIGENTE (Apenas Opções Únicas)
+  // ⚡ AUTO-SELEÇÃO INTELIGENTE
   // =========================================================
   useEffect(() => {
     const currentSize = searchParams.get("size");
@@ -352,7 +358,7 @@ const ProductDetailsPage = () => {
     config,
   ]);
 
-  // --- VARIAÇÃO ATIVA (Exige tudo selecionado) ---
+  // --- VARIAÇÃO ATIVA ---
   const activeVariant = useMemo(() => {
     if (!product?.variants) return undefined;
     return product.variants.find((v) => {
@@ -375,39 +381,30 @@ const ProductDetailsPage = () => {
   ]);
 
   // --- HANDLERS DOS CLICKS ---
-  // 👈 REMOVIDO as linhas que apagavam as outras opções (prev.delete...)
-  const handleSizeSelect = (size: string) => {
+  const handleSizeSelect = (size: string) =>
     setSearchParams((prev) => {
       prev.set("size", size);
       return prev;
     });
-  };
-
-  const handleModelSelect = (model: string) => {
+  const handleModelSelect = (model: string) =>
     setSearchParams((prev) => {
       prev.set("model", model);
       return prev;
     });
-  };
-
-  const handleExtraSelect = (extra: string) => {
+  const handleExtraSelect = (extra: string) =>
     setSearchParams((prev) => {
       prev.set("extra", extra);
       return prev;
     });
-  };
-
-  const handleColorSelect = (color: string) => {
+  const handleColorSelect = (color: string) =>
     setSearchParams((prev) => {
       prev.set("color", color);
       return prev;
     });
-  };
 
   useEffect(() => setCurrentImageIndex(0), [activeVariant]);
 
   // --- LÓGICA DE IMAGENS ---
-  // 👉 AGORA USA A VARIAÇÃO ATIVA (A foto só muda quando escolher tudo)
   const displayImages = useMemo(() => {
     if (!product) return ["https://via.placeholder.com/400"];
     const images: string[] = [];
@@ -443,6 +440,21 @@ const ProductDetailsPage = () => {
     });
   };
 
+  // Funções de navegação do Modal
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Impede que o clique feche o modal
+    setCurrentImageIndex((prev) =>
+      prev === displayImages.length - 1 ? 0 : prev + 1,
+    );
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? displayImages.length - 1 : prev - 1,
+    );
+  };
+
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-gray-500 animate-pulse">
@@ -473,7 +485,6 @@ const ProductDetailsPage = () => {
       currency: "BRL",
     });
 
-  // 👉 PREÇO FINAL (Só exibe o exato se tiver activeVariant, senão mostra o preço base do produto)
   const displayPrice = activeVariant ? activeVariant.price : product.price;
   const currentStock = activeVariant ? activeVariant.stock : product.stock;
 
@@ -485,21 +496,86 @@ const ProductDetailsPage = () => {
   return (
     <div className="w-full mx-auto px-4 md:px-32 py-8 md:pt-32 pb-20">
       <Toaster />
+
+      {/* ========================================================= */}
+      {/* 🔍 NOVO MODAL DE IMAGEM (LIGHTBOX)                        */}
+      {/* ========================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm transition-opacity"
+          onClick={(e) => {
+            // Fecha se clicar no fundo escuro
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
           <button
             onClick={() => setIsModalOpen(false)}
-            className="absolute top-6 right-6 text-white hover:text-[#ffd639] transition-colors p-2 z-[101]"
+            className="absolute top-6 right-6 text-white/70 hover:text-[#ffd639] transition-colors p-2 z-[101]"
           >
             <FaTimes size={32} />
           </button>
-          <img
-            src={displayImages[currentImageIndex]}
-            alt={product.name}
-            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-          />
+
+          {/* Dica visual de Zoom */}
+          {!isZoomed && (
+            <div className="absolute top-6 left-6 text-white/50 flex items-center gap-2 text-sm z-[101] pointer-events-none">
+              <FaSearchPlus /> Clique na imagem para dar zoom
+            </div>
+          )}
+
+          {/* Seta Voltar */}
+          {displayImages.length > 1 && (
+            <button
+              onClick={prevImage}
+              className="absolute left-4 md:left-10 text-white/70 hover:text-[#ffd639] transition-colors p-4 z-[101] bg-black/20 rounded-full hover:bg-black/40"
+            >
+              <FaChevronLeft size={28} />
+            </button>
+          )}
+
+          {/* Imagem (Com Container com Scroll nativo para Pan quando der Zoom) */}
+          <div
+            className="relative flex items-center justify-center max-w-full max-h-full overflow-auto scrollbar-hide pointer-events-none"
+            onClick={(e) => {
+              // Se clicar no container da imagem mas fora da imagem em si, também fecha
+              if (e.target === e.currentTarget) setIsModalOpen(false);
+            }}
+          >
+            <img
+              src={displayImages[currentImageIndex]}
+              alt={product.name}
+              className={`max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 pointer-events-auto ${isZoomed ? "scale-150 md:scale-[2] cursor-zoom-out" : "scale-100 cursor-zoom-in object-contain"}`}
+              style={{ transformOrigin: "center center" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsZoomed(!isZoomed);
+              }}
+            />
+          </div>
+
+          {/* Seta Avançar */}
+          {displayImages.length > 1 && (
+            <button
+              onClick={nextImage}
+              className="absolute right-4 md:right-10 text-white/70 hover:text-[#ffd639] transition-colors p-4 z-[101] bg-black/20 rounded-full hover:bg-black/40"
+            >
+              <FaChevronRight size={28} />
+            </button>
+          )}
+
+          {/* Indicador de Bolinhas (Dots) no mobile/desktop */}
+          {displayImages.length > 1 && (
+            <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-[101] pointer-events-none">
+              {displayImages.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-2 h-2 rounded-full transition-all ${currentImageIndex === idx ? "bg-[#ffd639] scale-125" : "bg-white/30"}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
+      {/* ========================================================= */}
 
       <div className="mb-8">
         <Link
@@ -524,7 +600,7 @@ const ProductDetailsPage = () => {
               className="w-full transition-transform duration-500 hover:scale-105"
             />
             {hasVariants && !isFullySelected && (
-              <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse">
+              <div className="absolute w-full md:w-[30vw] bg-[#ffd639]/20 border border-[#ffd639] text-[#313b2f] flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl shadow-sm animate-pulse pointer-events-none">
                 <FaExclamationCircle className="text-[#313b2f]" /> Conclua sua
                 seleção abaixo
               </div>
@@ -539,13 +615,11 @@ const ProductDetailsPage = () => {
           </div>
 
           {displayImages.length > 1 && (
-            // 👉 LIMITAMOS A LARGURA AQUI E ADICIONAMOS O SNAP-X
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide w-[80vw] md:w-[30vw] snap-x snap-mandatory">
               {displayImages.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  // 👉 ADICIONAMOS O SNAP-START NO BOTÃO
                   className={`flex-shrink-0 w-20 h-20 snap-start rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === idx ? "border-[#ffd639]" : "border-transparent opacity-70"}`}
                 >
                   <img src={imgUrl} className="w-full h-full object-cover" />
@@ -579,7 +653,6 @@ const ProductDetailsPage = () => {
           {/* Seletores de Variantes Dinâmicos */}
           {hasVariants && (
             <div className="mb-8 space-y-6 border-b border-gray-100 pb-6">
-              {/* 1. SELETOR DE TAMANHO */}
               {config.showSizes && availableSizes.length > 0 && (
                 <div>
                   <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
@@ -604,7 +677,6 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* 2. SELETOR DE MODELOS (Ex: Montanha, Nuvem) */}
               {config.showModels && availableModels.length > 0 && (
                 <div className="animate-in fade-in duration-300">
                   <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
@@ -629,7 +701,6 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* 3. SELETOR DE COMPLEMENTO / KIT */}
               {config.showComplements && availableExtras.length > 0 && (
                 <div className="animate-in fade-in duration-300">
                   <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
@@ -655,7 +726,6 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* 4. SELETOR DE COR */}
               {config.showColors && availableColors.length > 0 && (
                 <div className="animate-in fade-in duration-300">
                   <span className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
@@ -675,11 +745,7 @@ const ProductDetailsPage = () => {
                         <button
                           key={color}
                           onClick={() => handleColorSelect(color)}
-                          className={`flex items-center w-full sm:w-56 gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg border-2 font-medium transition-all ${
-                            selectedColor === color
-                              ? "border-[#313b2f] bg-[#313b2f] text-white"
-                              : "border-gray-200 text-gray-600 bg-white"
-                          }`}
+                          className={`flex items-center w-full sm:w-56 gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg border-2 font-medium transition-all ${selectedColor === color ? "border-[#313b2f] bg-[#313b2f] text-white" : "border-gray-200 text-gray-600 bg-white"}`}
                         >
                           {colorDef?.hexExterno ? (
                             <>

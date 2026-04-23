@@ -3,6 +3,7 @@ import { useOrderStore } from "../../store/OrderStore";
 import { useAuthStore } from "../../store/AuthStore";
 import { Navigate, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   FaShoppingCart,
   FaTrashAlt,
@@ -77,72 +78,169 @@ const AdminOrdersPage: React.FC = () => {
   const handleDownloadPDF = (order: any) => {
     const doc = new jsPDF();
 
-    // Cabeçalho
-    doc.setFontSize(22);
-    doc.text("Inphantil Móveis - Produção", 105, 20, { align: "center" });
-
-    doc.setFontSize(16);
-    doc.text(`Pedido #${order.id}`, 105, 30, { align: "center" });
-    doc.line(20, 35, 190, 35); // Linha separadora
-
-    // Dados do Pedido e Cliente
-    doc.setFontSize(12);
-    doc.text(`Cliente: ${order.user?.name || "Cliente Desconhecido"}`, 20, 50);
-    doc.text(`Email: ${order.user?.email || "Sem email"}`, 20, 60);
-    doc.text(
-      `Data do Pedido: ${new Date(order.createdAt).toLocaleDateString("pt-BR")}`,
-      20,
-      70,
-    );
-    doc.text(
-      `Status Atual: ${STATUS_LABELS[order.status] || order.status}`,
-      20,
-      80,
-    );
-
-    // Lista de Itens
-    doc.setFontSize(14);
-    doc.text("Itens para Produção:", 20, 100);
-
-    doc.setFontSize(12);
-    let yPos = 110;
-
-    order.items?.forEach((item: any) => {
-      const itemName = item.product?.name || "Produto não encontrado";
-
-      // FORMATAÇÃO DA VARIANTE PARA O PDF
-      let variantText = "";
-      if (item.variant) {
-        const details = [];
-        if (item.variant.color && item.variant.color !== "Cor Única") {
-          details.push(`Cor: ${item.variant.color}`);
-        }
-        if (item.variant.size) {
-          details.push(`Tam: ${item.variant.size}`);
-        }
-        if (details.length > 0) {
-          variantText = ` (${details.join(" | ")})`;
-        }
-      }
-
-      const itemText = `${item.quantity}x ${itemName}${variantText}`;
-
-      const splitText = doc.splitTextToSize(itemText, 170);
-      doc.text(splitText, 20, yPos);
-      yPos += 7 * splitText.length + 3;
-    });
-
-    // Total e Rodapé
-    doc.line(20, yPos + 5, 190, yPos + 5);
-    doc.setFontSize(14);
-    doc.text(`Total do Pedido: ${formatPrice(order.total)}`, 20, yPos + 20);
+    // --- CABEÇALHO ---
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(49, 59, 47); // Verde Inphantil
+    doc.text("INPHANTIL MÓVEIS", 105, 20, { align: "center" });
 
     doc.setFontSize(10);
-    doc.text("Documento gerado para controle interno.", 105, 280, {
-      align: "center",
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text("Ordem de Produção e Separação", 105, 26, { align: "center" });
+
+    // --- CAIXA DE INFORMAÇÕES (PEDIDO, CLIENTE E ENDEREÇO) ---
+    doc.setFillColor(249, 250, 251); // Fundo cinza clarinho
+    doc.rect(15, 35, 180, 50, "F");
+
+    doc.setFontSize(10);
+    doc.setTextColor(40);
+
+    // Coluna 1: Dados do Pedido
+    doc.setFont("helvetica", "bold");
+    doc.text("DADOS DO PEDIDO", 20, 42);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Pedido: #${order.id}`, 20, 48);
+    doc.text(
+      `Data: ${new Date(order.createdAt).toLocaleDateString("pt-BR")}`,
+      20,
+      54,
+    );
+    doc.text(`Status: ${order.status}`, 20, 60); // Se tiver STATUS_LABELS pode usar
+
+    // Coluna 2: Dados do Cliente
+    doc.setFont("helvetica", "bold");
+    doc.text("CLIENTE", 100, 42);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Nome: ${order.user?.name || "Não informado"}`, 100, 48);
+    doc.text(`Email: ${order.user?.email || "Não informado"}`, 100, 54);
+    doc.text(
+      `Telefone: ${order.user?.phone || order.phone || "Não informado"}`,
+      100,
+      60,
+    );
+
+    // Linha Inteira: Endereço de Entrega
+    doc.setFont("helvetica", "bold");
+    doc.text("ENDEREÇO DE ENTREGA", 20, 72);
+    doc.setFont("helvetica", "normal");
+
+    // 🧠 Lógica para encontrar o endereço (Tenta vários nomes de variáveis comuns)
+    const addr = order.shippingAddress || order.address || {};
+    const rua = addr.street || addr.logradouro || "Endereço não cadastrado";
+    const num = addr.number || addr.numero || "S/N";
+    const comp =
+      addr.complement || addr.complemento
+        ? ` - ${addr.complement || addr.complemento}`
+        : "";
+    const bairro = addr.neighborhood || addr.bairro || "";
+    const cidade = addr.city || addr.cidade || "";
+    const estado = addr.state || addr.estado || "";
+    const cep = addr.zipCode || addr.cep || "";
+
+    doc.text(`${rua}, ${num}${comp}`, 20, 78);
+    doc.text(`${bairro} - ${cidade}/${estado} - CEP: ${cep}`, 20, 84);
+
+    // --- TABELA DE ITENS ---
+    const tableColumn = [
+      "Qtd",
+      "Produto / Especificações",
+      "V. Unitário",
+      "V. Total",
+    ];
+    const tableRows: any[] = [];
+
+    order.items?.forEach((item: any) => {
+      const itemName = item.product?.name || "Produto Desconhecido";
+
+      // 🧠 MÁGICA DA VARIANTE: Procura em todos os cantos possíveis!
+      const size = item.size || item.variant?.size || item.productVariant?.size;
+      const color =
+        item.color || item.variant?.color || item.productVariant?.color;
+      const extra =
+        item.complement ||
+        item.variant?.complement ||
+        item.productVariant?.complement;
+
+      const details = [];
+      if (size && size !== "UNICO" && size !== "Tamanho Único") {
+        details.push(`Tamanho: ${size}`);
+      }
+      if (color && color !== "Cor Única") {
+        details.push(`Cor: ${color}`);
+      }
+      if (extra) {
+        details.push(`Opções: ${extra}`);
+      }
+
+      const description =
+        details.length > 0
+          ? `${itemName}\n>> ${details.join(" | ")}`
+          : itemName;
+
+      // Calcula o total da linha
+      const price = Number(item.price) || 0;
+      const qty = Number(item.quantity) || 1;
+
+      tableRows.push([
+        `${qty}x`,
+        description,
+        price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+        (price * qty).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }),
+      ]);
     });
 
-    doc.save(`pedido_${order.id}_producao.pdf`);
+    // Gerando a tabela com AutoTable
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 95,
+      theme: "striped",
+      headStyles: {
+        fillColor: [49, 59, 47],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: { cellWidth: 15, halign: "center" },
+        1: { cellWidth: "auto" },
+        2: { cellWidth: 30, halign: "right" },
+        3: { cellWidth: 30, halign: "right" },
+      },
+      styles: { fontSize: 10, cellPadding: 4, valign: "middle" },
+      didDrawPage: (data) => {
+        // Rodapé no final de cada página
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(
+          "Inphantil Móveis - Uso Interno da Produção",
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10,
+        );
+      },
+    });
+
+    // --- TOTAL FINAL DO PEDIDO ---
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+
+    // Caixinha de Resumo Financeiro
+    doc.setFillColor(249, 250, 251);
+    doc.rect(130, finalY - 5, 65, 12, "F");
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(49, 59, 47);
+    const totalFormatado = Number(order.total || 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+    doc.text(`TOTAL: ${totalFormatado}`, 190, finalY + 3, { align: "right" });
+
+    // --- SALVAR ---
+    doc.save(`Pedido_${order.id}_Producao.pdf`);
   };
 
   const handleStatusChange = (
