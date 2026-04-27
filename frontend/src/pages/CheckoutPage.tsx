@@ -511,6 +511,27 @@ const CheckoutPage: React.FC = () => {
 
               <div className="flex justify-between text-gray-500 text-sm items-center">
                 <span className="flex items-center gap-1.5">
+                  <FaTruck /> Prazo para produção{" "}
+                </span>
+                <span className="font-medium text-[#313b2f] text-right">
+                  {!selectedAddress ? (
+                    "Selecione o endereço"
+                  ) : shippingData.requiresQuote ? (
+                    <span className="text-orange-500 font-bold">
+                      Sob Consulta
+                    </span>
+                  ) : (
+                    <>
+                      <span className="block  text-gray-500 font-normal">
+                        Até 10 dias úteis
+                      </span>
+                    </>
+                  )}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-gray-500 text-sm items-center">
+                <span className="flex items-center gap-1.5">
                   <FaTruck /> Frete{" "}
                   {selectedAddress && !shippingData.requiresQuote
                     ? `(${shippingData.percentage}%)`
@@ -527,7 +548,7 @@ const CheckoutPage: React.FC = () => {
                     <>
                       {formatPrice(shippingCost)}
                       <span className="block text-xs text-green-500 font-normal">
-                        Prazo: {shippingData.days} dias úteis
+                        Prazo: {shippingData.days} dias úteis após o envio
                       </span>
                     </>
                   )}
