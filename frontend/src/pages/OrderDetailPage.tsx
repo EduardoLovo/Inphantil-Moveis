@@ -20,6 +20,7 @@ interface OrderDetail {
   createdAt: string;
   total: number | string;
   shippingCost: number | string;
+  shippingDays?: number;
   paymentMethod: string;
   status:
     | "PENDING"
@@ -430,12 +431,37 @@ const DetalhesPedidoPage: React.FC = () => {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Frete</span>
-                <span className="text-green-600">
-                  {formatPrice(order.shippingCost || 0)}{" "}
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1.5">
+                  <FaTools className="text-gray-400" /> Produção
+                </span>
+                <span className="font-medium text-gray-800 text-right">
+                  Até 10 dias úteis
                 </span>
               </div>
+
+              {/* 👉 ATUALIZADO: Frete com prazo */}
+              <div className="flex justify-between items-start">
+                <span className="flex items-center gap-1.5 mt-0.5">
+                  <FaTruck className="text-gray-400" /> Frete
+                </span>
+                <div className="text-right">
+                  <span className="text-green-600 font-bold block">
+                    {Number(order.shippingCost) === 0 ? (
+                      <span className="text-orange-500">Sob Consulta</span>
+                    ) : (
+                      formatPrice(order.shippingCost || 0)
+                    )}
+                  </span>
+                  {/* Exibe os dias do frete se existir no banco de dados */}
+                  {order.shippingDays && (
+                    <span className="block text-xs text-gray-500 mt-0.5">
+                      Prazo: {order.shippingDays} dias úteis
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
                 <span className="font-bold text-gray-800">Total Pago</span>
                 <span className="text-xl font-bold text-[#313b2f]">
