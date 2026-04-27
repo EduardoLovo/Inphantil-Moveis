@@ -62,8 +62,6 @@ const PosCompraPage: React.FC = () => {
                 })) || [],
             },
           });
-
-          // 3. Marca como disparado para não repetir se o cliente recarregar a página
           setHasFiredPixel(true);
           console.log("✅ Evento de Compra enviado ao Gestor de Tráfego!");
         } catch (error) {

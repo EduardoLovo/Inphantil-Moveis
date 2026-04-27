@@ -336,6 +336,9 @@ export class OrderService {
     }
 
     async updateStatus(id: number, updateDto: UpdateOrderStatusDto) {
+        console.log(
+            `\n\n🚨 [ATENÇÃO] Alguém mandou atualizar o pedido ${id} para o status: ${updateDto.status}`,
+        );
         const order = await this.prisma.order.findUnique({
             where: { id },
             select: { status: true },
@@ -343,6 +346,10 @@ export class OrderService {
 
         if (!order)
             throw new NotFoundException(`Pedido com ID ${id} não encontrado.`);
+
+        console.log(
+            `👉 Status ANTIGO no banco: ${order.status} | NOVO status recebido: ${updateDto.status}`,
+        );
 
         const updatedOrder = await this.prisma.order.update({
             where: { id },
@@ -359,6 +366,9 @@ export class OrderService {
             updateDto.status === 'PAID' &&
             updatedOrder.user
         ) {
+            console.log(
+                '✅ ENTROU NO IF! Vai mandar o email e enviar pro Seven agora!',
+            );
             this.mailService
                 .sendPaymentApprovedEmail(
                     updatedOrder,
@@ -378,6 +388,29 @@ export class OrderService {
                     updatedOrder.user,
                     updatedOrder.address,
                 )
+                .then(async (respostaDoSeven) => {
+                    console.log('🟢 RESPOSTA OFICIAL DO SEVEN:');
+                    console.dir(respostaDoSeven, { depth: null });
+
+                    // 👉 PEGAMOS O ID USANDO O NOME QUE O SEVEN NOS MOSTROU: 'pedidoId'
+                    const idInternoSeven = respostaDoSeven?.dados?.pedidoId;
+
+                    if (idInternoSeven) {
+                        // SALVAMOS NO BANCO DE DADOS NA NOVA COLUNA
+                        await this.prisma.order.update({
+                            where: { id: updatedOrder.id },
+                            data: { sevenId: Number(idInternoSeven) },
+                        });
+
+                        console.log(
+                            `🔗 Sucesso! Pedido Site #${updatedOrder.id} vinculado ao ID Seven #${idInternoSeven}`,
+                        );
+                    } else {
+                        console.warn(
+                            `⚠️ O Seven não devolveu o pedidoId para o pedido #${updatedOrder.id}`,
+                        );
+                    }
+                })
                 .catch((err: any) =>
                     console.error(
                         `Erro crítico na integração com o Seven:`,

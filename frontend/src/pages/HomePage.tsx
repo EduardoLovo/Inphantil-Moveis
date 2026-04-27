@@ -227,7 +227,7 @@ const HomePage = () => {
               transition={{ delay: 0.5, duration: 0.8 }}
             >
               <h2 className="text-[#ffffbc] text-3xl md:text-5xl font-bold mb-4 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] ">
-                Bem-vindo(a) ao Mundo das Camas Montessorianas!
+                Bem-vindo(a) a Inphantil!
               </h2>
               <p className="text-[#ffffbc] text-base md:text-xl max-w-2xl drop-shadow-[0_0_8px_rgba(0,0,0,0.9)] mb-6">
                 O melhor lugar para decorar o quartinho do seu bebê com carinho

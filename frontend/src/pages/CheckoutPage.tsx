@@ -526,7 +526,7 @@ const CheckoutPage: React.FC = () => {
                   ) : (
                     <>
                       {formatPrice(shippingCost)}
-                      <span className="block text-xs text-gray-400 font-normal">
+                      <span className="block text-xs text-green-500 font-normal">
                         Prazo: {shippingData.days} dias úteis
                       </span>
                     </>

@@ -9,6 +9,8 @@ import {
     ParseIntPipe,
     Patch,
     Delete,
+    Res,
+    NotFoundException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -24,6 +26,8 @@ import { Role, User } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { Response } from 'express';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -33,6 +37,7 @@ export class OrderController {
     constructor(
         private readonly orderService: OrderService,
         private readonly sevenService: SevenService,
+        private readonly prisma: PrismaService, // 👈 Adicione esta linha
     ) {}
 
     @Post()
@@ -97,8 +102,55 @@ export class OrderController {
 
     // Não esqueça de importar o SevenService no construtor do controller se ele não estiver lá!
     @Get(':id/nota-fiscal')
-    async baixarNF(@Param('id') id: string) {
-        // Converte o ID da URL para número (ou mantém string, dependendo de como você salva)
-        return this.sevenService.baixarNotaFiscal(id);
+    async downloadNF(@Param('id') id: string, @Res() res: Response) {
+        // 1. Primeiro buscamos o pedido no banco para pegar o sevenId
+        const order = await this.prisma.order.findUnique({
+            where: { id: Number(id) },
+        });
+
+        if (!order || !order.sevenId) {
+            throw new NotFoundException('Nota fiscal ainda não disponível.');
+        }
+
+        // 2. Chamamos o service passando o ID do SEVEN!
+        const pdfBuffer = await this.sevenService.baixarNotaFiscal(
+            String(order.sevenId),
+        );
+
+        res.set({
+            'Content-Type': 'application/json', // ou application/pdf
+            'Content-Disposition': `attachment; filename=nota-fiscal-${id}.pdf`,
+        });
+
+        res.send(pdfBuffer);
+    }
+
+    @Get(':id/invoice')
+    @ApiOperation({ summary: 'Baixar a Nota Fiscal (PDF) do ERP Seven' })
+    async downloadInvoice(
+        @Param('id', ParseIntPipe) id: number,
+        @Res() res: Response,
+    ) {
+        try {
+            // Pede o arquivo (Buffer) para o SevenService
+            const pdfBuffer = await this.sevenService.baixarNotaFiscal(
+                id.toString(),
+            );
+
+            // Configura o cabeçalho HTTP para forçar o navegador a baixar como PDF
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="Nota_Fiscal_Pedido_${id}.pdf"`,
+                'Content-Length': pdfBuffer.length,
+            });
+
+            // Envia o arquivo de volta para o React
+            res.end(pdfBuffer);
+        } catch (error) {
+            // Se o Seven disser que a nota não existe ou der erro
+            res.status(404).json({
+                message: 'Nota fiscal não encontrada ou ainda não emitida.',
+            });
+        }
     }
 }

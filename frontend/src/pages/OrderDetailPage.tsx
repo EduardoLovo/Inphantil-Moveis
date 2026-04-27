@@ -11,9 +11,9 @@ import {
   FaSpinner,
   FaTools,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // Não esqueça de importar o navigate
+import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast"; // 👈 Adicionado para os avisos de sucesso/erro da NF
 
-// Dentro do seu componente...
 // Tipo provisório para a página ler os dados completos
 interface OrderDetail {
   id: number;
@@ -60,6 +60,9 @@ const DetalhesPedidoPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 👈 Novo estado para controlar o loading do botão da Nota Fiscal
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,6 +78,38 @@ const DetalhesPedidoPage: React.FC = () => {
     };
     fetchOrder();
   }, [id]);
+
+  // =========================================================
+  // 📄 FUNÇÃO PARA BAIXAR A NOTA FISCAL (Vem do Seven via Backend)
+  // =========================================================
+  const handleDownloadNF = async () => {
+    if (!order) return;
+
+    try {
+      setIsDownloadingInvoice(true);
+
+      // Bate na sua rota do backend pedindo o arquivo (blob)
+      const response = await api.get(`/orders/${order.id}/invoice`, {
+        responseType: "blob",
+      });
+
+      // Mágica para forçar o download no navegador
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Nota_Fiscal_Pedido_${order.id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success("Nota Fiscal baixada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao baixar NF:", error);
+      toast.error("Nota Fiscal ainda não está disponível no sistema.");
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
 
   const formatPrice = (val: number | string | any) =>
     Number(val).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -92,7 +127,6 @@ const DetalhesPedidoPage: React.FC = () => {
   const getPaymentMethodName = (method: string) => {
     if (!method) return "Não especificado";
 
-    // Transforma tudo em minúsculo e tira os espaços para não ter erro de digitação
     const normalized = method.toLowerCase().trim();
 
     if (normalized === "pix") return "Pix";
@@ -105,7 +139,6 @@ const DetalhesPedidoPage: React.FC = () => {
     }
     if (normalized === "boleto") return "Boleto Bancário";
 
-    // Se vier um nome novo que a gente não mapeou, ele mostra a palavra original com a primeira letra maiúscula
     return method.charAt(0).toUpperCase() + method.slice(1);
   };
 
@@ -158,6 +191,7 @@ const DetalhesPedidoPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-[1200px] mx-auto px-4 py-12 md:pt-32 pb-20 min-h-[75vh]">
+      <Toaster /> {/* 👈 Adicionado para renderizar os alertas na tela */}
       {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-in fade-in duration-500">
         <div>
@@ -175,26 +209,29 @@ const DetalhesPedidoPage: React.FC = () => {
           </p>
         </div>
 
-        {/* BOTÃO DA NOTA FISCAL */}
-        {order.invoiceUrl ? (
-          <a
-            href={order.invoiceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition-colors border border-blue-200"
+        {/* 👈 BOTÃO DA NOTA FISCAL ATUALIZADO */}
+        {order.status === "SHIPPED" || order.status === "DELIVERED" ? (
+          <button
+            onClick={handleDownloadNF}
+            disabled={isDownloadingInvoice}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition-colors border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FaFilePdf /> Baixar Nota Fiscal
-          </a>
+            {isDownloadingInvoice ? (
+              <FaSpinner className="animate-spin" />
+            ) : (
+              <FaFilePdf />
+            )}
+            {isDownloadingInvoice ? "Gerando Nota..." : "Baixar Nota Fiscal"}
+          </button>
         ) : (
           <div
             className="flex items-center gap-2 px-6 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl border border-gray-200 cursor-not-allowed"
-            title="A Nota Fiscal será disponibilizada em breve"
+            title="A Nota Fiscal será disponibilizada após o envio"
           >
             <FaFilePdf /> Nota Fiscal Indisponível
           </div>
         )}
       </div>
-
       {/* BARRA DE PROGRESSO DO STATUS */}
       <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 animate-in slide-in-from-bottom-4 duration-500">
         {isCanceled ? (
@@ -241,7 +278,6 @@ const DetalhesPedidoPage: React.FC = () => {
           </div>
         )}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* COLUNA ESQUERDA: LISTA DE PRODUTOS */}
         <div className="lg:col-span-2 space-y-6">
@@ -251,7 +287,6 @@ const DetalhesPedidoPage: React.FC = () => {
             </h2>
             <div className="space-y-6">
               {order.items.map((item: any) => {
-                // 👉 1. PUXA OS DADOS DE FORMA INTELIGENTE (attributes ou direto)
                 const varSize =
                   item.variant?.attributes?.size || item.variant?.size;
                 const varColor =
@@ -293,7 +328,7 @@ const DetalhesPedidoPage: React.FC = () => {
                         {item.product?.name || "Produto Excluído"}
                       </h3>
 
-                      {/* 👉 2. MOSTRANDO A VARIAÇÃO BONITINHA PARA O CLIENTE */}
+                      {/* MOSTRANDO A VARIAÇÃO BONITINHA */}
                       <div className="text-sm text-gray-500 mt-2 space-y-1">
                         {isCustom ? (
                           <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-xs">

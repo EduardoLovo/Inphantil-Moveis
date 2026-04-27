@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import axios from 'axios';
 
 // 👉 1. OS MOLDES DO TYPESCRIPT (100% BLINDADOS CONTRA O PRISMA)
 export interface IntegracaoUser {
@@ -43,7 +44,7 @@ export class SevenService {
     constructor(private readonly httpService: HttpService) {}
 
     // 👉 1. A NOVA FUNÇÃO QUE FAZ O LOGIN SOZINHA
-    private async gerarToken(): Promise<string> {
+    public async gerarToken(): Promise<string> {
         const url = String(process.env.SEVEN_API_URL);
         const apiUser = String(process.env.SEVEN_API_USER);
         const apiPass = String(process.env.SEVEN_API_PASS);
@@ -87,7 +88,8 @@ export class SevenService {
         observacaoPersonalizada: string = '',
     ) {
         const url = String(process.env.SEVEN_API_URL);
-
+        const dataEntrega = new Date(order.createdAt);
+        dataEntrega.setDate(dataEntrega.getDate() + 5);
         try {
             // 👉 2. PRIMEIRO PASSO: Pega o Token antes de tudo!
             const token = await this.gerarToken();
@@ -119,7 +121,7 @@ export class SevenService {
 
                 tpComissao: 'PEDIDO',
                 dataPedido: this.formatDateBR(order.createdAt),
-                dataPrevistaEntrega: this.formatDateBR(order.createdAt),
+                dataPrevistaEntrega: this.formatDateBR(dataEntrega),
 
                 atualizaDadosCliente: 'SIM',
                 atualizaCadastroCliente: 'SIM',
@@ -310,49 +312,29 @@ export class SevenService {
         }
     }
 
-    // 👉 NOVA FUNÇÃO PARA BAIXAR A NF
-    async baixarNotaFiscal(pedidoId: string | number) {
-        const url = String(process.env.SEVEN_API_URL);
-
+    async baixarNotaFiscal(pedidoVendaId: string): Promise<Buffer> {
         try {
-            this.logger.log(`Solicitando NF do pedido ${pedidoId} ao Seven...`);
-
-            // 1. Pega o crachá de acesso (reaproveitando a nossa função de sucesso!)
+            // Como estamos dentro do SevenService, ele acha a função autenticar()
             const token = await this.gerarToken();
 
-            // 2. Bate na porta da NF (O '1' do seu exemplo é dinâmico agora: pedidoId)
-            const response = await firstValueFrom(
-                this.httpService.get(
-                    `${url}/resources/v1/downloadNF/linkDanfeNfe/${pedidoId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
+            const response = await axios.get(
+                `https://accionsistemas.com.br:8090/api/resources/v1/downloadNF/linkDanfeNfe/${pedidoVendaId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
                     },
-                ),
+                    responseType: 'arraybuffer', // Fundamental para baixar arquivos
+                },
             );
 
-            console.log(`🔍 RETORNO DA NF:`, response.data);
-            return response.data;
-        } catch (error: unknown) {
-            const err = error as any;
-
-            // 👉 Se o ERP disser que não achou (Erro 400), nós avisamos o cliente com carinho!
-            if (err.response?.status === 400) {
-                return {
-                    status: 'pendente',
-                    mensagem:
-                        'Sua Nota Fiscal ainda está sendo gerada pela nossa equipe.',
-                };
-            }
-
-            this.logger.error(
-                `Erro ao baixar NF do pedido ${pedidoId}`,
-                err.response?.data || err.message,
+            return Buffer.from(response.data);
+        } catch (error: any) {
+            // 👈 2. O ': any' aqui resolve o erro "unknown"
+            console.error(
+                `Erro ao baixar NF do pedido ${pedidoVendaId} no Seven:`,
+                error.message,
             );
-            throw new Error(
-                'Falha ao comunicar com o ERP para buscar a Nota Fiscal.',
-            );
+            throw new Error('Falha ao obter o PDF da Nota Fiscal');
         }
     }
 }
