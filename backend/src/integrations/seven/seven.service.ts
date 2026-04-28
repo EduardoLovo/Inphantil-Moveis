@@ -129,7 +129,7 @@ export class SevenService {
                 insereObsCliente: 'NAO',
                 insereVend2Cliente: 'NAO',
                 boComissaoAuto: 'NAO',
-                tipoDeFrete: 'SEM FRETE',
+                tipoDeFrete: 'EMITENTE',
 
                 cliente: {
                     regimeTributacao: 'Lucro Real',
