@@ -184,7 +184,12 @@ const CheckoutPage: React.FC = () => {
     selectedAddress && !shippingData.requiresQuote
       ? (subtotal * shippingData.percentage) / 100
       : 0;
-  const finalTotal = subtotal + shippingCost;
+
+  // 👉 CÁLCULO DO DESCONTO PIX (6% sobre o valor dos produtos)
+  const pixDiscount = paymentMethod === "pix" ? subtotal * 0.06 : 0;
+
+  // O total final agora subtrai o desconto
+  const finalTotal = subtotal + shippingCost - pixDiscount;
   // ==========================================
 
   // ==========================================
@@ -508,6 +513,12 @@ const CheckoutPage: React.FC = () => {
                 <span>Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
+              {paymentMethod === "pix" && (
+                <div className="flex justify-between text-green-600 text-sm items-center font-medium animate-in fade-in duration-300">
+                  <span>Desconto Pix (6%)</span>
+                  <span>- {formatPrice(pixDiscount)}</span>
+                </div>
+              )}
 
               <div className="flex justify-between text-gray-500 text-sm items-center">
                 <span className="flex items-center gap-1.5">
@@ -537,6 +548,7 @@ const CheckoutPage: React.FC = () => {
                     ? `(${shippingData.percentage}%)`
                     : ""}
                 </span>
+
                 <span className="font-medium text-[#313b2f] text-right">
                   {!selectedAddress ? (
                     "Selecione o endereço"

@@ -455,7 +455,7 @@ const AdminOrdersPage: React.FC = () => {
                 className="hover:bg-yellow-50/30 transition-colors group"
               >
                 <td className="p-5 font-mono text-gray-400 text-sm">
-                  #{order.id}
+                  #{order.id} {order.sevenId}
                 </td>
                 <td className="p-5 text-sm text-gray-600">
                   <div className="font-medium text-gray-800">

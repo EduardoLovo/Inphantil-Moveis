@@ -35,5 +35,6 @@ export interface Order {
   user: User;
   addressId: number;
   address: Address;
+  sevenId: number;
   items: OrderItem[];
 }
