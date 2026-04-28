@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
+import { useAuthStore } from "../../store/AuthStore"; // 👈 Importamos para pegar o usuário logado
 import {
   FaArrowLeft,
   FaEnvelope,
@@ -10,7 +11,10 @@ import {
   FaShoppingBag,
   FaSpinner,
   FaBoxOpen,
-} from "react-icons/fa";
+  FaEdit,
+  FaCheck,
+  FaTimes,
+} from "react-icons/fa"; // 👈 Adicionamos ícones para editar
 
 // Interfaces
 interface OrderItem {
@@ -62,8 +66,15 @@ const STATUS_LABELS: Record<string, string> = {
 const AdminUserDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuthStore(); // 👈 Puxamos o usuário logado no painel
+
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // 👉 ESTADOS PARA A EDIÇÃO DE CARGO
+  const [isEditingRole, setIsEditingRole] = useState(false);
+  const [newRole, setNewRole] = useState("");
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   useEffect(() => {
     if (id) fetchUserDetail();
@@ -73,11 +84,39 @@ const AdminUserDetailsPage = () => {
     try {
       const res = await api.get(`/users/${id}`);
       setUser(res.data);
+      setNewRole(res.data.role); // Preenche o select com o cargo atual
     } catch (error) {
       alert("Erro ao carregar usuário");
       navigate("/admin/users");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 👉 FUNÇÃO PARA SALVAR O NOVO CARGO
+  const handleUpdateRole = async () => {
+    if (!user || newRole === user.role) {
+      setIsEditingRole(false);
+      return;
+    }
+
+    setIsUpdatingRole(true);
+    try {
+      // Faz o PATCH lá no seu NestJS
+      await api.patch(`/users/${user.id}/role`, { role: newRole });
+
+      // Atualiza a tela sem precisar recarregar a página
+      setUser({ ...user, role: newRole });
+      setIsEditingRole(false);
+    } catch (error: any) {
+      console.error(error);
+      alert(
+        error.response?.data?.message ||
+          "Erro ao atualizar cargo. Verifique suas permissões.",
+      );
+      setNewRole(user.role); // Volta o select pro original se der erro
+    } finally {
+      setIsUpdatingRole(false);
     }
   };
 
@@ -96,6 +135,9 @@ const AdminUserDetailsPage = () => {
     );
 
   if (!user) return null;
+
+  // 👉 VERIFICA SE QUEM TÁ LOGADO É DEV (Para mostrar o botão de editar)
+  const isDev = currentUser?.role === "DEV";
 
   return (
     <div className="w-full max-w-5xl mx-auto p-4 md:p-8 space-y-6 animate-in fade-in duration-500">
@@ -125,20 +167,74 @@ const AdminUserDetailsPage = () => {
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${
-                user.role === "ADMIN"
-                  ? "bg-purple-100 text-purple-700 border-purple-200"
-                  : user.role === "SELLER"
-                    ? "bg-blue-100 text-blue-700 border-blue-200"
-                    : user.role === "DEV"
-                      ? "bg-gray-800 text-white border-gray-800"
-                      : "bg-green-50 text-green-700 border-green-100"
-              }`}
-            >
-              {user.role}
-            </span>
-            <span className="text-sm font-medium text-gray-600 flex items-center gap-1">
+            {/* 👉 BLOCO DO CARGO (ROLE) */}
+            {isEditingRole ? (
+              <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value)}
+                  className="text-sm font-bold bg-white border border-gray-300 rounded px-2 py-1 outline-none"
+                  disabled={isUpdatingRole}
+                >
+                  <option value="USER">USER</option>
+                  <option value="SELLER">SELLER</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="DEV">DEV</option>
+                </select>
+                <button
+                  onClick={handleUpdateRole}
+                  disabled={isUpdatingRole}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                  title="Salvar"
+                >
+                  {isUpdatingRole ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaCheck />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingRole(false);
+                    setNewRole(user.role);
+                  }}
+                  disabled={isUpdatingRole}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                  title="Cancelar"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${
+                    user.role === "ADMIN"
+                      ? "bg-purple-100 text-purple-700 border-purple-200"
+                      : user.role === "SELLER"
+                        ? "bg-blue-100 text-blue-700 border-blue-200"
+                        : user.role === "DEV"
+                          ? "bg-gray-800 text-white border-gray-800"
+                          : "bg-green-50 text-green-700 border-green-100"
+                  }`}
+                >
+                  {user.role}
+                </span>
+
+                {/* Mostra o botão de lápis apenas se o usuário logado for DEV */}
+                {isDev && (
+                  <button
+                    onClick={() => setIsEditingRole(true)}
+                    className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Alterar cargo"
+                  >
+                    <FaEdit />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <span className="text-sm font-medium text-gray-600 flex items-center gap-1 mt-1">
               <FaShoppingBag className="text-gray-400" /> {user.orders.length}{" "}
               Pedidos
             </span>

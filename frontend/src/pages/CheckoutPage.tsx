@@ -63,7 +63,10 @@ const CheckoutPage: React.FC = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const { user } = useAuthStore();
+
+  // 👉 ESTADOS DOS DADOS PESSOAIS (CPF e Telefone)
   const [cpf, setCpf] = useState(user?.cpf || "");
+  const [phone, setPhone] = useState((user as any)?.phone || ""); // O "(user as any)" previne erro de TypeScript se "phone" não estiver tipado
 
   const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
 
@@ -118,6 +121,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+  // 👉 MÁSCARA DO CPF
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, "");
     if (value.length > 11) value = value.slice(0, 11);
@@ -125,6 +129,15 @@ const CheckoutPage: React.FC = () => {
     value = value.replace(/(\d{3})(\d)/, "$1.$2");
     value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
     setCpf(value);
+  };
+
+  // 👉 NOVA MÁSCARA DO TELEFONE: (00) 00000-0000
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 11) value = value.slice(0, 11);
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+    setPhone(value);
   };
 
   const handleAddressSuccess = () => {
@@ -240,8 +253,16 @@ const CheckoutPage: React.FC = () => {
     try {
       if (!selectedAddressId)
         throw new Error("Por favor, selecione um endereço de entrega.");
+
+      // 👉 VERIFICAÇÃO DO CPF
       if (!cpf || cpf.length < 14)
         throw new Error("Por favor, preencha um CPF válido para continuarmos.");
+
+      // 👉 VERIFICAÇÃO DO TELEFONE (14 chars = fixo, 15 chars = celular)
+      if (!phone || phone.length < 14)
+        throw new Error(
+          "Por favor, preencha um Telefone válido para continuarmos.",
+        );
 
       // 👉 2. REAPROVEITA O PEDIDO SE ELE JÁ FOI CRIADO NESSA TELA
       let orderId = createdOrderId;
@@ -256,6 +277,7 @@ const CheckoutPage: React.FC = () => {
             customData: item.customData,
           })),
           cpf: cpf,
+          phone: phone, // 👉 TELEFONE ENVIADO PARA O BACKEND
           shippingCost: shippingCost,
           paymentMethod: paymentMethod,
         };
@@ -361,6 +383,9 @@ const CheckoutPage: React.FC = () => {
       </div>
     );
   }
+
+  // Verifica se faltam dados pessoais para mostrar o bloco
+  const needsPersonalData = !user?.cpf || !(user as any)?.phone;
 
   return (
     <div className="w-full max-w-[1400px] mx-auto px-4 py-8 md:pt-32 pb-20 min-h-[70vh]">
@@ -590,22 +615,42 @@ const CheckoutPage: React.FC = () => {
                 Método de Pagamento
               </h3>
 
-              {!user?.cpf && (
+              {/* 👉 NOVO BLOCO DE DADOS PESSOAIS */}
+              {needsPersonalData && (
                 <div className="mb-6 animate-in fade-in duration-300">
                   <h3 className="text-lg font-bold text-[#313b2f] mb-3">
                     Dados Pessoais
                   </h3>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-600">
-                      CPF (Obrigatório para a Nota Fiscal)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="000.000.000-00"
-                      value={cpf}
-                      onChange={handleCpfChange}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all font-mono"
-                    />
+                  <div className="space-y-4">
+                    {!user?.cpf && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-600">
+                          CPF (Obrigatório para a Nota Fiscal)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="000.000.000-00"
+                          value={cpf}
+                          onChange={handleCpfChange}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all font-mono"
+                        />
+                      </div>
+                    )}
+
+                    {!(user as any)?.phone && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-600">
+                          WhatsApp / Telefone (Para entrega)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="(00) 00000-0000"
+                          value={phone}
+                          onChange={handlePhoneChange}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#ffd639] focus:border-transparent outline-none transition-all font-mono"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

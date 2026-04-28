@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -47,5 +48,22 @@ export class UsersService {
 
         if (!user) throw new NotFoundException('Usuário não encontrado');
         return user;
+    }
+
+    async updateRole(userId: number, newRole: Role) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado.');
+        }
+
+        // Atualiza o cargo no banco de dados
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { role: newRole },
+            select: { id: true, name: true, email: true, role: true }, // Não devolvemos a senha!
+        });
     }
 }
